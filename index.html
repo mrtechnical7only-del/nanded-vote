@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benazir's Mehndi Studio</title>
+    
+    <!-- React & ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Animation Styles -->
+    <style>
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 1s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-amber-50/30">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Icons Components (Simple SVG versions to avoid external dependencies) ---
+        const Heart = ({ size = 24, fill = "none", className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        );
+        const Menu = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        );
+        const X = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
+        );
+        const CheckCircle = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        );
+        const Calendar = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        );
+        const Star = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        );
+        const Phone = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        );
+        const Mail = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        );
+        const MapPin = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        );
+        const Instagram = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+        );
+        const Facebook = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        );
+
+        const { useState } = React;
+
+        const App = () => {
+          const [activeSection, setActiveSection] = useState('home');
+          const [isMenuOpen, setIsMenuOpen] = useState(false);
+          const [showNotification, setShowNotification] = useState(false);
+          const [notificationMsg, setNotificationMsg] = useState('');
+
+          const handleAction = (msg) => {
+            setNotificationMsg(msg);
+            setShowNotification(true);
+            setTimeout(() => setShowNotification(false), 3000);
+          };
+
+          const scrollToSection = (sectionId) => {
+            setActiveSection(sectionId);
+            setIsMenuOpen(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          const portfolioImages = [
+            { id: 1, src: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=800", title: "Bridal Intricate", category: "Bridal" },
+            { id: 2, src: "https://images.unsplash.com/photo-1574665807971-5d9c2409746e?auto=format&fit=crop&q=80&w=800", title: "Modern Floral", category: "Party" },
+            { id: 3, src: "https://images.unsplash.com/photo-1632808447547-90c7416ec483?auto=format&fit=crop&q=80&w=800", title: "Traditional Feet", category: "Bridal" },
+            { id: 4, src: "https://images.unsplash.com/photo-1569388330292-79cc1ec67270?auto=format&fit=crop&q=80&w=800", title: "Arabic Style", category: "Party" },
+            { id: 5, src: "https://images.unsplash.com/photo-1621808892953-29a34177b960?auto=format&fit=crop&q=80&w=800", title: "Sangeet Special", category: "Occasional" },
+            { id: 6, src: "https://images.unsplash.com/photo-1552554047-97d8c035255c?auto=format&fit=crop&q=80&w=800", title: "Minimalist Back Hand", category: "Casual" },
+            { id: 7, src: "https://images.unsplash.com/photo-1582650085805-4c6e3d233c09?auto=format&fit=crop&q=80&w=800", title: "Royal Mehndi Art", category: "Royal Bridal" },
+            { id: 8, src: "https://images.unsplash.com/photo-1533633816668-2c262194639d?auto=format&fit=crop&q=80&w=800", title: "Full Back Hand", category: "Bridal" },
+            { id: 9, src: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800", title: "Peacock Design", category: "Traditional" }
+          ];
+
+          const courses = [
+            {
+              id: 1,
+              title: "Beginner Mehndi Art",
+              price: "₹1,999",
+              duration: "2 Weeks",
+              level: "Beginner",
+              features: ["Basic Shapes & Lines", "Cone Handling", "Floral Patterns", "Certificate Included"],
+              color: "bg-rose-50"
+            },
+            {
+              id: 2,
+              title: "Master Bridal Course",
+              price: "₹5,999",
+              duration: "1 Month",
+              level: "Advanced",
+              features: ["Full Bridal Hands & Feet", "Complex Figures", "3D Shading Techniques", "Business Setup Guide"],
+              color: "bg-amber-50"
+            },
+            {
+              id: 3,
+              title: "Arabic & Gulf Style",
+              price: "₹2,499",
+              duration: "3 Weeks",
+              level: "Intermediate",
+              features: ["Bold Arabic Flows", "Negative Space Designs", "Gulf Rose Patterns", "Speed Techniques"],
+              color: "bg-orange-50"
+            }
+          ];
+
+          return (
+            <div className="font-sans text-gray-800 bg-amber-50/30 min-h-screen">
+              {/* Navigation */}
+              <nav className="sticky top-0 z-50 bg-white shadow-md">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex justify-between h-20 items-center">
+                    <div className="flex items-center cursor-pointer" onClick={() => scrollToSection('home')}>
+                      <div className="bg-red-800 p-2 rounded-full text-white mr-2">
+                        <Heart size={20} fill="white" />
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-bold text-red-900 font-serif">Benazir's</h1>
+                        <p className="text-xs text-amber-600 tracking-widest uppercase">Mehndi Studio</p>
+                      </div>
+                    </div>
+
+                    <div className="hidden md:flex space-x-8">
+                      {['Home', 'Gallery', 'Courses', 'Services', 'Contact'].map((item) => (
+                        <button
+                          key={item}
+                          onClick={() => scrollToSection(item.toLowerCase())}
+                          className={`text-sm font-medium uppercase tracking-wide transition-colors ${
+                            activeSection === item.toLowerCase() ? 'text-red-700 border-b-2 border-red-700' : 'text-gray-500 hover:text-red-700'
+                          }`}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="md:hidden">
+                      <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-red-700">
+                        {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {isMenuOpen && (
+                  <div className="md:hidden bg-white border-t">
+                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                      {['Home', 'Gallery', 'Courses', 'Services', 'Contact'].map((item) => (
+                        <button
+                          key={item}
+                          onClick={() => scrollToSection(item.toLowerCase())}
+                          className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-red-700 hover:bg-red-50 rounded-md"
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </nav>
+
+              {/* Notification Toast */}
+              {showNotification && (
+                <div className="fixed top-24 right-5 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl animate-bounce flex items-center">
+                  <CheckCircle className="mr-2" size={20} />
+                  {notificationMsg}
+                </div>
+              )}
+
+              {/* Hero Section */}
+              {activeSection === 'home' && (
+                <div className="relative">
+                  <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
+                  <div 
+                    className="h-[600px] bg-cover bg-center flex items-center justify-center relative"
+                    style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=1600")' }}
+                  >
+                    <div className="z-20 text-center text-white px-4 animate-fade-in-up">
+                      <h2 className="text-xl md:text-2xl font-light mb-2 text-amber-300 tracking-wider">WELCOME TO</h2>
+                      <h1 className="text-5xl md:text-7xl font-bold font-serif mb-6 leading-tight">Artistry on Your Hands</h1>
+                      <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-200">
+                        Exclusive Mehndi designs for Brides, Parties, and Festivals. Learn the art from Benazir Fatima.
+                      </p>
+                      <div className="flex flex-col md:flex-row gap-4 justify-center">
+                        <button 
+                          onClick={() => scrollToSection('courses')}
+                          className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-full text-lg font-medium transition-transform transform hover:scale-105"
+                        >
+                          Join My Course
+                        </button>
+                        <button 
+                          onClick={() => scrollToSection('gallery')}
+                          className="bg-transparent border-2 border-white hover:bg-white hover:text-red-900 text-white px-8 py-3 rounded-full text-lg font-medium transition-colors"
+                        >
+                          View Portfolio
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="py-12 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                      {[
+                        { label: "Happy Brides", value: "500+" },
+                        { label: "Students Taught", value: "200+" },
+                        { label: "Years Experience", value: "5+" },
+                        { label: "Design Styles", value: "50+" }
+                      ].map((stat, idx) => (
+                        <div key={idx} className="p-4">
+                          <h3 className="text-3xl font-bold text-red-800">{stat.value}</h3>
+                          <p className="text-gray-600 uppercase text-sm tracking-wide mt-1">{stat.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery Section */}
+              {(activeSection === 'gallery' || activeSection === 'home') && (
+                <div className="py-20 px-4 max-w-7xl mx-auto bg-amber-50/30">
+                  <div className="text-center mb-16">
+                    <h2 className="text-sm font-bold text-amber-600 tracking-widest uppercase mb-2">My Work</h2>
+                    <h3 className="text-4xl font-serif font-bold text-gray-900">Latest Creations</h3>
+                    <div className="w-24 h-1 bg-red-700 mx-auto mt-4"></div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {portfolioImages.map((img) => (
+                      <div key={img.id} className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer bg-white">
+                        <div className="aspect-w-3 aspect-h-4 h-80 overflow-hidden">
+                          <img 
+                            src={img.src} 
+                            alt={img.title} 
+                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              e.target.onerror = null; 
+                              e.target.src = "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=800";
+                            }}
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                          <span className="text-amber-400 text-sm font-medium">{img.category}</span>
+                          <h4 className="text-white text-xl font-bold">{img.title}</h4>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {activeSection === 'home' && (
+                     <div className="text-center mt-12">
+                       <button 
+                        onClick={() => scrollToSection('gallery')}
+                        className="text-red-800 font-semibold hover:text-red-600 border-b border-red-800 pb-1"
+                       >
+                         See All Designs &rarr;
+                       </button>
+                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* Courses Section */}
+              {(activeSection === 'courses' || activeSection === 'home') && (
+                <div className="py-20 bg-white">
+                  <div className="max-w-7xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                      <h2 className="text-sm font-bold text-amber-600 tracking-widest uppercase mb-2">Learn With Benazir</h2>
+                      <h3 className="text-4xl font-serif font-bold text-gray-900">Professional Mehndi Courses</h3>
+                      <p className="mt-4 text-gray-600 max-w-2xl mx-auto">From holding the cone to mastering bridal intricacies, start your journey today.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {courses.map((course) => (
+                        <div key={course.id} className={`${course.color} rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-shadow flex flex-col relative`}>
+                          {course.id === 2 && (
+                             <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
+                               POPULAR
+                             </div>
+                          )}
+                          <h4 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h4>
+                          <div className="flex items-end mb-6">
+                            <span className="text-3xl font-bold text-red-800">{course.price}</span>
+                            <span className="text-gray-500 text-sm ml-2 mb-1">/ one time</span>
+                          </div>
+                          
+                          <div className="space-y-4 mb-8 flex-grow">
+                            <div className="flex items-center text-gray-700">
+                              <Calendar size={18} className="mr-3 text-amber-600" />
+                              <span>Duration: {course.duration}</span>
+                            </div>
+                            <div className="flex items-center text-gray-700">
+                              <Star size={18} className="mr-3 text-amber-600" />
+                              <span>Level: {course.level}</span>
+                            </div>
+                            <div className="border-t border-gray-200 pt-4">
+                              <p className="font-semibold mb-2 text-sm">What you'll learn:</p>
+                              <ul className="space-y-2">
+                                {course.features.map((feature, i) => (
+                                  <li key={i} className="flex items-start text-sm text-gray-600">
+                                    <CheckCircle size={14} className="mr-2 mt-1 text-green-600 flex-shrink-0" />
+                                    {feature}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                          
+                          <button 
+                            onClick={() => handleAction(`You've shown interest in ${course.title}! Please fill the contact form.`)}
+                            className="w-full py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                          >
+                            Enroll Now
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Services/Pricing */}
+              {(activeSection === 'services' || activeSection === 'home') && (
+                <div className="py-20 bg-red-900 text-white">
+                  <div className="max-w-7xl mx-auto px-4">
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                       <div>
+                         <h2 className="text-amber-400 font-bold tracking-widest uppercase mb-2">Book an Appointment</h2>
+                         <h3 className="text-4xl font-serif font-bold mb-6">Make Your Special Day Beautiful</h3>
+                         <p className="text-gray-200 mb-8 leading-relaxed">
+                           Whether it's your wedding day, Karwa Chauth, Eid, or just a party, we provide bespoke mehndi application services. We use 100% organic, chemical-free henna for the richest stain.
+                         </p>
+                         
+                         <div className="space-y-6">
+                           <div className="flex justify-between items-center border-b border-red-700 pb-4">
+                             <div>
+                               <h4 className="text-xl font-bold">Bridal Package</h4>
+                               <p className="text-red-200 text-sm">Full hands (elbow) & legs (calf)</p>
+                             </div>
+                             <span className="text-2xl font-serif text-amber-400">₹5,000+</span>
+                           </div>
+                           <div className="flex justify-between items-center border-b border-red-700 pb-4">
+                             <div>
+                               <h4 className="text-xl font-bold">Party Mehndi</h4>
+                               <p className="text-red-200 text-sm">Per hand (one side)</p>
+                             </div>
+                             <span className="text-2xl font-serif text-amber-400">₹300+</span>
+                           </div>
+                           <div className="flex justify-between items-center border-b border-red-700 pb-4">
+                             <div>
+                               <h4 className="text-xl font-bold">Guest Package</h4>
+                               <p className="text-red-200 text-sm">Hourly rate for groups</p>
+                             </div>
+                             <span className="text-2xl font-serif text-amber-400">₹2,500/hr</span>
+                           </div>
+                         </div>
+
+                         <button 
+                          onClick={() => scrollToSection('contact')}
+                          className="mt-10 bg-amber-500 text-red-900 px-8 py-3 rounded-full font-bold hover:bg-amber-400 transition-colors"
+                         >
+                           Book Appointment
+                         </button>
+                       </div>
+                       
+                       <div className="grid grid-cols-2 gap-4">
+                          <img src="https://images.unsplash.com/photo-1582650085805-4c6e3d233c09?auto=format&fit=crop&q=80&w=400" className="rounded-lg shadow-xl translate-y-8" alt="Mehndi process" />
+                          <img src="https://images.unsplash.com/photo-1551024601-56455b24560b?auto=format&fit=crop&q=80&w=400" className="rounded-lg shadow-xl" alt="Finished hand" />
+                       </div>
+                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Section */}
+              {(activeSection === 'contact' || activeSection === 'home') && (
+                <div className="py-20 bg-amber-50/50">
+                  <div className="max-w-4xl mx-auto px-4">
+                    <div className="text-center mb-12">
+                      <h3 className="text-3xl font-serif font-bold text-gray-900">Get In Touch</h3>
+                      <p className="text-gray-600 mt-2">Book a slot or ask about courses</p>
+                    </div>
+                    
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+                      <div className="bg-gray-900 text-white p-8 md:w-2/5 flex flex-col justify-between">
+                        <div>
+                          <h4 className="text-xl font-bold mb-6 text-amber-400">Contact Info</h4>
+                          <div className="space-y-4">
+                            <div className="flex items-center">
+                              <Phone size={20} className="mr-3 text-amber-400" />
+                              <span>+91 98765 43210</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Mail size={20} className="mr-3 text-amber-400" />
+                              <span>contact@benazirmehndi.com</span>
+                            </div>
+                            <div className="flex items-center">
+                              <MapPin size={20} className="mr-3 text-amber-400" />
+                              <span>Mumbai, Maharashtra</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-8">
+                          <p className="text-sm text-gray-400 mb-3">Follow me on social media:</p>
+                          <div className="flex space-x-4">
+                            <Instagram className="cursor-pointer hover:text-amber-400" />
+                            <Facebook className="cursor-pointer hover:text-amber-400" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-8 md:w-3/5">
+                        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleAction('Message sent! I will contact you shortly.'); }}>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                            <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:outline-none" placeholder="Benazir Fatima" required />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Service Interested In</label>
+                            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:outline-none">
+                              <option>Bridal Mehndi</option>
+                              <option>Party Mehndi</option>
+                              <option>Mehndi Course</option>
+                              <option>Other</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:outline-none" placeholder="Tell me about your requirements..." required></textarea>
+                          </div>
+                          <button type="submit" className="w-full bg-red-800 text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors">
+                            Send Message
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Footer */}
+              <footer className="bg-gray-900 text-white py-8 border-t border-gray-800">
+                <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+                  <div className="mb-4 md:mb-0">
+                    <h2 className="text-xl font-serif font-bold">Benazir's Mehndi Studio</h2>
+                    <p className="text-sm text-gray-400">© 2024 All rights reserved.</p>
+                  </div>
+                  <div className="flex space-x-6 text-sm text-gray-400">
+                    <a href="#" className="hover:text-white">Privacy Policy</a>
+                    <a href="#" className="hover:text-white">Terms of Service</a>
+                  </div>
+                </div>
+              </footer>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
