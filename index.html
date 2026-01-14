@@ -1,486 +1,363 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benazir's Mehndi Studio</title>
-    
-    <!-- React & ReactDOM from CDN -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Tailwind CSS -->
+    <title>NWCMC Voting Awareness Simulation</title>
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Animation Styles -->
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Custom Animations */
+        @keyframes scrollPaper {
+            0% { transform: translateY(100%); opacity: 0; }
+            12% { transform: translateY(0); opacity: 1; }
+            88% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
         }
-        .animate-fade-in-up {
-            animation: fade-in-up 1s ease-out forwards;
+        .animate-scroll {
+            animation: scrollPaper 4s linear forwards;
+        }
+        @keyframes scaleIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .scale-in {
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+        /* Sticky VVPAT container */
+        .vvpat-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        /* Hidden classes */
+        .hidden-element {
+            display: none !important;
+        }
+        /* EVM Units background textures */
+        .ballot-paper {
+            background-image: repeating-linear-gradient(0deg, #f8fafc, #f8fafc 1px, transparent 1px, transparent 40px);
         }
     </style>
 </head>
-<body class="bg-amber-50/30">
-    <div id="root"></div>
+<body class="bg-slate-200 font-sans text-slate-900 flex flex-col min-h-screen overflow-x-hidden">
 
-    <script type="text/babel">
-        // --- Icons Components (Simple SVG versions to avoid external dependencies) ---
-        const Heart = ({ size = 24, fill = "none", className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-        );
-        const Menu = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-        );
-        const X = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
-        );
-        const CheckCircle = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-        );
-        const Calendar = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-        );
-        const Star = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        );
-        const Phone = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        );
-        const Mail = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        );
-        const MapPin = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        );
-        const Instagram = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-        );
-        const Facebook = ({ size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-        );
-
-        const { useState } = React;
-
-        const App = () => {
-          const [activeSection, setActiveSection] = useState('home');
-          const [isMenuOpen, setIsMenuOpen] = useState(false);
-          const [showNotification, setShowNotification] = useState(false);
-          const [notificationMsg, setNotificationMsg] = useState('');
-
-          const handleAction = (msg) => {
-            setNotificationMsg(msg);
-            setShowNotification(true);
-            setTimeout(() => setShowNotification(false), 3000);
-          };
-
-          const scrollToSection = (sectionId) => {
-            setActiveSection(sectionId);
-            setIsMenuOpen(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          };
-
-          const portfolioImages = [
-            { id: 1, src: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=800", title: "Bridal Intricate", category: "Bridal" },
-            { id: 2, src: "https://images.unsplash.com/photo-1574665807971-5d9c2409746e?auto=format&fit=crop&q=80&w=800", title: "Modern Floral", category: "Party" },
-            { id: 3, src: "https://images.unsplash.com/photo-1632808447547-90c7416ec483?auto=format&fit=crop&q=80&w=800", title: "Traditional Feet", category: "Bridal" },
-            { id: 4, src: "https://images.unsplash.com/photo-1569388330292-79cc1ec67270?auto=format&fit=crop&q=80&w=800", title: "Arabic Style", category: "Party" },
-            { id: 5, src: "https://images.unsplash.com/photo-1621808892953-29a34177b960?auto=format&fit=crop&q=80&w=800", title: "Sangeet Special", category: "Occasional" },
-            { id: 6, src: "https://images.unsplash.com/photo-1552554047-97d8c035255c?auto=format&fit=crop&q=80&w=800", title: "Minimalist Back Hand", category: "Casual" },
-            { id: 7, src: "https://images.unsplash.com/photo-1582650085805-4c6e3d233c09?auto=format&fit=crop&q=80&w=800", title: "Royal Mehndi Art", category: "Royal Bridal" },
-            { id: 8, src: "https://images.unsplash.com/photo-1533633816668-2c262194639d?auto=format&fit=crop&q=80&w=800", title: "Full Back Hand", category: "Bridal" },
-            { id: 9, src: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=800", title: "Peacock Design", category: "Traditional" }
-          ];
-
-          const courses = [
-            {
-              id: 1,
-              title: "Beginner Mehndi Art",
-              price: "₹1,999",
-              duration: "2 Weeks",
-              level: "Beginner",
-              features: ["Basic Shapes & Lines", "Cone Handling", "Floral Patterns", "Certificate Included"],
-              color: "bg-rose-50"
-            },
-            {
-              id: 2,
-              title: "Master Bridal Course",
-              price: "₹5,999",
-              duration: "1 Month",
-              level: "Advanced",
-              features: ["Full Bridal Hands & Feet", "Complex Figures", "3D Shading Techniques", "Business Setup Guide"],
-              color: "bg-amber-50"
-            },
-            {
-              id: 3,
-              title: "Arabic & Gulf Style",
-              price: "₹2,499",
-              duration: "3 Weeks",
-              level: "Intermediate",
-              features: ["Bold Arabic Flows", "Negative Space Designs", "Gulf Rose Patterns", "Speed Techniques"],
-              color: "bg-orange-50"
-            }
-          ];
-
-          return (
-            <div className="font-sans text-gray-800 bg-amber-50/30 min-h-screen">
-              {/* Navigation */}
-              <nav className="sticky top-0 z-50 bg-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="flex justify-between h-20 items-center">
-                    <div className="flex items-center cursor-pointer" onClick={() => scrollToSection('home')}>
-                      <div className="bg-red-800 p-2 rounded-full text-white mr-2">
-                        <Heart size={20} fill="white" />
-                      </div>
-                      <div>
-                        <h1 className="text-2xl font-bold text-red-900 font-serif">Benazir's</h1>
-                        <p className="text-xs text-amber-600 tracking-widest uppercase">Mehndi Studio</p>
-                      </div>
-                    </div>
-
-                    <div className="hidden md:flex space-x-8">
-                      {['Home', 'Gallery', 'Courses', 'Services', 'Contact'].map((item) => (
-                        <button
-                          key={item}
-                          onClick={() => scrollToSection(item.toLowerCase())}
-                          className={`text-sm font-medium uppercase tracking-wide transition-colors ${
-                            activeSection === item.toLowerCase() ? 'text-red-700 border-b-2 border-red-700' : 'text-gray-500 hover:text-red-700'
-                          }`}
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="md:hidden">
-                      <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 hover:text-red-700">
-                        {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {isMenuOpen && (
-                  <div className="md:hidden bg-white border-t">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                      {['Home', 'Gallery', 'Courses', 'Services', 'Contact'].map((item) => (
-                        <button
-                          key={item}
-                          onClick={() => scrollToSection(item.toLowerCase())}
-                          className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-red-700 hover:bg-red-50 rounded-md"
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </nav>
-
-              {/* Notification Toast */}
-              {showNotification && (
-                <div className="fixed top-24 right-5 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl animate-bounce flex items-center">
-                  <CheckCircle className="mr-2" size={20} />
-                  {notificationMsg}
-                </div>
-              )}
-
-              {/* Hero Section */}
-              {activeSection === 'home' && (
-                <div className="relative">
-                  <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
-                  <div 
-                    className="h-[600px] bg-cover bg-center flex items-center justify-center relative"
-                    style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=1600")' }}
-                  >
-                    <div className="z-20 text-center text-white px-4 animate-fade-in-up">
-                      <h2 className="text-xl md:text-2xl font-light mb-2 text-amber-300 tracking-wider">WELCOME TO</h2>
-                      <h1 className="text-5xl md:text-7xl font-bold font-serif mb-6 leading-tight">Artistry on Your Hands</h1>
-                      <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-200">
-                        Exclusive Mehndi designs for Brides, Parties, and Festivals. Learn the art from Benazir Fatima.
-                      </p>
-                      <div className="flex flex-col md:flex-row gap-4 justify-center">
-                        <button 
-                          onClick={() => scrollToSection('courses')}
-                          className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-full text-lg font-medium transition-transform transform hover:scale-105"
-                        >
-                          Join My Course
-                        </button>
-                        <button 
-                          onClick={() => scrollToSection('gallery')}
-                          className="bg-transparent border-2 border-white hover:bg-white hover:text-red-900 text-white px-8 py-3 rounded-full text-lg font-medium transition-colors"
-                        >
-                          View Portfolio
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="py-12 bg-white">
-                    <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                      {[
-                        { label: "Happy Brides", value: "500+" },
-                        { label: "Students Taught", value: "200+" },
-                        { label: "Years Experience", value: "5+" },
-                        { label: "Design Styles", value: "50+" }
-                      ].map((stat, idx) => (
-                        <div key={idx} className="p-4">
-                          <h3 className="text-3xl font-bold text-red-800">{stat.value}</h3>
-                          <p className="text-gray-600 uppercase text-sm tracking-wide mt-1">{stat.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Gallery Section */}
-              {(activeSection === 'gallery' || activeSection === 'home') && (
-                <div className="py-20 px-4 max-w-7xl mx-auto bg-amber-50/30">
-                  <div className="text-center mb-16">
-                    <h2 className="text-sm font-bold text-amber-600 tracking-widest uppercase mb-2">My Work</h2>
-                    <h3 className="text-4xl font-serif font-bold text-gray-900">Latest Creations</h3>
-                    <div className="w-24 h-1 bg-red-700 mx-auto mt-4"></div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {portfolioImages.map((img) => (
-                      <div key={img.id} className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer bg-white">
-                        <div className="aspect-w-3 aspect-h-4 h-80 overflow-hidden">
-                          <img 
-                            src={img.src} 
-                            alt={img.title} 
-                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              e.target.onerror = null; 
-                              e.target.src = "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=800";
-                            }}
-                          />
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                          <span className="text-amber-400 text-sm font-medium">{img.category}</span>
-                          <h4 className="text-white text-xl font-bold">{img.title}</h4>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {activeSection === 'home' && (
-                     <div className="text-center mt-12">
-                       <button 
-                        onClick={() => scrollToSection('gallery')}
-                        className="text-red-800 font-semibold hover:text-red-600 border-b border-red-800 pb-1"
-                       >
-                         See All Designs &rarr;
-                       </button>
-                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Courses Section */}
-              {(activeSection === 'courses' || activeSection === 'home') && (
-                <div className="py-20 bg-white">
-                  <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center mb-16">
-                      <h2 className="text-sm font-bold text-amber-600 tracking-widest uppercase mb-2">Learn With Benazir</h2>
-                      <h3 className="text-4xl font-serif font-bold text-gray-900">Professional Mehndi Courses</h3>
-                      <p className="mt-4 text-gray-600 max-w-2xl mx-auto">From holding the cone to mastering bridal intricacies, start your journey today.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                      {courses.map((course) => (
-                        <div key={course.id} className={`${course.color} rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-shadow flex flex-col relative`}>
-                          {course.id === 2 && (
-                             <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
-                               POPULAR
-                             </div>
-                          )}
-                          <h4 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h4>
-                          <div className="flex items-end mb-6">
-                            <span className="text-3xl font-bold text-red-800">{course.price}</span>
-                            <span className="text-gray-500 text-sm ml-2 mb-1">/ one time</span>
-                          </div>
-                          
-                          <div className="space-y-4 mb-8 flex-grow">
-                            <div className="flex items-center text-gray-700">
-                              <Calendar size={18} className="mr-3 text-amber-600" />
-                              <span>Duration: {course.duration}</span>
-                            </div>
-                            <div className="flex items-center text-gray-700">
-                              <Star size={18} className="mr-3 text-amber-600" />
-                              <span>Level: {course.level}</span>
-                            </div>
-                            <div className="border-t border-gray-200 pt-4">
-                              <p className="font-semibold mb-2 text-sm">What you'll learn:</p>
-                              <ul className="space-y-2">
-                                {course.features.map((feature, i) => (
-                                  <li key={i} className="flex items-start text-sm text-gray-600">
-                                    <CheckCircle size={14} className="mr-2 mt-1 text-green-600 flex-shrink-0" />
-                                    {feature}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                          
-                          <button 
-                            onClick={() => handleAction(`You've shown interest in ${course.title}! Please fill the contact form.`)}
-                            className="w-full py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
-                          >
-                            Enroll Now
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Services/Pricing */}
-              {(activeSection === 'services' || activeSection === 'home') && (
-                <div className="py-20 bg-red-900 text-white">
-                  <div className="max-w-7xl mx-auto px-4">
-                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                       <div>
-                         <h2 className="text-amber-400 font-bold tracking-widest uppercase mb-2">Book an Appointment</h2>
-                         <h3 className="text-4xl font-serif font-bold mb-6">Make Your Special Day Beautiful</h3>
-                         <p className="text-gray-200 mb-8 leading-relaxed">
-                           Whether it's your wedding day, Karwa Chauth, Eid, or just a party, we provide bespoke mehndi application services. We use 100% organic, chemical-free henna for the richest stain.
-                         </p>
-                         
-                         <div className="space-y-6">
-                           <div className="flex justify-between items-center border-b border-red-700 pb-4">
-                             <div>
-                               <h4 className="text-xl font-bold">Bridal Package</h4>
-                               <p className="text-red-200 text-sm">Full hands (elbow) & legs (calf)</p>
-                             </div>
-                             <span className="text-2xl font-serif text-amber-400">₹5,000+</span>
-                           </div>
-                           <div className="flex justify-between items-center border-b border-red-700 pb-4">
-                             <div>
-                               <h4 className="text-xl font-bold">Party Mehndi</h4>
-                               <p className="text-red-200 text-sm">Per hand (one side)</p>
-                             </div>
-                             <span className="text-2xl font-serif text-amber-400">₹300+</span>
-                           </div>
-                           <div className="flex justify-between items-center border-b border-red-700 pb-4">
-                             <div>
-                               <h4 className="text-xl font-bold">Guest Package</h4>
-                               <p className="text-red-200 text-sm">Hourly rate for groups</p>
-                             </div>
-                             <span className="text-2xl font-serif text-amber-400">₹2,500/hr</span>
-                           </div>
-                         </div>
-
-                         <button 
-                          onClick={() => scrollToSection('contact')}
-                          className="mt-10 bg-amber-500 text-red-900 px-8 py-3 rounded-full font-bold hover:bg-amber-400 transition-colors"
-                         >
-                           Book Appointment
-                         </button>
-                       </div>
-                       
-                       <div className="grid grid-cols-2 gap-4">
-                          <img src="https://images.unsplash.com/photo-1582650085805-4c6e3d233c09?auto=format&fit=crop&q=80&w=400" className="rounded-lg shadow-xl translate-y-8" alt="Mehndi process" />
-                          <img src="https://images.unsplash.com/photo-1551024601-56455b24560b?auto=format&fit=crop&q=80&w=400" className="rounded-lg shadow-xl" alt="Finished hand" />
-                       </div>
-                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Contact Section */}
-              {(activeSection === 'contact' || activeSection === 'home') && (
-                <div className="py-20 bg-amber-50/50">
-                  <div className="max-w-4xl mx-auto px-4">
-                    <div className="text-center mb-12">
-                      <h3 className="text-3xl font-serif font-bold text-gray-900">Get In Touch</h3>
-                      <p className="text-gray-600 mt-2">Book a slot or ask about courses</p>
-                    </div>
-                    
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
-                      <div className="bg-gray-900 text-white p-8 md:w-2/5 flex flex-col justify-between">
-                        <div>
-                          <h4 className="text-xl font-bold mb-6 text-amber-400">Contact Info</h4>
-                          <div className="space-y-4">
-                            <div className="flex items-center">
-                              <Phone size={20} className="mr-3 text-amber-400" />
-                              <span>+91 98765 43210</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Mail size={20} className="mr-3 text-amber-400" />
-                              <span>contact@benazirmehndi.com</span>
-                            </div>
-                            <div className="flex items-center">
-                              <MapPin size={20} className="mr-3 text-amber-400" />
-                              <span>Mumbai, Maharashtra</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-8">
-                          <p className="text-sm text-gray-400 mb-3">Follow me on social media:</p>
-                          <div className="flex space-x-4">
-                            <Instagram className="cursor-pointer hover:text-amber-400" />
-                            <Facebook className="cursor-pointer hover:text-amber-400" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="p-8 md:w-3/5">
-                        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleAction('Message sent! I will contact you shortly.'); }}>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                            <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:outline-none" placeholder="Benazir Fatima" required />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Service Interested In</label>
-                            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:outline-none">
-                              <option>Bridal Mehndi</option>
-                              <option>Party Mehndi</option>
-                              <option>Mehndi Course</option>
-                              <option>Other</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                            <textarea rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:outline-none" placeholder="Tell me about your requirements..." required></textarea>
-                          </div>
-                          <button type="submit" className="w-full bg-red-800 text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors">
-                            Send Message
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Footer */}
-              <footer className="bg-gray-900 text-white py-8 border-t border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-                  <div className="mb-4 md:mb-0">
-                    <h2 className="text-xl font-serif font-bold">Benazir's Mehndi Studio</h2>
-                    <p className="text-sm text-gray-400">© 2024 All rights reserved.</p>
-                  </div>
-                  <div className="flex space-x-6 text-sm text-gray-400">
-                    <a href="#" className="hover:text-white">Privacy Policy</a>
-                    <a href="#" className="hover:text-white">Terms of Service</a>
-                  </div>
-                </div>
-              </footer>
+    <!-- Main Header -->
+    <header id="mainHeader" class="bg-[#1e3a8a] text-white p-4 shadow-xl border-b-4 border-orange-600 relative z-40">
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="text-center lg:text-left">
+                <h1 class="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none mb-1">Nanded Waghala Municipal Corporation</h1>
+                <p class="text-orange-400 font-bold text-[10px] md:text-xs tracking-[0.2em] uppercase italic">EVM Awareness Simulation २०२५-२६</p>
             </div>
-          );
+            <div class="flex bg-black/20 p-1 rounded-xl backdrop-blur-md border border-white/10 w-full lg:w-auto">
+                <button onclick="switchWard(false)" id="btnWardRegular" class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black transition-all bg-orange-600 text-white shadow-lg">
+                    WARD 1-19 (4 VOTES)
+                </button>
+                <button onclick="switchWard(true)" id="btnWard20" class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black transition-all text-slate-300 hover:text-white">
+                    WARD 20 (5 VOTES)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Schedule Banner -->
+    <section id="scheduleBanner" class="bg-orange-600 text-white py-2 px-4 shadow-md z-30">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 text-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-calendar-days text-orange-200"></i>
+                <div class="flex flex-col items-center sm:items-start leading-none">
+                    <span class="text-[10px] font-black uppercase tracking-tight">Thursday, 15 Jan 2026</span>
+                    <span class="text-[9px] font-bold opacity-80">गुरुवार, १५ जाने २०२६</span>
+                </div>
+            </div>
+            <div class="hidden sm:block w-px h-5 bg-white/20"></div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-clock text-orange-200"></i>
+                <div class="flex flex-col items-center sm:items-start leading-none">
+                    <span class="text-[10px] font-black uppercase tracking-tight">07:30 AM - 05:30 PM</span>
+                    <span class="text-[9px] font-bold opacity-80">७:३० AM ते ५:३० PM</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✨ FIXED SMART VVPAT -->
+    <div class="vvpat-sticky w-full flex justify-center py-2 bg-slate-200/95 backdrop-blur-md border-b-2 border-slate-300 shadow-2xl pointer-events-none">
+        <div class="w-full max-w-[280px] md:max-w-sm px-2 pointer-events-auto">
+            <div class="bg-slate-400 p-2 md:p-3 rounded-2xl shadow-xl border-b-4 border-slate-500 relative transform scale-95 transition-all">
+                <div class="bg-[#0a0a0a] h-20 md:h-28 rounded-lg flex items-center justify-center overflow-hidden border-4 border-slate-600 shadow-inner">
+                    <div id="vvpatContainer" class="w-full flex items-center justify-center h-full">
+                        <div class="text-slate-600 font-mono text-[8px] text-center animate-pulse tracking-tighter uppercase font-bold leading-tight">
+                            [ System Ready ]<br>Check Your Slip Here
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-1 flex justify-between items-center px-1 text-[6px] font-black text-slate-700 tracking-widest">
+                    <div class="flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_green]"></div><span>POWER</span></div>
+                    <div class="flex items-center gap-1"><span>BUSY</span><div id="vvpatBusyLight" class="w-1.5 h-1.5 rounded-full bg-slate-600 transition-colors"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 mt-6 flex-grow w-full pb-32">
+        <div id="evmGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- JavaScript setup machines once here -->
+        </div>
+
+        <!-- Disclaimer -->
+        <section class="mt-16 bg-white border-2 border-slate-300 rounded-[2rem] p-6 text-slate-800 shadow-xl max-w-4xl mx-auto">
+            <div class="flex items-center gap-3 mb-6 text-orange-600 border-b pb-4">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <h3 class="font-black uppercase text-base tracking-tight leading-none">Important Public Notice / सूचना</h3>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 text-[11px] md:text-sm font-bold leading-relaxed text-slate-600">
+                <div class="p-5 bg-orange-50/50 rounded-2xl border-2 border-orange-100">
+                    Yeh website sirf logo ki jaagrukta (awareness) aur unhe voting process samjhane ke liye ek demo ke taur par banayi gayi hai. Iska maqsad logo ko matdaan mein hone wali mushkilaat se bachana hai. Humara kisi bhi political party ya raajneetik dal se koi lena-dena nahi hai.
+                </div>
+                <div class="p-5 bg-blue-50/50 rounded-2xl border-2 border-blue-100">
+                    This website is an independent educational demonstration created solely for public awareness. Its purpose is to help voters understand the multi-vote system to ensure a smooth voting experience. We are not affiliated with any political party or organization.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden-element fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[110] p-4">
+        <div class="bg-white rounded-[2.5rem] p-6 md:p-8 max-w-xs w-full text-center shadow-2xl border-t-8 border-green-500 scale-in">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <i class="fa-solid fa-circle-check text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-black italic text-slate-900 mb-1 uppercase tracking-tighter leading-none">BEEEEP...!!!</h2>
+            <p class="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest border-b pb-2 text-center">Voting Successful</p>
+            
+            <div class="mb-8 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-100 rounded-3xl">
+                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2 border-b border-blue-100 pb-2 text-center">Loktantra Sandesh</p>
+                <p class="text-sm font-black text-blue-900 leading-tight italic text-center">
+                    "Aapka vote aapki taqat hai. Loktantra ko mazboot banayein!"
+                </p>
+            </div>
+
+            <button onclick="resetVoting()" class="w-full bg-[#1e3a8a] text-white py-4 rounded-xl font-black uppercase tracking-[0.2em] hover:bg-blue-900 transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95 border-b-4 border-blue-950">
+                <i class="fa-solid fa-rotate-left"></i> New Simulation
+            </button>
+        </div>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="fixed bottom-6 left-0 right-0 px-4 pointer-events-none z-[40]">
+        <div class="max-w-[280px] md:max-w-sm mx-auto bg-slate-900/95 backdrop-blur-xl shadow-[0_25px_60px_rgba(0,0,0,0.5)] border-2 border-slate-700 p-2 md:p-3 rounded-[2rem] flex items-center justify-between pointer-events-auto text-white ring-2 ring-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fa-solid fa-check-to-slot text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-[8px] text-blue-400 font-black uppercase leading-none mb-0.5">Status</p>
+                    <p id="progressLabel" class="font-black text-[10px] md:text-xs tracking-tight leading-none">0 / 4 Rec.</p>
+                </div>
+            </div>
+            <div id="progressDots" class="flex gap-1.5 px-2"></div>
+        </div>
+    </div>
+
+    <footer class="text-center py-20 bg-slate-300 border-t-2 border-slate-400 relative">
+        <p class="text-slate-900 font-black text-4xl italic tracking-tighter mb-1">7ONLY</p>
+        <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] opacity-80">Public Awareness Initiative</p>
+    </footer>
+
+    <script>
+        // --- State ---
+        let isWard20 = false;
+        let votedSeats = { A: null, B: null, C: null, D: null, E: null };
+        let busyMachine = null; // Stores ID of machine currently showing slip
+        let isComplete = false;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const config = {
+            A: { name: 'Seat A (अ)', color: 'bg-white', border: 'border-slate-300', machineBg: 'bg-slate-100', accent: 'border-slate-400' },
+            B: { name: 'Seat B (ब)', color: 'bg-pink-100', border: 'border-pink-300', machineBg: 'bg-pink-100/50', accent: 'border-pink-400' },
+            C: { name: 'Seat C (क)', color: 'bg-yellow-100', border: 'border-yellow-300', machineBg: 'bg-yellow-100/50', accent: 'border-yellow-400' },
+            D: { name: 'Seat D (ड)', color: 'bg-blue-100', border: 'border-blue-300', machineBg: 'bg-blue-100/50', accent: 'border-blue-400' },
+            E: { name: 'Seat E (इ)', color: 'bg-green-100', border: 'border-green-300', machineBg: 'bg-green-100/50', accent: 'border-green-400' }
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        const symbols = ["☕", "🍳", "🛺", "🚲", "❌"];
+
+        window.onload = () => {
+            initSimulation();
+        };
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 'click') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'beep') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+            }
+        }
+
+        function switchWard(mode) {
+            if (busyMachine) return;
+            isWard20 = mode;
+            document.getElementById('btnWardRegular').className = !isWard20 ? 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black bg-orange-600 text-white shadow-lg' : 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black text-slate-300 hover:text-white';
+            document.getElementById('btnWard20').className = isWard20 ? 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black bg-orange-600 text-white shadow-lg' : 'flex-1 lg:flex-none px-4 py-2 rounded-lg text-[10px] md:text-xs font-black text-slate-300 hover:text-white';
+            const grid = document.getElementById('evmGrid');
+            grid.className = isWard20 ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6';
+            resetVoting();
+        }
+
+        // --- Core Optimization: Initial Build ---
+        function initSimulation() {
+            const grid = document.getElementById('evmGrid');
+            grid.innerHTML = '';
+            const activeSeats = isWard20 ? ['A', 'B', 'C', 'D', 'E'] : ['A', 'B', 'C', 'D'];
+
+            activeSeats.forEach((id) => {
+                const s = config[id];
+                const card = document.createElement('div');
+                card.id = `machine-${id}`;
+                card.className = `machine-unit relative flex flex-col rounded-3xl p-3 shadow-2xl border-x-4 border-b-8 transition-all duration-300 ${s.machineBg} ${s.accent.replace('border-', 'border-b-')}`;
+                
+                let rows = '';
+                for (let i = 0; i < 5; i++) {
+                    const isNota = i === 4;
+                    rows += `
+                        <div id="row-${id}-${i}" class="flex items-center gap-2 h-12 border-b-2 border-slate-50 last:border-0 px-1">
+                            <div class="flex-1 flex items-center gap-1 overflow-hidden">
+                                <span class="text-[9px] font-black w-3 text-slate-400">${i + 1}</span>
+                                <div class="flex flex-col truncate leading-none">
+                                    <span class="text-[9px] font-black uppercase text-slate-800">${isNota ? 'NOTA' : 'Candidate ' + (i + 1)}</span>
+                                    <span class="text-[8px] font-bold text-slate-400 mt-0.5">${isNota ? 'नोटा' : 'उमेदवार ' + (i + 1)}</span>
+                                </div>
+                                <span class="text-xl ml-auto">${symbols[i]}</span>
+                            </div>
+                            <div class="bg-slate-100 p-1 rounded-lg flex items-center gap-1.5 border border-slate-200 shadow-sm">
+                                <div id="led-${id}-${i}" class="w-3.5 h-3.5 rounded-full border border-black/10 bg-slate-300"></div>
+                                <button id="btn-${id}-${i}" onclick="handleVote('${id}', ${i})" class="evm-btn w-10 h-8 rounded shadow-md active:translate-y-1 transition-all bg-[#1e40af] hover:bg-blue-700 flex items-center justify-center">
+                                    <div class="w-4 h-4 rounded-full border border-white/20"></div>
+                                </button>
+                            </div>
+                        </div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center px-2 py-1 bg-black/5 rounded-lg mb-3">
+                        <div class="flex items-center gap-1"><div id="ready-${id}" class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_5px_green]"></div><span class="text-[7px] font-black text-slate-600 uppercase">Ready</span></div>
+                        <div class="flex items-center gap-1"><span class="text-[7px] font-black text-slate-600 uppercase">Busy</span><div id="busy-${id}" class="w-2.5 h-2.5 rounded-full bg-slate-500"></div></div>
+                    </div>
+                    <div class="bg-white rounded-xl border-2 ${s.border} p-1 shadow-inner flex-grow ballot-paper">
+                        <div class="${s.color} py-1.5 px-2 mb-3 text-center text-xs font-black rounded border-2 ${s.border} shadow-md uppercase tracking-tight">${s.name}</div>
+                        <div class="space-y-1">${rows}</div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+            updateUIState();
+        }
+
+        // --- Core Optimization: Update UI without rebuilding DOM ---
+        function updateUIState() {
+            const activeSeats = isWard20 ? ['A', 'B', 'C', 'D', 'E'] : ['A', 'B', 'C', 'D'];
+            const votedCount = activeSeats.filter(s => votedSeats[s] !== null).length;
+
+            activeSeats.forEach((id, idx) => {
+                const hasVoted = votedSeats[id] !== null;
+                const isNext = !hasVoted && busyMachine === null && idx === votedCount;
+                const machineEl = document.getElementById(`machine-${id}`);
+                
+                // Highlight Next
+                if (isNext) machineEl.classList.add('ring-8', 'ring-blue-500/20', 'scale-[1.02]');
+                else machineEl.classList.remove('ring-8', 'ring-blue-500/20', 'scale-[1.02]');
+
+                // Status Lights
+                document.getElementById(`ready-${id}`).className = `w-2.5 h-2.5 rounded-full ${hasVoted ? 'bg-slate-600' : 'bg-green-500 shadow-[0_0_5px_green]'}`;
+                document.getElementById(`busy-${id}`).className = `w-2.5 h-2.5 rounded-full ${busyMachine === id ? 'bg-red-600 shadow-[0_0_5px_red]' : 'bg-slate-500'}`;
+
+                // Row & Button States
+                for (let i = 0; i < 5; i++) {
+                    const isSelected = votedSeats[id] === i;
+                    const row = document.getElementById(`row-${id}-${i}`);
+                    const led = document.getElementById(`led-${id}-${i}`);
+                    const btn = document.getElementById(`btn-${id}-${i}`);
+
+                    row.className = `flex items-center gap-2 h-12 border-b-2 border-slate-50 last:border-0 px-1 ${isSelected ? 'bg-red-50' : ''}`;
+                    led.className = `w-3.5 h-3.5 rounded-full border border-black/10 transition-colors ${isSelected ? 'bg-red-600 shadow-[0_0_5px_red]' : 'bg-slate-300'}`;
+                    
+                    // Logic: Disable if machine voted, or someone else is busy, or simulation complete
+                    btn.disabled = hasVoted || busyMachine !== null || isComplete;
+                    btn.className = `evm-btn w-10 h-8 rounded shadow-md active:translate-y-1 transition-all flex items-center justify-center ${isSelected ? 'bg-[#000080]' : 'bg-[#1e40af] hover:bg-blue-700'} disabled:opacity-40`;
+                }
+            });
+
+            // Update Progress Widget
+            document.getElementById('progressLabel').innerText = `${votedCount} / ${activeSeats.length} Rec.`;
+            const dots = document.getElementById('progressDots');
+            dots.innerHTML = '';
+            activeSeats.forEach(s => {
+                const dot = document.createElement('div');
+                dot.className = `w-3 h-3 rounded-full transition-all duration-700 shadow-inner ${votedSeats[s] !== null ? 'bg-green-500 shadow-[0_0_10px_#22c55e] scale-125' : 'bg-slate-700 border border-slate-600'}`;
+                dots.appendChild(dot);
+            });
+        }
+
+        function handleVote(seatId, index) {
+            if (busyMachine || isComplete || votedSeats[seatId] !== null) return;
+
+            busyMachine = seatId;
+            votedSeats[seatId] = index;
+
+            // VVPAT
+            const vvpat = document.getElementById('vvpatContainer');
+            const light = document.getElementById('vvpatBusyLight');
+            light.className = 'w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_red]';
+            vvpat.innerHTML = `
+                <div class="bg-white w-24 md:w-32 h-16 md:h-24 p-2 shadow-md flex flex-col items-center justify-center animate-scroll border-x border-slate-100 text-center">
+                    <p class="text-[5px] font-bold text-slate-300 mb-1 border-b w-full uppercase tracking-widest leading-none pb-0.5">VVPAT CONFIRMATION</p>
+                    <span class="text-xl md:text-3xl mb-1">${symbols[index]}</span>
+                    <p class="text-[8px] md:text-[10px] font-black text-black uppercase">${index === 4 ? 'NOTA' : 'Candidate ' + (index + 1)}</p>
+                    <p class="text-[7px] mt-1 bg-slate-200 px-2 font-bold rounded italic">SEAT ${seatId}</p>
+                </div>`;
+
+            const total = isWard20 ? 5 : 4;
+            const current = Object.keys(votedSeats).filter(k => (isWard20 || k !== 'E') && votedSeats[k] !== null).length;
+
+            if (current === total) {
+                playSound('beep');
+                setTimeout(() => { isComplete = true; document.getElementById('successModal').classList.remove('hidden-element'); }, 3500);
+            } else {
+                playSound('click');
+            }
+
+            updateUIState();
+
+            setTimeout(() => {
+                busyMachine = null;
+                light.className = 'w-1.5 h-1.5 rounded-full bg-slate-600';
+                if (!isComplete) vvpat.innerHTML = `<div class="text-slate-600 font-mono text-[8px] text-center animate-pulse uppercase font-bold leading-tight">[ System Ready ]<br>Check Your Slip Here</div>`;
+                updateUIState();
+            }, 4000);
+        }
+
+        function resetVoting() {
+            votedSeats = { A: null, B: null, C: null, D: null, E: null };
+            busyMachine = null; isComplete = false;
+            document.getElementById('successModal').classList.add('hidden-element');
+            document.getElementById('vvpatContainer').innerHTML = `<div class="text-slate-600 font-mono text-[8px] text-center animate-pulse uppercase font-bold leading-tight">[ System Ready ]<br>Check Your Slip Here</div>`;
+            document.getElementById('vvpatBusyLight').className = 'w-1.5 h-1.5 rounded-full bg-slate-600';
+            initSimulation();
+        }
     </script>
 </body>
 </html>
+
+
