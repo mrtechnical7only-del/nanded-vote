@@ -13,6 +13,9 @@
         body { font-family: 'Inter', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .party-card { transition: all 0.3s ease; cursor: pointer; }
+        .party-card:hover { transform: translateY(-5px); }
+        .party-card.active { ring: 4px; ring-color: #1e40af; transform: scale(1.05); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 pb-20">
@@ -40,9 +43,12 @@
     <main class="max-w-6xl mx-auto px-4 mt-8">
         <!-- Party Summary Section -->
         <section class="mb-8">
-            <div class="flex items-center gap-2 mb-4 text-blue-800 font-bold">
-                <i data-lucide="bar-chart-3"></i>
-                <h2 class="text-xl">Party Standings (81 Total Seats)</h2>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2 text-blue-800 font-bold">
+                    <i data-lucide="bar-chart-3"></i>
+                    <h2 class="text-xl">Party Standings (Click to Filter)</h2>
+                </div>
+                <button id="reset-btn" class="hidden text-xs font-bold text-blue-600 hover:text-blue-800 underline uppercase tracking-widest">Show All Results</button>
             </div>
             <div id="party-summary" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
                 <!-- Data will be injected here -->
@@ -56,7 +62,7 @@
                 <input 
                     type="text" 
                     id="search-input"
-                    placeholder="Winner ya Runner-up ka naam search karein..." 
+                    placeholder="Winner, Runner-up ya Ward search karein..." 
                     class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 >
             </div>
@@ -64,9 +70,12 @@
 
         <!-- Results Grid -->
         <section>
-            <div class="flex items-center gap-2 mb-4 text-blue-800 font-bold">
-                <i data-lucide="users"></i>
-                <h2 class="text-xl">Muqabla: Kaun Jeeta, Kaun Hara?</h2>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2 text-blue-800 font-bold">
+                    <i data-lucide="users"></i>
+                    <h2 class="text-xl" id="results-title">Muqabla: Kaun Jeeta, Kaun Hara?</h2>
+                </div>
+                <span id="results-count" class="text-xs font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full"></span>
             </div>
             <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Election Cards will be injected here -->
@@ -76,10 +85,13 @@
 
     <footer class="mt-12 py-12 bg-white border-t border-gray-100 text-center">
         <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">NWMC Nanded Election Archive 2026</p>
-        <p class="text-[10px] text-gray-400 mt-2 italic">Created for GitHub Hosting</p>
+        <p class="text-[10px] text-gray-400 mt-2 italic">Interactive filtering updated for GitHub Hosting</p>
     </footer>
 
     <script>
+        let selectedParty = 'All';
+        let currentSearch = '';
+
         // Election Data
         const electionData = [
             { prabhag: '1', seat: 'A', winner: 'Rawat Shravasti', party: 'BJP', votes: '4,822', runnerUp: 'Dudhmal Ratna', runnerUpParty: 'Shiv Sena (S)', margin: '1,051' },
@@ -103,7 +115,7 @@
             { prabhag: '20', seat: 'A', winner: 'Landge Narchna', party: 'BJP', votes: '11,270', runnerUp: 'Deepmala Gaikwad', runnerUpParty: 'Vanchit', margin: '811' }
         ];
 
-        const partySummary = [
+        const partySummaryData = [
             { name: 'BJP', seats: 45, color: 'bg-orange-500' },
             { name: 'AIMIM', seats: 14, color: 'bg-green-700' },
             { name: 'Congress', seats: 10, color: 'bg-blue-600' },
@@ -116,30 +128,63 @@
         // Function to render Party Summary
         function renderSummary() {
             const container = document.getElementById('party-summary');
-            container.innerHTML = partySummary.map(p => `
-                <div class="${p.color} p-4 rounded-xl shadow-sm border border-black/5 text-white">
+            container.innerHTML = partySummaryData.map(p => `
+                <div class="party-card ${p.color} p-4 rounded-xl shadow-sm border-2 ${selectedParty === p.name ? 'border-blue-900 scale-105' : 'border-transparent'} text-white" 
+                     onclick="filterByParty('${p.name}')">
                     <p class="text-[10px] font-bold opacity-75 uppercase">${p.name}</p>
                     <h3 class="text-3xl font-black">${p.seats}</h3>
                 </div>
             `).join('');
+
+            const resetBtn = document.getElementById('reset-btn');
+            if (selectedParty !== 'All') {
+                resetBtn.classList.remove('hidden');
+            } else {
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        function filterByParty(party) {
+            if (selectedParty === party) {
+                selectedParty = 'All';
+            } else {
+                selectedParty = party;
+            }
+            renderSummary();
+            renderResults();
+        }
+
+        document.getElementById('reset-btn').onclick = () => {
+            selectedParty = 'All';
+            renderSummary();
+            renderResults();
         }
 
         // Function to render Result Cards
-        function renderResults(filter = '') {
+        function renderResults() {
+            const filter = document.getElementById('search-input').value.toLowerCase();
             const container = document.getElementById('results-grid');
-            const filtered = electionData.filter(item => 
-                item.winner.toLowerCase().includes(filter.toLowerCase()) || 
-                item.runnerUp.toLowerCase().includes(filter.toLowerCase()) ||
-                item.prabhag.includes(filter)
-            );
+            const countEl = document.getElementById('results-count');
+            const titleEl = document.getElementById('results-title');
+
+            const filtered = electionData.filter(item => {
+                const matchesParty = selectedParty === 'All' || item.party === selectedParty || (selectedParty === 'Shiv Sena' && item.party.includes('Shiv Sena'));
+                const matchesSearch = item.winner.toLowerCase().includes(filter) || 
+                                     item.runnerUp.toLowerCase().includes(filter) ||
+                                     item.prabhag.includes(filter);
+                return matchesParty && matchesSearch;
+            });
+
+            titleEl.innerText = selectedParty === 'All' ? 'Muqabla: Kaun Jeeta, Kaun Hara?' : `${selectedParty} Winners & Competitors`;
+            countEl.innerText = `${filtered.length} Cards Found`;
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400">Result nahi mila.</div>`;
+                container.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400">Is category mein koi result nahi mila.</div>`;
                 return;
             }
 
             container.innerHTML = filtered.map(item => `
-                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:border-blue-300 transition-colors">
                     <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center">
                         <span class="text-sm font-black text-blue-800">PRABHAG ${item.prabhag}-${item.seat}</span>
                         <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase tracking-widest">Final Result</span>
@@ -186,13 +231,12 @@
                 </div>
             `).join('');
             
-            // Re-initialize icons
             lucide.createIcons();
         }
 
         // Search Listener
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            renderResults(e.target.value);
+        document.getElementById('search-input').addEventListener('input', () => {
+            renderResults();
         });
 
         // Initial Load
