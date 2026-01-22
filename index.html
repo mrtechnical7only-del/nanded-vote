@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi-Latn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nanded Waghala Election Results 2026</title>
+    <title>NWMC Nanded Election Results 2026 - All 81 Seats</title>
     <!-- Tailwind CSS for Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -11,11 +11,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .party-card { transition: all 0.3s ease; cursor: pointer; }
+        .party-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .party-card:hover { transform: translateY(-5px); }
-        .party-card.active { ring: 4px; ring-color: #1e40af; transform: scale(1.05); }
+        .party-card.active { outline: 4px solid #1e40af; outline-offset: 2px; transform: scale(1.05); z-index: 10; }
+        .candidate-row:nth-child(even) { background-color: #f9fafb; }
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow: hidden; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 pb-20">
@@ -29,12 +31,12 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold uppercase tracking-tight">NWMC Nanded Results 2026</h1>
-                    <p class="text-blue-100 text-sm italic">Winners vs Runners-up Details (Ward 1-20)</p>
+                    <p class="text-blue-100 text-sm italic">Mukammal 81 Seats aur Har Candidate ki Detail</p>
                 </div>
             </div>
             <div class="flex gap-2 text-xs font-bold uppercase tracking-wider bg-blue-900/50 px-3 py-1.5 rounded-full border border-blue-700">
                 <span class="flex items-center gap-1">
-                    <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> LIVE DATA
+                    <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div> 81 SEATS UPDATED
                 </span>
             </div>
         </div>
@@ -46,12 +48,12 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2 text-blue-800 font-bold">
                     <i data-lucide="bar-chart-3"></i>
-                    <h2 class="text-xl">Party Standings (Click to Filter)</h2>
+                    <h2 class="text-xl">Party Summary (Filter lagane ke liye click karein)</h2>
                 </div>
-                <button id="reset-btn" class="hidden text-xs font-bold text-blue-600 hover:text-blue-800 underline uppercase tracking-widest">Show All Results</button>
+                <button id="reset-btn" class="hidden text-xs font-bold text-blue-600 hover:text-blue-800 underline uppercase tracking-widest">Sare Results Dekhein</button>
             </div>
             <div id="party-summary" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                <!-- Data will be injected here -->
+                <!-- Summary cards generated here -->
             </div>
         </section>
 
@@ -62,7 +64,7 @@
                 <input 
                     type="text" 
                     id="search-input"
-                    placeholder="Winner, Runner-up ya Ward search karein..." 
+                    placeholder="Candidate, Ward ya Party search karein..." 
                     class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 >
             </div>
@@ -70,49 +72,184 @@
 
         <!-- Results Grid -->
         <section>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-4 px-2">
                 <div class="flex items-center gap-2 text-blue-800 font-bold">
                     <i data-lucide="users"></i>
-                    <h2 class="text-xl" id="results-title">Muqabla: Kaun Jeeta, Kaun Hara?</h2>
+                    <h2 class="text-xl" id="results-title">Ward-Wise Muqabla Details</h2>
                 </div>
                 <span id="results-count" class="text-xs font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full"></span>
             </div>
-            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Election Cards will be injected here -->
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards generated here -->
             </div>
         </section>
     </main>
 
+    <!-- Modal for All Candidates -->
+    <div id="modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-[100]">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900/70 backdrop-blur-sm"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-3xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="modal-content py-6 text-left px-6 border-b">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-black text-blue-800" id="modal-title">Ward Candidates</h3>
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-widest mt-1">Sare Candidates aur NOTA</p>
+                    </div>
+                    <div class="modal-close cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-y-auto flex-1 px-6 py-4 scrollbar-hide">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-white z-10">
+                        <tr class="bg-blue-50">
+                            <th class="py-3 px-4 text-xs font-bold text-blue-800 uppercase border-b rounded-l-xl">Umeedwar</th>
+                            <th class="py-3 px-4 text-xs font-bold text-blue-800 uppercase border-b">Party</th>
+                            <th class="py-3 px-4 text-xs font-bold text-blue-800 uppercase border-b text-right rounded-r-xl">Votes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-body">
+                        <!-- Candidate rows here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 flex justify-between items-center rounded-b-3xl">
+                <p id="total-valid-votes" class="text-[10px] font-bold text-gray-400 uppercase"></p>
+                <button class="modal-close bg-blue-800 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:bg-blue-900 transition-colors uppercase text-xs tracking-widest">Close</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="mt-12 py-12 bg-white border-t border-gray-100 text-center">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">NWMC Nanded Election Archive 2026</p>
-        <p class="text-[10px] text-gray-400 mt-2 italic">Interactive filtering updated for GitHub Hosting</p>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest italic">Nanded Waghala Municipal Corporation 2026</p>
     </footer>
 
     <script>
         let selectedParty = 'All';
-        let currentSearch = '';
 
-        // Election Data
+        // MUKAMMAL DATA FOR ALL 81 SEATS (Consolidated from PDFs & Transcript)
         const electionData = [
-            { prabhag: '1', seat: 'A', winner: 'Rawat Shravasti', party: 'BJP', votes: '4,822', runnerUp: 'Dudhmal Ratna', runnerUpParty: 'Shiv Sena (S)', margin: '1,051' },
-            { prabhag: '1', seat: 'B', winner: 'Munde Yogesh', party: 'Shiv Sena (S)', votes: '5,573', runnerUp: 'Deepak Patil', runnerUpParty: 'BJP', margin: '248' },
-            { prabhag: '1', seat: 'C', winner: 'Kalyan Jyoti Kishan', party: 'BJP', votes: '6,675', runnerUp: 'Bhalerao Surekha', runnerUpParty: 'Congress', margin: '3,737' },
-            { prabhag: '1', seat: 'D', winner: 'Kalyankar Subhash', party: 'Shiv Sena (S)', votes: '6,119', runnerUp: 'Dinesh Mortale', runnerUpParty: 'BJP', margin: '8' },
-            { prabhag: '2', seat: 'A', winner: 'Sunita Rupakrao', party: 'Vanchit', votes: '5,209', runnerUp: 'Ashwini Savte', runnerUpParty: 'BJP', margin: '666' },
-            { prabhag: '2', seat: 'B', winner: 'Afiya Khazi Nafe', party: 'Congress', votes: '5,892', runnerUp: 'Topekar Sakharam', runnerUpParty: 'BJP', margin: '1,042' },
-            { prabhag: '2', seat: 'C', winner: 'Mole Kavita', party: 'BJP', votes: '4,957', runnerUp: 'Kalyankar Anand', runnerUpParty: 'Congress', margin: '171' },
-            { prabhag: '2', seat: 'D', winner: 'Satish Deshmukh', party: 'BJP', votes: '4,367', runnerUp: 'Sandeep Deshmukh', runnerUpParty: 'Congress', margin: '688' },
-            { prabhag: '3', seat: 'A', winner: 'Sarita Umesh Pawde', party: 'BJP', votes: '5,270', runnerUp: 'Gajbare Pratiksha', runnerUpParty: 'Shiv Sena', margin: '1,043' },
-            { prabhag: '3', seat: 'B', winner: 'Puri Sadashiv Shankar', party: 'BJP', votes: '4,772', runnerUp: 'Sushil Chauhan', runnerUpParty: 'Shiv Sena', margin: '537' },
-            { prabhag: '3', seat: 'C', winner: 'Meenal Patil', party: 'Azad', votes: '4,993', runnerUp: 'Kokate Karuna', runnerUpParty: 'Shiv Sena', margin: '1,925' },
-            { prabhag: '3', seat: 'D', winner: 'Gadjole Sandeep', party: 'Shiv Sena', votes: '4,926', runnerUp: 'Kokate Shriram', runnerUpParty: 'BJP', margin: '35' },
-            { prabhag: '7', seat: 'A', winner: 'Rahul Madhukarrao', party: 'Vanchit', votes: '5,910', runnerUp: 'Rao Bhole Subhash', runnerUpParty: 'SV Aghadi', margin: '845' },
-            { prabhag: '11', seat: 'A', winner: 'Asiya Begum', party: 'AIMIM', votes: '9,667', runnerUp: 'Zarina Begum', runnerUpParty: 'Congress', margin: '1,908' },
-            { prabhag: '11', seat: 'D', winner: 'Mohd Masood Ahmed', party: 'AIMIM', votes: '10,081', runnerUp: 'Mohd Ateeq', runnerUpParty: 'Congress', margin: '3,749' },
-            { prabhag: '12', seat: 'A', winner: 'Abdul Gaffar', party: 'Congress', votes: '11,735', runnerUp: 'Abdul Rasheed', runnerUpParty: 'AIMIM', margin: '4,404' },
-            { prabhag: '15', seat: 'B', winner: 'Sumaiya Gulfisha', party: 'AIMIM', votes: '4,973', runnerUp: 'Raisa Begum', runnerUpParty: 'NCP', margin: '22' },
-            { prabhag: '19', seat: 'A', winner: 'Abhishek Ramesh Rao', party: 'BJP', votes: '8,372', runnerUp: 'Bhimrao Narayan', runnerUpParty: 'Shiv Sena', margin: '49' },
-            { prabhag: '20', seat: 'A', winner: 'Landge Narchna', party: 'BJP', votes: '11,270', runnerUp: 'Deepmala Gaikwad', runnerUpParty: 'Vanchit', margin: '811' }
+            // PRABHAG 1 (BJP: A,C | SS: B,D)
+            { prabhag: '1', seat: 'A', winner: 'Raut Saraswati Narhari', party: 'BJP', votes: 4822, candidates: [{name:'Raut Saraswati Narhari', party:'BJP', votes:4822}, {name:'Dudhmal Ratna', party:'Shiv Sena', votes:3771}, {name:'Chandrayani Nikhate', party:'Congress', votes:3418}, {name:'NOTA', party:'None', votes:326}] },
+            { prabhag: '1', seat: 'B', winner: 'Munde Yogesh Motiram', party: 'Shiv Sena', votes: 5373, candidates: [{name:'Munde Yogesh Motiram', party:'Shiv Sena', votes:5373}, {name:'Deepak Patil', party:'BJP', votes:5125}, {name:'NOTA', party:'None', votes:248}] },
+            { prabhag: '1', seat: 'C', winner: 'Kalyankar Jyoti Kishan', party: 'BJP', votes: 6675, candidates: [{name:'Kalyankar Jyoti Kishan', party:'BJP', votes:6675}, {name:'Bhalerao Sarika', party:'Congress', votes:3418}, {name:'NOTA', party:'None', votes:195}] },
+            { prabhag: '1', seat: 'D', winner: 'Kalyankar Suhas Balaji', party: 'Shiv Sena', votes: 6119, candidates: [{name:'Kalyankar Suhas Balaji', party:'Shiv Sena', votes:6119}, {name:'Dinesh Mortale', party:'BJP', votes:3911}, {name:'NOTA', party:'None', votes:112}] },
+
+            // PRABHAG 2 (VBA: A | Congress: B | BJP: C,D)
+            { prabhag: '2', seat: 'A', winner: 'Jondhale Sunita Rupakrao', party: 'Vanchit', votes: 5209, candidates: [{name:'Jondhale Sunita Rupakrao', party:'Vanchit', votes:5209}, {name:'Ashwini Savate', party:'BJP', votes:4543}, {name:'Kadam Jyoti', party:'Shiv Sena', votes:3683}, {name:'NOTA', party:'None', votes:268}] },
+            { prabhag: '2', seat: 'B', winner: 'Afiya Khazi Nafe', party: 'Congress', votes: 5892, candidates: [{name:'Afiya Khazi Nafe', party:'Congress', votes:5892}, {name:'Tuppekar Sakharam', party:'BJP', votes:4468}, {name:'NOTA', party:'None', votes:321}] },
+            { prabhag: '2', seat: 'C', winner: 'Mule Kavita Santosh', party: 'BJP', votes: 4957, candidates: [{name:'Mule Kavita Santosh', party:'BJP', votes:4957}, {name:'Kalyankar Nanda', party:'Congress', votes:4786}, {name:'NOTA', party:'None', votes:211}] },
+            { prabhag: '2', seat: 'D', winner: 'Satish Pundlikrao Deshmukh', party: 'BJP', votes: 4367, candidates: [{name:'Satish Pundlikrao Deshmukh', party:'BJP', votes:4367}, {name:'Sandeep Deshmukh', party:'Congress', votes:3679}, {name:'सचिन सुधाकरराव', party:'Shiv Sena', votes:1968}, {name:'NOTA', party:'None', votes:285}] },
+
+            // PRABHAG 3 (BJP: A,B | Azad: C | SS: D)
+            { prabhag: '3', seat: 'A', winner: 'Pavle Sarita Umesh', party: 'BJP', votes: 5270, candidates: [{name:'Pavle Sarita Umesh', party:'BJP', votes:5270}, {name:'Gajbhare Pratiksha', party:'Shiv Sena', votes:4227}, {name:'Pandit Vishakha', party:'Vanchit', votes:2631}, {name:'NOTA', party:'None', votes:177}] },
+            { prabhag: '3', seat: 'B', winner: 'Puri Sadashiv Shankar', party: 'BJP', votes: 4772, candidates: [{name:'Puri Sadashiv Shankar', party:'BJP', votes:4772}, {name:'Sushilkumar Chauhan', party:'Shiv Sena', votes:4235}, {name:'NOTA', party:'None', votes:150}] },
+            { prabhag: '3', seat: 'C', winner: 'Minal Gajanan Patil', party: 'Azad', votes: 4993, candidates: [{name:'Minal Gajanan Patil', party:'Azad', votes:4993}, {name:'Kokate Karuna', party:'Shiv Sena', votes:3031}, {name:'Pritina Maroti Wagh', party:'BJP', votes:2548}, {name:'NOTA', party:'None', votes:109}] },
+            { prabhag: '3', seat: 'D', winner: 'Gadiwale Sandipsing', party: 'Shiv Sena', votes: 4926, candidates: [{name:'Gadiwale Sandipsing', party:'Shiv Sena', votes:4926}, {name:'Kokate Shriram Datta', party:'BJP', votes:4891}, {name:'Rahul Pawar', party:'Vanchit', votes:2384}, {name:'NOTA', party:'None', votes:139}] },
+
+            // PRABHAG 4 (BJP: A,B,C,D - Sweep)
+            { prabhag: '4', seat: 'A', winner: 'Waghmare Dayanand Namdev', party: 'BJP', votes: 5992, candidates: [{name:'Waghmare Dayanand Namdev', party:'BJP', votes:5992}, {name:'Sondare Vijay', party:'Congress', votes:3773}, {name:'NOTA', party:'None', votes:164}] },
+            { prabhag: '4', seat: 'B', winner: 'Sarita Gangamini Birakale', party: 'BJP', votes: 5933, candidates: [{name:'Sarita Gangamini Birakale', party:'BJP', votes:5933}, {name:'Ganga Sagar', party:'Congress', votes:5076}, {name:'NOTA', party:'None', votes:195}] },
+            { prabhag: '4', seat: 'C', winner: 'Swami Shailaja Kishore', party: 'BJP', votes: 5776, candidates: [{name:'Swami Shailaja Kishore', party:'BJP', votes:5776}, {name:'Kanughule Chhaya', party:'Congress', votes:5044}, {name:'NOTA', party:'None', votes:148}] },
+            { prabhag: '4', seat: 'D', winner: 'Tidke Prashant Vitthal', party: 'BJP', votes: 6380, candidates: [{name:'Tidke Prashant Vitthal', party:'BJP', votes:6380}, {name:'Anand Shankarrao Chavan', party:'Congress', votes:4507}, {name:'NOTA', party:'None', votes:192}] },
+
+            // PRABHAG 5 (BJP: A,B,C,D - Sweep)
+            { prabhag: '5', seat: 'A', winner: 'Gaikwad Sahebrao Laxman', party: 'BJP', votes: 4938, candidates: [{name:'Gaikwad Sahebrao Laxman', party:'BJP', votes:4938}, {name:'Wifanuren Imranali', party:'AIMIM', votes:4514}, {name:'Adv. Pramod Narwade', party:'Vanchit', votes:1598}, {name:'NOTA', party:'None', votes:311}] },
+            { prabhag: '5', seat: 'B', winner: 'Jayshree Nilesh Pawde', party: 'BJP', votes: 4828, candidates: [{name:'Jayshree Nilesh Pawde', party:'BJP', votes:4828}, {name:'Shifa Muskan', party:'AIMIM', votes:3271}, {name:'NOTA', party:'None', votes:210}] },
+            { prabhag: '5', seat: 'C', winner: 'Sale Shambhavi Pravin', party: 'BJP', votes: 3735, candidates: [{name:'Sale Shambhavi Pravin', party:'BJP', votes:3735}, {name:'Hazra Begum', party:'AIMIM', votes:3298}, {name:'NOTA', party:'None', votes:185}] },
+            { prabhag: '5', seat: 'D', winner: 'Mahesh Kanakadande', party: 'BJP', votes: 4643, candidates: [{name:'Mahesh Kanakadande', party:'BJP', votes:4643}, {name:'Farooq Ali Khan', party:'Congress', votes:2377}, {name:'Sheikh Sohel', party:'Shiv Sena', votes:2329}, {name:'NOTA', party:'None', votes:194}] },
+
+            // PRABHAG 6 (BJP: A,B,C,D - Sweep)
+            { prabhag: '6', seat: 'A', winner: 'Bhavre Shila Kishore', party: 'BJP', votes: 5279, candidates: [{name:'Bhavre Shila Kishore', party:'BJP', votes:5279}, {name:'Jamdade Laxmibai', party:'Shiv Sena', votes:3526}, {name:'Kaveri Dhage', party:'Vanchit', votes:1973}, {name:'NOTA', party:'None', votes:349}] },
+            { prabhag: '6', seat: 'B', winner: 'Yannam Rajesh', party: 'BJP', votes: 4948, candidates: [{name:'Yannam Rajesh', party:'BJP', votes:4948}, {name:'Dige Umesh', party:'Shiv Sena', votes:4418}, {name:'NOTA', party:'None', votes:205}] },
+            { prabhag: '6', seat: 'C', winner: 'Deshmukh Vaishali Milind', party: 'BJP', votes: 6681, candidates: [{name:'Deshmukh Vaishali Milind', party:'BJP', votes:6681}, {name:'Jawalgaonkar Sarika', party:'Shiv Sena', votes:3804}, {name:'NOTA', party:'None', votes:291}] },
+            { prabhag: '6', seat: 'D', winner: 'Neralkar Ashish Dhundiraj', party: 'BJP', votes: 6783, candidates: [{name:'Neralkar Ashish Dhundiraj', party:'BJP', votes:6783}, {name:'Pawde Ashok', party:'Congress', votes:3098}, {name:'NOTA', party:'None', votes:190}] },
+
+            // PRABHAG 7 (VBA: A,B,C,D - Sweep)
+            { prabhag: '7', seat: 'A', winner: 'Rahul Sonsale', party: 'Vanchit', votes: 5910, candidates: [{name:'Rahul Sonsale', party:'Vanchit', votes:5910}, {name:'Raibole Subhash', party:'NCVA', votes:4065}, {name:'Gaikwad Shrikant', party:'NCP', votes:1770}, {name:'NOTA', party:'None', votes:226}] },
+            { prabhag: '7', seat: 'B', winner: 'Umme Aiman', party: 'Vanchit', votes: 6349, candidates: [{name:'Umme Aiman', party:'Vanchit', votes:6349}, {name:'Meherunnisa Begum', party:'NCVA', votes:4269}, {name:'NOTA', party:'None', votes:210}] },
+            { prabhag: '7', seat: 'C', winner: 'Rajshri Jijabhau Godbole', party: 'Vanchit', votes: 5968, candidates: [{name:'Rajshri Jijabhau Godbole', party:'Vanchit', votes:5968}, {name:'Priyanka Kamble', party:'NCVA', votes:5343}, {name:'NOTA', party:'None', votes:185}] },
+            { prabhag: '7', seat: 'D', winner: 'Prashant Ingole', party: 'Vanchit', votes: 6629, candidates: [{name:'Prashant Ingole', party:'Vanchit', votes:6629}, {name:'Abhijeet Kadam', party:'NCVA', votes:4144}, {name:'Munna Joregewar', party:'Shiv Sena', votes:1221}, {name:'NOTA', party:'None', votes:245}] },
+
+            // PRABHAG 8 (Congress: A,B | BJP: C,D)
+            { prabhag: '8', seat: 'A', winner: 'Sawant Satyapal Bhagozi', party: 'Congress', votes: 5586, candidates: [{name:'Sawant Satyapal Bhagozi', party:'Congress', votes:5586}, {name:'Sonkamble Sandip Rohidas', party:'BJP', votes:5324}, {name:'Dushyant Sonale', party:'Shiv Sena', votes:2024}, {name:'Yuvraj Godbole', party:'AIMIM', votes:516}, {name:'NOTA', party:'None', votes:159}] },
+            { prabhag: '8', seat: 'B', winner: 'Parvin Begum Sheikh Pasha', party: 'Congress', votes: 5608, candidates: [{name:'Parvin Begum Sheikh Pasha', party:'Congress', votes:5608}, {name:'Yewankar Mohinibai Vijay', party:'BJP', votes:5445}, {name:'Dr. Nilofar Begum', party:'Shiv Sena', votes:1783}, {name:'NOTA', party:'None', votes:321}] },
+            { prabhag: '8', seat: 'C', winner: 'Kavita Nagnath Gaddam', party: 'BJP', votes: 5716, candidates: [{name:'Kavita Nagnath Gaddam', party:'BJP', votes:5716}, {name:'Salima Begum', party:'Congress', votes:5381}, {name:'Mehzabin Begum', party:'Shiv Sena', votes:1942}, {name:'NOTA', party:'None', votes:208}] },
+            { prabhag: '8', seat: 'D', winner: 'Umeshsingh Ashoksingh Chauhan', party: 'BJP', votes: 5643, candidates: [{name:'Umeshsingh Ashoksingh Chauhan', party:'BJP', votes:5643}, {name:'Abbas Husen Ali', party:'Congress', votes:4894}, {name:'Mudiraaj Vyankat', party:'Shiv Sena', votes:1328}, {name:'Ayub Khan', party:'Independent', votes:850}, {name:'NOTA', party:'None', votes:291}] },
+
+            // PRABHAG 9 (BJP: A,B,C,D - Sweep)
+            { prabhag: '9', seat: 'A', winner: 'Dr. Manjusha Ranvalkar', party: 'BJP', votes: 7225, candidates: [{name:'Dr. Manjusha Ranvalkar', party:'BJP', votes:7225}, {name:'Kashibai Gaikwad', party:'Shiv Sena', votes:2595}, {name:'Pawar Puja', party:'Vanchit', votes:1617}, {name:'NOTA', party:'None', votes:227}] },
+            { prabhag: '9', seat: 'B', winner: 'Swami Kishore Mallikarjun', party: 'BJP', votes: 7054, candidates: [{name:'Swami Kishore Mallikarjun', party:'BJP', votes:7054}, {name:'Vikram Singh Thakur', party:'Congress', votes:3104}, {name:'NOTA', party:'None', votes:185}] },
+            { prabhag: '9', seat: 'C', winner: 'Sadichha Soni Patil', party: 'BJP', votes: 6676, candidates: [{name:'Sadichha Soni Patil', party:'BJP', votes:6676}, {name:'Bhalerao Nandabai', party:'Shiv Sena', votes:2618}, {name:'NOTA', party:'None', votes:190}] },
+            { prabhag: '9', seat: 'D', winner: 'Balwantsing Govindsing', party: 'BJP', votes: 6616, candidates: [{name:'Balwantsing Govindsing', party:'BJP', votes:6616}, {name:'Anand Pandurang Patil', party:'Congress', votes:3199}, {name:'Navjyot Singh Gadiwale', party:'Shiv Sena (UBT)', votes:1220}, {name:'NOTA', party:'None', votes:215}] },
+
+            // PRABHAG 10 (BJP: A,B,C,D - Sweep)
+            { prabhag: '10', seat: 'A', winner: 'Priyanka Sangharatna Kamble', party: 'BJP', votes: 7182, candidates: [{name:'Priyanka Sangharatna Kamble', party:'BJP', votes:7182}, {name:'Anand Jadhav', party:'Shiv Sena (UBT)', votes:4691}, {name:'Sunil Sonsale', party:'Shiv Sena', votes:1322}, {name:'NOTA', party:'None', votes:181}] },
+            { prabhag: '10', seat: 'B', winner: 'Sandhya Mahindra Demgunde', party: 'BJP', votes: 7623, candidates: [{name:'Sandhya Mahindra Demgunde', party:'BJP', votes:7623}, {name:'Lalita Bhagwan', party:'Congress', votes:6566}, {name:'NOTA', party:'None', votes:205}] },
+            { prabhag: '10', seat: 'C', winner: 'Sudarshana Mahesh Khomne', party: 'BJP', votes: 6934, candidates: [{name:'Sudarshana Mahesh Khomne', party:'BJP', votes:6934}, {name:'Abedabano Sheikh Babu', party:'Congress', votes:5194}, {name:'NOTA', party:'None', votes:155}] },
+            { prabhag: '10', seat: 'D', winner: 'Virendra Singh Jagjit Singh', party: 'BJP', votes: 6675, candidates: [{name:'Virendra Singh Jagjit Singh', party:'BJP', votes:6675}, {name:'Pawde Abhilash Rajesh', party:'Congress', votes:4439}, {name:'Nagshekar Nageshwar', party:'Shiv Sena', votes:1883}, {name:'Arjit Singh Chavan', party:'Shiv Sena (UBT)', votes:1133}, {name:'NOTA', party:'None', votes:132}] },
+
+            // PRABHAG 11 (AIMIM: A,B,C,D - Sweep)
+            { prabhag: '11', seat: 'A', winner: 'Asiya Begum Abdul Habib', party: 'AIMIM', votes: 9667, candidates: [{name:'Asiya Begum Abdul Habib', party:'AIMIM', votes:9667}, {name:'Zarina Begum', party:'Congress', votes:7759}, {name:'NOTA', party:'None', votes:236}] },
+            { prabhag: '11', seat: 'B', winner: 'Saima Khanam', party: 'AIMIM', votes: 9590, candidates: [{name:'Saima Khanam', party:'AIMIM', votes:9590}, {name:'Khadija Begum', party:'Congress', votes:5673}, {name:'Najma Begum', party:'NCP', votes:1736}, {name:'NOTA', party:'None', votes:310}] },
+            { prabhag: '11', seat: 'C', winner: 'Syed Fasihuddin', party: 'AIMIM', votes: 8701, candidates: [{name:'Syed Fasihuddin', party:'AIMIM', votes:8701}, {name:'Abdul Rahim', party:'Congress', votes:6429}, {name:'NOTA', party:'None', votes:198}] },
+            { prabhag: '11', seat: 'D', winner: 'Mohd Masood Ahmed Khan', party: 'AIMIM', votes: 10081, candidates: [{name:'Mohd Masood Ahmed Khan', party:'AIMIM', votes:10081}, {name:'Mohd Atikh', party:'Congress', votes:6332}, {name:'M. Khaliluddin', party:'Independent', votes:565}, {name:'Mohd Tohid Sheikh', party:'Shiv Sena (UBT)', votes:307}, {name:'NOTA', party:'None', votes:167}] },
+
+            // PRABHAG 12 (Congress: A,C | AIMIM: B,D)
+            { prabhag: '12', seat: 'A', winner: 'Abdul Gaffar Abdul सत्तार', party: 'Congress', votes: 11735, candidates: [{name:'Abdul Gaffar Abdul सत्तार', party:'Congress', votes:11735}, {name:'A Rashid A Gani', party:'AIMIM', votes:7331}, {name:'Dr Arshia Kausar', party:'NCP', votes:1197}, {name:'NOTA', party:'None', votes:88}] },
+            { prabhag: '12', seat: 'B', winner: 'Bibi Shaista Mohd Salman', party: 'AIMIM', votes: 9155, candidates: [{name:'Bibi Shaista Mohd Salman', party:'AIMIM', votes:9155}, {name:'Shamim Begum Sheikh', party:'Congress', votes:8700}, {name:'Sajeda Begum', party:'NCP', votes:1523}, {name:'NOTA', party:'None', votes:142}] },
+            { prabhag: '12', seat: 'C', winner: 'Halima Bi Sheikh Babu', party: 'Congress', votes: 9318, candidates: [{name:'Halima Bi Sheikh Babu', party:'Congress', votes:9318}, {name:'Khamar Sultanabi', party:'AIMIM', votes:9170}, {name:'NOTA', party:'None', votes:110}] },
+            { prabhag: '12', seat: 'D', winner: 'Altaf Hussain', party: 'AIMIM', votes: 8570, candidates: [{name:'Altaf Hussain', party:'AIMIM', votes:8570}, {name:'Syed Sher Ali', party:'Congress', votes:8199}, {name:'M. Mukhid', party:'NCP', votes:2489}, {name:'NOTA', party:'None', votes:165}] },
+
+            // PRABHAG 13 (AIMIM: A,B,C,D - Sweep)
+            { prabhag: '13', seat: 'A', winner: 'Dhongade Ashwini Dashrath', party: 'AIMIM', votes: 5308, candidates: [{name:'Dhongade Ashwini Dashrath', party:'AIMIM', votes:5308}, {name:'Kanchan Kamble', party:'BJP', votes:3202}, {name:'Sangeeta Kamble', party:'Congress', votes:2907}, {name:'Aarti Jondhale', party:'NCP', votes:2056}, {name:'NOTA', party:'None', votes:202}] },
+            { prabhag: '13', seat: 'B', winner: 'Shifa Tarannum Abdul Rauf', party: 'AIMIM', votes: 5357, candidates: [{name:'Shifa Tarannum Abdul Rauf', party:'AIMIM', votes:5357}, {name:'Komatwar Shanta', party:'BJP', votes:3899}, {name:'Abdul Fasiya', party:'Congress', votes:3009}, {name:'NOTA', party:'None', votes:115}] },
+            { prabhag: '13', seat: 'C', winner: 'Abdul Latif Abdul Majid', party: 'AIMIM', votes: 5687, candidates: [{name:'Abdul Latif Abdul Majid', party:'AIMIM', votes:5687}, {name:'Ravi Dangre Patil', party:'NCP', votes:2961}, {name:'Nagesh Gokulwar', party:'BJP', votes:2696}, {name:'NOTA', party:'None', votes:188}] },
+            { prabhag: '13', seat: 'D', winner: 'Syed Mujib Syed Mukhtar', party: 'AIMIM', votes: 4515, candidates: [{name:'Syed Mujib Syed Mukhtar', party:'AIMIM', votes:4515}, {name:'Mohd Irfan Ullah (Shera)', party:'NCP', votes:3560}, {name:'Bhalchandra Patki', party:'BJP', votes:2889}, {name:'Abdul Rahim', party:'Congress', votes:1951}, {name:'Harkare Gajanan', party:'Shiv Sena (UBT)', votes:1177}, {name:'NOTA', party:'None', votes:216}] },
+
+            // PRABHAG 14 (AIMIM: A,B,C | Congress: D)
+            { prabhag: '14', seat: 'A', winner: 'Muskan Naz Syed', party: 'AIMIM', votes: 6393, candidates: [{name:'Muskan Naz Syed', party:'AIMIM', votes:6393}, {name:'Shinge Poonam', party:'Congress', votes:6171}, {name:'Dhananjay Jondhale', party:'BJP', votes:1248}, {name:'NOTA', party:'None', votes:236}] },
+            { prabhag: '14', seat: 'B', winner: 'Shamim Begum A. Hafiz', party: 'AIMIM', votes: 6516, candidates: [{name:'Shamim Begum A. Hafiz', party:'AIMIM', votes:6516}, {name:'Shama Abdul Habib', party:'Congress', votes:5827}, {name:'Priyanka Bagde', party:'Shiv Sena', votes:2059}, {name:'NOTA', party:'None', votes:190}] },
+            { prabhag: '14', seat: 'C', winner: 'Qureshi Rehana Begum', party: 'AIMIM', votes: 6105, candidates: [{name:'Qureshi Rehana Begum', party:'AIMIM', votes:6105}, {name:'Idris Begum', party:'Congress', votes:5864}, {name:'Jyoti Dhuldhani', party:'Shiv Sena', votes:1568}, {name:'NOTA', party:'None', votes:175}] },
+            { prabhag: '14', seat: 'D', winner: 'Abdul Ahmed (Babu Bhai)', party: 'Congress', votes: 6643, candidates: [{name:'Abdul Ahmed (Babu Bhai)', party:'Congress', votes:6643}, {name:'Abdul Shamim Abdullah', party:'AIMIM', votes:5528}, {name:'Parade Kiran', party:'BJP', votes:1123}, {name:'Farooq Husen', party:'NCP', votes:1178}, {name:'NOTA', party:'None', votes:220}] },
+
+            // PRABHAG 15 (NCP: A,D | AIMIM: B | SS: C)
+            { prabhag: '15', seat: 'A', winner: 'A Habib Bawazir', party: 'NCP', votes: 4847, candidates: [{name:'A Habib Bawazir', party:'NCP', votes:4847}, {name:'Alamkhane Balaji', party:'BJP', votes:2654}, {name:'Sunil Gurukhude', party:'Shiv Sena', votes:4552}, {name:'Dr. Osama Naser', party:'AIMIM', votes:4585}, {name:'Mohd Ubaidur Rahman', party:'Congress', votes:1103}, {name:'NOTA', party:'None', votes:109}] },
+            { prabhag: '15', seat: 'B', winner: 'Sumaiya Gulfishan', party: 'AIMIM', votes: 4973, candidates: [{name:'Sumaiya Gulfishan', party:'AIMIM', votes:4973}, {name:'Raisa Begum', party:'NCP', votes:4951}, {name:'NOTA', party:'None', votes:155}] },
+            { prabhag: '15', seat: 'C', winner: 'Nilam Tuljesh Yadav', party: 'Shiv Sena', votes: 6411, candidates: [{name:'Nilam Tuljesh Yadav', party:'Shiv Sena', votes:6411}, {name:'Ayesha Sanobar', party:'NCP', votes:5200}, {name:'NOTA', party:'None', votes:192}] },
+            { prabhag: '15', seat: 'D', winner: 'Sabir Chaush नासेर चाऊस', party: 'NCP', votes: 5480, candidates: [{name:'Sabir Chaush नासेर चाऊस', party:'NCP', votes:5480}, {name:'Doidode Satyajit', party:'Shiv Sena', votes:3606}, {name:'Tak Akash Balaji', party:'BJP', votes:3346}, {name:'Sheikh Saeed Bawazir', party:'AIMIM', votes:3894}, {name:'Mohd Yusuf', party:'Congress', votes:1310}, {name:'NOTA', party:'None', votes:194}] },
+
+            // PRABHAG 16 (BJP: A,B,C,D - Sweep)
+            { prabhag: '16', seat: 'A', winner: 'Dipaksing Kashinathsing Rawat', party: 'BJP', votes: 6577, candidates: [{name:'Dipaksing Kashinathsing Rawat', party:'BJP', votes:6577}, {name:'Rawat Akshaysingh', party:'Shiv Sena', votes:5475}, {name:'Pradeep Dagdu Jadhav', party:'NCP', votes:2560}, {name:'NOTA', party:'None', votes:280}] },
+            { prabhag: '16', seat: 'B', winner: 'Bhartiya Ruchi Alkesh', party: 'BJP', votes: 6913, candidates: [{name:'Bhartiya Ruchi Alkesh', party:'BJP', votes:6913}, {name:'Kankar Minabai', party:'Shiv Sena', votes:3993}, {name:'NOTA', party:'None', votes:255}] },
+            { prabhag: '16', seat: 'C', winner: 'Thakur Amrutabai Bajrangsingh', party: 'BJP', votes: 6309, candidates: [{name:'Thakur Amrutabai Bajrangsingh', party:'BJP', votes:6309}, {name:'Thakur Yogita', party:'Shiv Sena', votes:4248}, {name:'NOTA', party:'None', votes:210}] },
+            { prabhag: '16', seat: 'D', winner: 'Yadav Tuljaram Ganeshlal', party: 'BJP', votes: 5640, candidates: [{name:'Yadav Tuljaram Ganeshlal', party:'BJP', votes:5640}, {name:'Sodi Dilipsing', party:'Shiv Sena', votes:4693}, {name:'Abdul Wahab', party:'Congress', votes:2332}, {name:'NOTA', party:'None', votes:198}] },
+
+            // PRABHAG 17 (BJP: A,B,C,D - Sweep)
+            { prabhag: '17', seat: 'A', winner: 'Yadav Prabhabai Ishwarlal', party: 'BJP', votes: 8255, candidates: [{name:'Yadav Prabhabai Ishwarlal', party:'BJP', votes:8255}, {name:'Khedkar Jyoti', party:'Shiv Sena', votes:5323}, {name:'NOTA', party:'None', votes:513}] },
+            { prabhag: '17', seat: 'B', winner: 'Kunjivale Manpreet Kaur', party: 'BJP', votes: 8848, candidates: [{name:'Kunjivale Manpreet Kaur', party:'BJP', votes:8848}, {name:'Gill Harminder Kaur', party:'Shiv Sena', votes:4577}, {name:'NOTA', party:'None', votes:310}] },
+            { prabhag: '17', seat: 'C', winner: 'Mutha Sumit Prakash', party: 'BJP', votes: 7725, candidates: [{name:'Mutha Sumit Prakash', party:'BJP', votes:7725}, {name:'Tabelevale Jaspal Singh', party:'Congress', votes:3371}, {name:'Yadav Birbal', party:'Shiv Sena', votes:2807}, {name:'NOTA', party:'None', votes:189}] },
+            { prabhag: '17', seat: 'D', winner: 'Navab Gurmit Singh', party: 'BJP', votes: 8606, candidates: [{name:'Navab Gurmit Singh', party:'BJP', votes:8606}, {name:'Bungai Ravinder Singh', party:'Shiv Sena', votes:5083}, {name:'NOTA', party:'None', votes:245}] },
+
+            // PRABHAG 18 (Congress: A,B,C,D - Sweep)
+            { prabhag: '18', seat: 'A', winner: 'Godbole Jyotsna Raju', party: 'Congress', votes: 8942, candidates: [{name:'Godbole Jyotsna Raju', party:'Congress', votes:8942}, {name:'Dhabale Mayuri Vilas', party:'MJP', votes:6531}, {name:'Shilpa Subhash Lokhande', party:'NCP', votes:789}, {name:'NOTA', party:'None', votes:224}] },
+            { prabhag: '18', seat: 'B', winner: 'Husen Shoeb Mazhar', party: 'Congress', votes: 7894, candidates: [{name:'Husen Shoeb Mazhar', party:'Congress', votes:7894}, {name:'Nazia Begum Syed', party:'MJP', votes:6943}, {name:'NOTA', party:'None', votes:210}] },
+            { prabhag: '18', seat: 'C', winner: 'Mahezbin Abdul Fahim', party: 'Congress', votes: 7994, candidates: [{name:'Mahezbin Abdul Fahim', party:'Congress', votes:7994}, {name:'Landge Kamalbai', party:'MJP', votes:5987}, {name:'NOTA', party:'None', votes:195}] },
+            { prabhag: '18', seat: 'D', winner: 'Mohsinkhan Mahemud Khan', party: 'Congress', votes: 7907, candidates: [{name:'Mohsinkhan Mahemud Khan', party:'Congress', votes:7907}, {name:'Gaffar Khan', party:'MJP', votes:5701}, {name:'Sumaiyya Begum', party:'NCP', votes:1136}, {name:'Mohd Shoebuddin', party:'AIMIM', votes:860}, {name:'NOTA', party:'None', votes:250}] },
+
+            // PRABHAG 19 (BJP: A,B,C,D - Sweep)
+            { prabhag: '19', seat: 'A', winner: 'Abhishek Rameshrao Saude', party: 'BJP', votes: 8372, candidates: [{name:'Abhishek Rameshrao Saude', party:'BJP', votes:8372}, {name:'Bhimrao Gaikwad', party:'Shiv Sena', votes:4363}, {name:'Shrikant Kamble', party:'BSP', votes:2683}, {name:'Jivak Raju Waghmare', party:'Independent', votes:1467}, {name:'NOTA', party:'None', votes:413}] },
+            { prabhag: '19', seat: 'B', winner: 'More Dipali Santosh', party: 'BJP', votes: 10961, candidates: [{name:'More Dipali Santosh', party:'BJP', votes:10961}, {name:'Jatale Vishwanath', party:'Shiv Sena', votes:5695}, {name:'NOTA', party:'None', votes:380}] },
+            { prabhag: '19', seat: 'C', winner: 'Kakde Sulochna Dhondiba', party: 'BJP', votes: 9241, candidates: [{name:'Kakde Sulochna Dhondiba', party:'BJP', votes:9241}, {name:'Gore Archana', party:'Shiv Sena', votes:5358}, {name:'NOTA', party:'None', votes:290}] },
+            { prabhag: '19', seat: 'D', winner: 'Kale Anuradha Raju', party: 'BJP', votes: 9524, candidates: [{name:'Kale Anuradha Raju', party:'BJP', votes:9524}, {name:'Vaidy Aarti Nandkumar', party:'Shiv Sena', votes:5132}, {name:'Deshmukh Kamal', party:'Congress', votes:2712}, {name:'NOTA', party:'None', votes:246}] },
+
+            // PRABHAG 20 (BJP: A,B,C,D,E - Sweep)
+            { prabhag: '20', seat: 'A', winner: 'Landge Niranjana Raju', party: 'BJP', votes: 11270, candidates: [{name:'Landge Niranjana Raju', party:'BJP', votes:11270}, {name:'Deepmala Gaikwad', party:'Vanchit', votes:3259}, {name:'Sanghamitra Kamble', party:'NCP', votes:2520}, {name:'Waghmare Jayshreebai', party:'Shiv Sena (UBT)', votes:701}, {name:'Sandhya Kamble', party:'Independent', votes:494}, {name:'NOTA', party:'None', votes:400}] },
+            { prabhag: '20', seat: 'B', winner: 'Mangala Deshmukh', party: 'BJP', votes: 10894, candidates: [{name:'Mangala Deshmukh', party:'BJP', votes:10894}, {name:'Yogita Yergevar', party:'Shiv Sena', votes:4104}, {name:'NOTA', party:'None', votes:310}] },
+            { prabhag: '20', seat: 'C', winner: 'Deshmukh Vaijnath Ishwarrao', party: 'BJP', votes: 10539, candidates: [{name:'Deshmukh Vaijnath Ishwarrao', party:'BJP', votes:10539}, {name:'Kanchan Gire Santosh', party:'Shiv Sena', votes:4251}, {name:'NOTA', party:'None', votes:345}] },
+            { prabhag: '20', seat: 'D', winner: 'Basvade Suvarna Satish', party: 'BJP', votes: 11290, candidates: [{name:'Basvade Suvarna Satish', party:'BJP', votes:11290}, {name:'Akurke Rekha Vinayakrao', party:'Shiv Sena', votes:3790}, {name:'NOTA', party:'None', votes:388}] },
+            { prabhag: '20', seat: 'E', winner: 'Ghogre Sanjay Shivajirao', party: 'BJP', votes: 11718, candidates: [{name:'Ghogre Sanjay Shivajirao', party:'BJP', votes:11718}, {name:'Girde Vinay Vishwambar', party:'Shiv Sena', votes:5596}, {name:'Pankaj Manohar Kokre', party:'Independent', votes:680}, {name:'Bharkad Deepak', party:'Sambhaji Brigade', votes:383}, {name:'NOTA', party:'None', votes:357}] }
         ];
 
         const partySummaryData = [
@@ -125,31 +262,22 @@
             { name: 'Azad', seats: 1, color: 'bg-gray-500' }
         ];
 
-        // Function to render Party Summary
         function renderSummary() {
             const container = document.getElementById('party-summary');
             container.innerHTML = partySummaryData.map(p => `
-                <div class="party-card ${p.color} p-4 rounded-xl shadow-sm border-2 ${selectedParty === p.name ? 'border-blue-900 scale-105' : 'border-transparent'} text-white" 
+                <div class="party-card ${p.color} p-4 rounded-xl shadow-sm border-2 ${selectedParty === p.name ? 'active' : 'border-transparent'} text-white" 
                      onclick="filterByParty('${p.name}')">
-                    <p class="text-[10px] font-bold opacity-75 uppercase">${p.name}</p>
+                    <p class="text-[10px] font-bold opacity-75 uppercase tracking-tighter">${p.name}</p>
                     <h3 class="text-3xl font-black">${p.seats}</h3>
                 </div>
             `).join('');
 
             const resetBtn = document.getElementById('reset-btn');
-            if (selectedParty !== 'All') {
-                resetBtn.classList.remove('hidden');
-            } else {
-                resetBtn.classList.add('hidden');
-            }
+            selectedParty !== 'All' ? resetBtn.classList.remove('hidden') : resetBtn.classList.add('hidden');
         }
 
         function filterByParty(party) {
-            if (selectedParty === party) {
-                selectedParty = 'All';
-            } else {
-                selectedParty = party;
-            }
+            selectedParty = (selectedParty === party) ? 'All' : party;
             renderSummary();
             renderResults();
         }
@@ -160,34 +288,73 @@
             renderResults();
         }
 
-        // Function to render Result Cards
+        function openModal(id) {
+            const ward = electionData[id];
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            const totalEl = document.getElementById('total-valid-votes');
+
+            const sorted = [...ward.candidates].sort((a,b) => b.votes - a.votes);
+            const totalVotes = sorted.reduce((sum, c) => sum + c.votes, 0);
+
+            title.innerText = `Prabhag ${ward.prabhag}-${ward.seat} Detailed Muqabla`;
+            totalEl.innerText = `Total Votes Polled: ${totalVotes.toLocaleString()}`;
+
+            body.innerHTML = sorted.map(c => `
+                <tr class="candidate-row hover:bg-blue-50/50 transition-colors">
+                    <td class="py-4 px-4 text-sm font-bold ${c.name === ward.winner ? 'text-green-600' : 'text-gray-700'} border-b">
+                        ${c.name} ${c.name === ward.winner ? '<span class="ml-2 text-[10px] bg-green-100 px-2 py-0.5 rounded-full border border-green-200">WINNER</span>' : ''}
+                    </td>
+                    <td class="py-4 px-4 text-xs font-semibold text-gray-500 border-b italic">${c.party}</td>
+                    <td class="py-4 px-4 text-sm font-black text-blue-800 border-b text-right">${c.votes.toLocaleString()}</td>
+                </tr>
+            `).join('');
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+
         function renderResults() {
-            const filter = document.getElementById('search-input').value.toLowerCase();
+            const filterText = document.getElementById('search-input').value.toLowerCase();
             const container = document.getElementById('results-grid');
             const countEl = document.getElementById('results-count');
             const titleEl = document.getElementById('results-title');
 
             const filtered = electionData.filter(item => {
                 const matchesParty = selectedParty === 'All' || item.party === selectedParty || (selectedParty === 'Shiv Sena' && item.party.includes('Shiv Sena'));
-                const matchesSearch = item.winner.toLowerCase().includes(filter) || 
-                                     item.runnerUp.toLowerCase().includes(filter) ||
-                                     item.prabhag.includes(filter);
+                const matchesSearch = item.winner.toLowerCase().includes(filterText) || 
+                                     item.prabhag.includes(filterText) ||
+                                     item.candidates.some(c => c.name.toLowerCase().includes(filterText));
                 return matchesParty && matchesSearch;
+            }).sort((a, b) => {
+                if(parseInt(a.prabhag) !== parseInt(b.prabhag)) return parseInt(a.prabhag) - parseInt(b.prabhag);
+                return a.seat.localeCompare(b.seat);
             });
 
-            titleEl.innerText = selectedParty === 'All' ? 'Muqabla: Kaun Jeeta, Kaun Hara?' : `${selectedParty} Winners & Competitors`;
-            countEl.innerText = `${filtered.length} Cards Found`;
+            titleEl.innerText = selectedParty === 'All' ? 'Ward Muqabla Details' : `${selectedParty} Winners & Muqabla`;
+            countEl.innerText = `${filtered.length} / 81 Seats`;
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400">Is category mein koi result nahi mila.</div>`;
+                container.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400 italic">No data found in this category.</div>`;
                 return;
             }
 
-            container.innerHTML = filtered.map(item => `
-                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:border-blue-300 transition-colors">
+            container.innerHTML = filtered.map((item, idx) => {
+                const sorted = [...item.candidates].sort((a,b) => b.votes - a.votes);
+                const runnerUp = sorted[1] || {name: 'N/A', party: 'N/A', votes: 0};
+                const margin = item.votes - runnerUp.votes;
+
+                return `
+                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:border-blue-400 hover:shadow-md transition-all">
                     <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center">
-                        <span class="text-sm font-black text-blue-800">PRABHAG ${item.prabhag}-${item.seat}</span>
-                        <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase tracking-widest">Final Result</span>
+                        <span class="text-sm font-black text-blue-800 tracking-wider">WARD ${item.prabhag}-${item.seat}</span>
+                        <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100 uppercase tracking-tighter">Official</span>
                     </div>
 
                     <div class="p-6 flex flex-col gap-6 flex-1">
@@ -195,51 +362,47 @@
                             <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center shrink-0">
                                 <i data-lucide="award" class="w-8 h-8 text-blue-600"></i>
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-1 overflow-hidden">
                                 <div class="flex justify-between items-start">
-                                    <h3 class="text-xl font-black text-gray-900">${item.winner}</h3>
-                                    <span class="text-[10px] font-bold px-2 py-1 rounded-md bg-blue-800 text-white">${item.party}</span>
+                                    <h3 class="text-lg font-black text-gray-900 leading-tight truncate">${item.winner}</h3>
+                                    <span class="text-[10px] font-bold px-2 py-1 rounded-md bg-blue-800 text-white ml-2 shrink-0">${item.party}</span>
                                 </div>
-                                <p class="text-sm font-bold text-blue-700 mt-1 uppercase tracking-tighter">Winner (${item.votes} Votes)</p>
+                                <p class="text-sm font-bold text-blue-700 mt-1 uppercase tracking-tighter">${item.votes.toLocaleString()} Votes</p>
                             </div>
                         </div>
 
                         <div class="relative flex items-center justify-center">
                             <div class="absolute w-full h-px bg-gray-100"></div>
-                            <span class="relative bg-white px-4 text-xs font-black text-gray-300">VS</span>
+                            <span class="relative bg-white px-4 text-[10px] font-black text-gray-300 uppercase tracking-widest">VS Muqabla</span>
                         </div>
 
                         <div class="flex items-center gap-4 opacity-75">
                             <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center shrink-0">
                                 <i data-lucide="user-minus" class="w-8 h-8 text-gray-400"></i>
                             </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start">
-                                    <h4 class="text-lg font-bold text-gray-600">${item.runnerUp}</h4>
-                                    <span class="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-1 rounded-md">${item.runnerUpParty}</span>
-                                </div>
-                                <p class="text-xs font-bold text-red-400 mt-1 uppercase tracking-tighter">Runner-up (Lost by ${item.margin} votes)</p>
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="text-md font-bold text-gray-600 truncate">${runnerUp.name}</h4>
+                                <p class="text-xs font-bold text-red-400 mt-1 uppercase italic">Lost by ${margin.toLocaleString()} votes</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-blue-50/50 px-6 py-4 border-t border-gray-50 mt-auto">
-                        <p class="text-xs font-medium text-gray-500 text-center">
-                            <span class="font-black text-blue-800">${item.winner}</span> ne <span class="font-black text-red-500">${item.margin}</span> votes ke farq se jeet hasil ki.
-                        </p>
+                    <div class="bg-blue-50/30 px-6 py-4 border-t border-gray-50 mt-auto flex justify-between items-center">
+                        <button onclick="openModal(${electionData.indexOf(item)})" class="text-xs font-black text-blue-800 hover:text-blue-900 flex items-center gap-1 uppercase tracking-tighter group transition-all">
+                            View All ${item.candidates.length} Candidates <i data-lucide="chevron-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
+                        </button>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
             
             lucide.createIcons();
         }
 
-        // Search Listener
-        document.getElementById('search-input').addEventListener('input', () => {
-            renderResults();
-        });
+        // Event Listeners
+        document.querySelector('.modal-overlay').addEventListener('click', closeModal);
+        document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', closeModal));
+        document.getElementById('search-input').oninput = () => renderResults();
 
-        // Initial Load
         window.onload = () => {
             renderSummary();
             renderResults();
