@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NWMC Nanded Election Results 2026 - All 81 Seats</title>
+    <title>NWMC Nanded Election Results 2026 - Official 81 Seats</title>
     <!-- Tailwind CSS for Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -48,7 +48,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2 text-blue-800 font-bold">
                     <i data-lucide="bar-chart-3"></i>
-                    <h2 class="text-xl">Party Summary (Filter lagane ke liye click karein)</h2>
+                    <h2 class="text-xl">Party Summary</h2>
                 </div>
                 <button id="reset-btn" class="hidden text-xs font-bold text-blue-600 hover:text-blue-800 underline uppercase tracking-widest">Sare Results Dekhein</button>
             </div>
@@ -121,8 +121,17 @@
         </div>
     </div>
 
-    <footer class="mt-12 py-12 bg-white border-t border-gray-100 text-center">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest italic">Nanded Waghala Municipal Corporation 2026</p>
+    <!-- Footer with Official Disclaimer -->
+    <footer class="mt-12 py-12 bg-white border-t border-gray-100">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest italic mb-6">Nanded Waghala Municipal Corporation 2026 Archive</p>
+            <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-left">
+                <p class="text-xs text-gray-600 leading-relaxed font-medium">
+                    <strong class="text-blue-800 block mb-1">Notice:</strong>
+                    This website is created solely for the convenience of the public to access election results easily. All the data provided has been sourced from the official website of the Nanded Waghala City Municipal Corporation (NWMC). While we have made every effort to ensure the accuracy of the information, technical or manual errors may occur. For final verification, users are strictly advised to refer to the official NWMC website or government gazette.
+                </p>
+            </div>
+        </div>
     </footer>
 
     <script>
@@ -175,8 +184,8 @@
             // PRABHAG 8 (Congress: A,B | BJP: C,D)
             { prabhag: '8', seat: 'A', winner: 'Sawant Satyapal Bhagozi', party: 'Congress', votes: 5586, candidates: [{name:'Sawant Satyapal Bhagozi', party:'Congress', votes:5586}, {name:'Sonkamble Sandip Rohidas', party:'BJP', votes:5324}, {name:'Dushyant Sonale', party:'Shiv Sena', votes:2024}, {name:'Yuvraj Godbole', party:'AIMIM', votes:516}, {name:'NOTA', party:'None', votes:159}] },
             { prabhag: '8', seat: 'B', winner: 'Parvin Begum Sheikh Pasha', party: 'Congress', votes: 5608, candidates: [{name:'Parvin Begum Sheikh Pasha', party:'Congress', votes:5608}, {name:'Yewankar Mohinibai Vijay', party:'BJP', votes:5445}, {name:'Dr. Nilofar Begum', party:'Shiv Sena', votes:1783}, {name:'NOTA', party:'None', votes:321}] },
-            { prabhag: '8', seat: 'C', winner: 'Kavita Nagnath Gaddam', party: 'BJP', votes: 5716, candidates: [{name:'Kavita Nagnath Gaddam', party:'BJP', votes:5716}, {name:'Salima Begum', party:'Congress', votes:5381}, {name:'Mehzabin Begum', party:'Shiv Sena', votes:1942}, {name:'NOTA', party:'None', votes:208}] },
-            { prabhag: '8', seat: 'D', winner: 'Umeshsingh Ashoksingh Chauhan', party: 'BJP', votes: 5643, candidates: [{name:'Umeshsingh Ashoksingh Chauhan', party:'BJP', votes:5643}, {name:'Abbas Husen Ali', party:'Congress', votes:4894}, {name:'Mudiraaj Vyankat', party:'Shiv Sena', votes:1328}, {name:'Ayub Khan', party:'Independent', votes:850}, {name:'NOTA', party:'None', votes:291}] },
+            { prabhag: '8', seat: 'C', winner: 'Kavita Nagnath Gaddam', party: 'BJP', votes: 5716, candidates: [{name:'Kavita Nagnath Gaddam', party:'BJP', votes:5716}, {name:'Salima Begum Nurulla', party:'Congress', votes:5381}, {name:'Mehzabin Begum Sheikh', party:'Shiv Sena', votes:1942}, {name:'NOTA', party:'None', votes:208}] },
+            { prabhag: '8', seat: 'D', winner: 'Umeshsingh Ashoksingh Chauhan', party: 'BJP', votes: 5643, candidates: [{name:'Umeshsingh Ashoksingh Chauhan', party:'BJP', votes:5643}, {name:'Abbas Husen Rajjab Ali', party:'Congress', votes:4894}, {name:'Mudiraaj Vyankat', party:'Shiv Sena', votes:1328}, {name:'Sheikh Athar Ahmed', party:'AIMIM', votes:540}, {name:'Ayub Khan Shabbir', party:'Independent', votes:850}, {name:'NOTA', party:'None', votes:291}] },
 
             // PRABHAG 9 (BJP: A,B,C,D - Sweep)
             { prabhag: '9', seat: 'A', winner: 'Dr. Manjusha Ranvalkar', party: 'BJP', votes: 7225, candidates: [{name:'Dr. Manjusha Ranvalkar', party:'BJP', votes:7225}, {name:'Kashibai Gaikwad', party:'Shiv Sena', votes:2595}, {name:'Pawar Puja', party:'Vanchit', votes:1617}, {name:'NOTA', party:'None', votes:227}] },
@@ -185,8 +194,8 @@
             { prabhag: '9', seat: 'D', winner: 'Balwantsing Govindsing', party: 'BJP', votes: 6616, candidates: [{name:'Balwantsing Govindsing', party:'BJP', votes:6616}, {name:'Anand Pandurang Patil', party:'Congress', votes:3199}, {name:'Navjyot Singh Gadiwale', party:'Shiv Sena (UBT)', votes:1220}, {name:'NOTA', party:'None', votes:215}] },
 
             // PRABHAG 10 (BJP: A,B,C,D - Sweep)
-            { prabhag: '10', seat: 'A', winner: 'Priyanka Sangharatna Kamble', party: 'BJP', votes: 7182, candidates: [{name:'Priyanka Sangharatna Kamble', party:'BJP', votes:7182}, {name:'Anand Jadhav', party:'Shiv Sena (UBT)', votes:4691}, {name:'Sunil Sonsale', party:'Shiv Sena', votes:1322}, {name:'NOTA', party:'None', votes:181}] },
-            { prabhag: '10', seat: 'B', winner: 'Sandhya Mahindra Demgunde', party: 'BJP', votes: 7623, candidates: [{name:'Sandhya Mahindra Demgunde', party:'BJP', votes:7623}, {name:'Lalita Bhagwan', party:'Congress', votes:6566}, {name:'NOTA', party:'None', votes:205}] },
+            { prabhag: '10', seat: 'A', winner: 'Priyanka Sangharatna Kamble', party: 'BJP', votes: 7182, candidates: [{name:'Priyanka Sangharatna Kamble', party:'BJP', votes:7182}, {name:'Anand Jadhav', party:'Shiv Sena (UBT)', votes:4691}, {name:'Sunil Manoharrao Sonkamble', party:'Shiv Sena', votes:1322}, {name:'NOTA', party:'None', votes:181}] },
+            { prabhag: '10', seat: 'B', winner: 'Sandhya Mahindra Demgunde', party: 'BJP', votes: 7623, candidates: [{name:'Sandhya Mahindra Demgunde', party:'BJP', votes:7623}, {name:'Lalita भगवान', party:'Congress', votes:6566}, {name:'NOTA', party:'None', votes:205}] },
             { prabhag: '10', seat: 'C', winner: 'Sudarshana Mahesh Khomne', party: 'BJP', votes: 6934, candidates: [{name:'Sudarshana Mahesh Khomne', party:'BJP', votes:6934}, {name:'Abedabano Sheikh Babu', party:'Congress', votes:5194}, {name:'NOTA', party:'None', votes:155}] },
             { prabhag: '10', seat: 'D', winner: 'Virendra Singh Jagjit Singh', party: 'BJP', votes: 6675, candidates: [{name:'Virendra Singh Jagjit Singh', party:'BJP', votes:6675}, {name:'Pawde Abhilash Rajesh', party:'Congress', votes:4439}, {name:'Nagshekar Nageshwar', party:'Shiv Sena', votes:1883}, {name:'Arjit Singh Chavan', party:'Shiv Sena (UBT)', votes:1133}, {name:'NOTA', party:'None', votes:132}] },
 
