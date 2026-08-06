@@ -1,423 +1,1067 @@
 <!DOCTYPE html>
-<html lang="hi-Latn">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NWMC Nanded Election Results 2026 - Official 81 Seats</title>
-    <!-- Tailwind CSS for Styling -->
+    <title>SIR Anomaly & Voter Register Portal 2026</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .party-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .party-card:hover { transform: translateY(-5px); }
-        .party-card.active { outline: 4px solid #1e40af; outline-offset: 2px; transform: scale(1.05); z-index: 10; }
-        .candidate-row:nth-child(even) { background-color: #f9fafb; }
-        .modal { transition: opacity 0.25s ease; }
-        body.modal-active { overflow: hidden; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-    </style>
-</head>
-<body class="bg-gray-50 text-gray-900 pb-20">
-
-    <!-- Header -->
-    <header class="bg-blue-800 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-white p-2 rounded-full shadow-md">
-                    <i data-lucide="map-pin" class="text-blue-800 w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold uppercase tracking-tight">NWMC Nanded Results 2026</h1>
-                    <p class="text-blue-100 text-sm italic">Mukammal 81 Seats aur Har Candidate ki Detail</p>
-                </div>
-            </div>
-            <div class="flex gap-2 text-xs font-bold uppercase tracking-wider bg-blue-900/50 px-3 py-1.5 rounded-full border border-blue-700">
-                <span class="flex items-center gap-1">
-                    <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div> 81 SEATS UPDATED
-                </span>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-4 mt-8">
-        <!-- Party Summary Section -->
-        <section class="mb-8">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2 text-blue-800 font-bold">
-                    <i data-lucide="bar-chart-3"></i>
-                    <h2 class="text-xl">Party Summary</h2>
-                </div>
-                <button id="reset-btn" class="hidden text-xs font-bold text-blue-600 hover:text-blue-800 underline uppercase tracking-widest">Sare Results Dekhein</button>
-            </div>
-            <div id="party-summary" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                <!-- Summary cards generated here -->
-            </div>
-        </section>
-
-        <!-- Search Bar -->
-        <section class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
-                <input 
-                    type="text" 
-                    id="search-input"
-                    placeholder="Candidate, Ward ya Party search karein..." 
-                    class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                >
-            </div>
-        </section>
-
-        <!-- Results Grid -->
-        <section>
-            <div class="flex items-center justify-between mb-4 px-2">
-                <div class="flex items-center gap-2 text-blue-800 font-bold">
-                    <i data-lucide="users"></i>
-                    <h2 class="text-xl" id="results-title">Ward-Wise Muqabla Details</h2>
-                </div>
-                <span id="results-count" class="text-xs font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full"></span>
-            </div>
-            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Cards generated here -->
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal for All Candidates -->
-    <div id="modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-[100]">
-        <div class="modal-overlay absolute w-full h-full bg-gray-900/70 backdrop-blur-sm"></div>
-        <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-3xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="modal-content py-6 text-left px-6 border-b">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="text-xl font-black text-blue-800" id="modal-title">Ward Candidates</h3>
-                        <p class="text-xs text-gray-400 uppercase font-bold tracking-widest mt-1">Sare Candidates aur NOTA</p>
-                    </div>
-                    <div class="modal-close cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-y-auto flex-1 px-6 py-4 scrollbar-hide">
-                <table class="w-full text-left border-collapse">
-                    <thead class="sticky top-0 bg-white z-10">
-                        <tr class="bg-blue-50">
-                            <th class="py-3 px-4 text-xs font-bold text-blue-800 uppercase border-b rounded-l-xl">Umeedwar</th>
-                            <th class="py-3 px-4 text-xs font-bold text-blue-800 uppercase border-b">Party</th>
-                            <th class="py-3 px-4 text-xs font-bold text-blue-800 uppercase border-b text-right rounded-r-xl">Votes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="modal-body">
-                        <!-- Candidate rows here -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="px-6 py-4 bg-gray-50 flex justify-between items-center rounded-b-3xl">
-                <p id="total-valid-votes" class="text-[10px] font-bold text-gray-400 uppercase"></p>
-                <button class="modal-close bg-blue-800 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:bg-blue-900 transition-colors uppercase text-xs tracking-widest">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer with Official Disclaimer -->
-    <footer class="mt-12 py-12 bg-white border-t border-gray-100">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest italic mb-6">Nanded Waghala Municipal Corporation 2026 Archive</p>
-            <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-left">
-                <p class="text-xs text-gray-600 leading-relaxed font-medium">
-                    <strong class="text-blue-800 block mb-1">Notice:</strong>
-                    This website is created solely for the convenience of the public to access election results easily. All the data provided has been sourced from the official website of the Nanded Waghala City Municipal Corporation (NWMC). While we have made every effort to ensure the accuracy of the information, technical or manual errors may occur. For final verification, users are strictly advised to refer to the official NWMC website or government gazette.
-                </p>
-            </div>
-        </div>
-    </footer>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        let selectedParty = 'All';
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
-        // MUKAMMAL DATA FOR ALL 81 SEATS (Consolidated from PDFs & Transcript)
-        const electionData = [
-            // PRABHAG 1 (BJP: A,C | SS: B,D)
-            { prabhag: '1', seat: 'A', winner: 'Raut Saraswati Narhari', party: 'BJP', votes: 4822, candidates: [{name:'Raut Saraswati Narhari', party:'BJP', votes:4822}, {name:'Dudhmal Ratna', party:'Shiv Sena', votes:3771}, {name:'Chandrayani Nikhate', party:'Congress', votes:3418}, {name:'NOTA', party:'None', votes:326}] },
-            { prabhag: '1', seat: 'B', winner: 'Munde Yogesh Motiram', party: 'Shiv Sena', votes: 5373, candidates: [{name:'Munde Yogesh Motiram', party:'Shiv Sena', votes:5373}, {name:'Deepak Patil', party:'BJP', votes:5125}, {name:'NOTA', party:'None', votes:248}] },
-            { prabhag: '1', seat: 'C', winner: 'Kalyankar Jyoti Kishan', party: 'BJP', votes: 6675, candidates: [{name:'Kalyankar Jyoti Kishan', party:'BJP', votes:6675}, {name:'Bhalerao Sarika', party:'Congress', votes:3418}, {name:'NOTA', party:'None', votes:195}] },
-            { prabhag: '1', seat: 'D', winner: 'Kalyankar Suhas Balaji', party: 'Shiv Sena', votes: 6119, candidates: [{name:'Kalyankar Suhas Balaji', party:'Shiv Sena', votes:6119}, {name:'Dinesh Mortale', party:'BJP', votes:3911}, {name:'NOTA', party:'None', votes:112}] },
+    <div id="root"></div>
 
-            // PRABHAG 2 (VBA: A | Congress: B | BJP: C,D)
-            { prabhag: '2', seat: 'A', winner: 'Jondhale Sunita Rupakrao', party: 'Vanchit', votes: 5209, candidates: [{name:'Jondhale Sunita Rupakrao', party:'Vanchit', votes:5209}, {name:'Ashwini Savate', party:'BJP', votes:4543}, {name:'Kadam Jyoti', party:'Shiv Sena', votes:3683}, {name:'NOTA', party:'None', votes:268}] },
-            { prabhag: '2', seat: 'B', winner: 'Afiya Khazi Nafe', party: 'Congress', votes: 5892, candidates: [{name:'Afiya Khazi Nafe', party:'Congress', votes:5892}, {name:'Tuppekar Sakharam', party:'BJP', votes:4468}, {name:'NOTA', party:'None', votes:321}] },
-            { prabhag: '2', seat: 'C', winner: 'Mule Kavita Santosh', party: 'BJP', votes: 4957, candidates: [{name:'Mule Kavita Santosh', party:'BJP', votes:4957}, {name:'Kalyankar Nanda', party:'Congress', votes:4786}, {name:'NOTA', party:'None', votes:211}] },
-            { prabhag: '2', seat: 'D', winner: 'Satish Pundlikrao Deshmukh', party: 'BJP', votes: 4367, candidates: [{name:'Satish Pundlikrao Deshmukh', party:'BJP', votes:4367}, {name:'Sandeep Deshmukh', party:'Congress', votes:3679}, {name:'सचिन सुधाकरराव', party:'Shiv Sena', votes:1968}, {name:'NOTA', party:'None', votes:285}] },
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
 
-            // PRABHAG 3 (BJP: A,B | Azad: C | SS: D)
-            { prabhag: '3', seat: 'A', winner: 'Pavle Sarita Umesh', party: 'BJP', votes: 5270, candidates: [{name:'Pavle Sarita Umesh', party:'BJP', votes:5270}, {name:'Gajbhare Pratiksha', party:'Shiv Sena', votes:4227}, {name:'Pandit Vishakha', party:'Vanchit', votes:2631}, {name:'NOTA', party:'None', votes:177}] },
-            { prabhag: '3', seat: 'B', winner: 'Puri Sadashiv Shankar', party: 'BJP', votes: 4772, candidates: [{name:'Puri Sadashiv Shankar', party:'BJP', votes:4772}, {name:'Sushilkumar Chauhan', party:'Shiv Sena', votes:4235}, {name:'NOTA', party:'None', votes:150}] },
-            { prabhag: '3', seat: 'C', winner: 'Minal Gajanan Patil', party: 'Azad', votes: 4993, candidates: [{name:'Minal Gajanan Patil', party:'Azad', votes:4993}, {name:'Kokate Karuna', party:'Shiv Sena', votes:3031}, {name:'Pritina Maroti Wagh', party:'BJP', votes:2548}, {name:'NOTA', party:'None', votes:109}] },
-            { prabhag: '3', seat: 'D', winner: 'Gadiwale Sandipsing', party: 'Shiv Sena', votes: 4926, candidates: [{name:'Gadiwale Sandipsing', party:'Shiv Sena', votes:4926}, {name:'Kokate Shriram Datta', party:'BJP', votes:4891}, {name:'Rahul Pawar', party:'Vanchit', votes:2384}, {name:'NOTA', party:'None', votes:139}] },
+        // User's Firebase Web App Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyC0XJ0hQjhuSkFjx-RnIJeUSRzHRISNt4E",
+          authDomain: "voters-ac217.firebaseapp.com",
+          projectId: "voters-ac217",
+          storageBucket: "voters-ac217.firebasestorage.app",
+          messagingSenderId: "98307843068",
+          appId: "1:98307843068:web:b091e8b6de83ed9ffc0879"
+        };
 
-            // PRABHAG 4 (BJP: A,B,C,D - Sweep)
-            { prabhag: '4', seat: 'A', winner: 'Waghmare Dayanand Namdev', party: 'BJP', votes: 5992, candidates: [{name:'Waghmare Dayanand Namdev', party:'BJP', votes:5992}, {name:'Sondare Vijay', party:'Congress', votes:3773}, {name:'NOTA', party:'None', votes:164}] },
-            { prabhag: '4', seat: 'B', winner: 'Sarita Gangamini Birakale', party: 'BJP', votes: 5933, candidates: [{name:'Sarita Gangamini Birakale', party:'BJP', votes:5933}, {name:'Ganga Sagar', party:'Congress', votes:5076}, {name:'NOTA', party:'None', votes:195}] },
-            { prabhag: '4', seat: 'C', winner: 'Swami Shailaja Kishore', party: 'BJP', votes: 5776, candidates: [{name:'Swami Shailaja Kishore', party:'BJP', votes:5776}, {name:'Kanughule Chhaya', party:'Congress', votes:5044}, {name:'NOTA', party:'None', votes:148}] },
-            { prabhag: '4', seat: 'D', winner: 'Tidke Prashant Vitthal', party: 'BJP', votes: 6380, candidates: [{name:'Tidke Prashant Vitthal', party:'BJP', votes:6380}, {name:'Anand Shankarrao Chavan', party:'Congress', votes:4507}, {name:'NOTA', party:'None', votes:192}] },
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'voters-ac217-app';
 
-            // PRABHAG 5 (BJP: A,B,C,D - Sweep)
-            { prabhag: '5', seat: 'A', winner: 'Gaikwad Sahebrao Laxman', party: 'BJP', votes: 4938, candidates: [{name:'Gaikwad Sahebrao Laxman', party:'BJP', votes:4938}, {name:'Wifanuren Imranali', party:'AIMIM', votes:4514}, {name:'Adv. Pramod Narwade', party:'Vanchit', votes:1598}, {name:'NOTA', party:'None', votes:311}] },
-            { prabhag: '5', seat: 'B', winner: 'Jayshree Nilesh Pawde', party: 'BJP', votes: 4828, candidates: [{name:'Jayshree Nilesh Pawde', party:'BJP', votes:4828}, {name:'Shifa Muskan', party:'AIMIM', votes:3271}, {name:'NOTA', party:'None', votes:210}] },
-            { prabhag: '5', seat: 'C', winner: 'Sale Shambhavi Pravin', party: 'BJP', votes: 3735, candidates: [{name:'Sale Shambhavi Pravin', party:'BJP', votes:3735}, {name:'Hazra Begum', party:'AIMIM', votes:3298}, {name:'NOTA', party:'None', votes:185}] },
-            { prabhag: '5', seat: 'D', winner: 'Mahesh Kanakadande', party: 'BJP', votes: 4643, candidates: [{name:'Mahesh Kanakadande', party:'BJP', votes:4643}, {name:'Farooq Ali Khan', party:'Congress', votes:2377}, {name:'Sheikh Sohel', party:'Shiv Sena', votes:2329}, {name:'NOTA', party:'None', votes:194}] },
+        // Initialize Firebase
+        let firebaseApp = null;
+        let auth = null;
+        let db = null;
 
-            // PRABHAG 6 (BJP: A,B,C,D - Sweep)
-            { prabhag: '6', seat: 'A', winner: 'Bhavre Shila Kishore', party: 'BJP', votes: 5279, candidates: [{name:'Bhavre Shila Kishore', party:'BJP', votes:5279}, {name:'Jamdade Laxmibai', party:'Shiv Sena', votes:3526}, {name:'Kaveri Dhage', party:'Vanchit', votes:1973}, {name:'NOTA', party:'None', votes:349}] },
-            { prabhag: '6', seat: 'B', winner: 'Yannam Rajesh', party: 'BJP', votes: 4948, candidates: [{name:'Yannam Rajesh', party:'BJP', votes:4948}, {name:'Dige Umesh', party:'Shiv Sena', votes:4418}, {name:'NOTA', party:'None', votes:205}] },
-            { prabhag: '6', seat: 'C', winner: 'Deshmukh Vaishali Milind', party: 'BJP', votes: 6681, candidates: [{name:'Deshmukh Vaishali Milind', party:'BJP', votes:6681}, {name:'Jawalgaonkar Sarika', party:'Shiv Sena', votes:3804}, {name:'NOTA', party:'None', votes:291}] },
-            { prabhag: '6', seat: 'D', winner: 'Neralkar Ashish Dhundiraj', party: 'BJP', votes: 6783, candidates: [{name:'Neralkar Ashish Dhundiraj', party:'BJP', votes:6783}, {name:'Pawde Ashok', party:'Congress', votes:3098}, {name:'NOTA', party:'None', votes:190}] },
+        try {
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+            } else {
+                firebaseApp = firebase.app();
+            }
+            auth = firebase.auth();
+            db = firebase.firestore();
+        } catch (e) {
+            console.error("Firebase init error:", e);
+        }
 
-            // PRABHAG 7 (VBA: A,B,C,D - Sweep)
-            { prabhag: '7', seat: 'A', winner: 'Rahul Sonsale', party: 'Vanchit', votes: 5910, candidates: [{name:'Rahul Sonsale', party:'Vanchit', votes:5910}, {name:'Raibole Subhash', party:'NCVA', votes:4065}, {name:'Gaikwad Shrikant', party:'NCP', votes:1770}, {name:'NOTA', party:'None', votes:226}] },
-            { prabhag: '7', seat: 'B', winner: 'Umme Aiman', party: 'Vanchit', votes: 6349, candidates: [{name:'Umme Aiman', party:'Vanchit', votes:6349}, {name:'Meherunnisa Begum', party:'NCVA', votes:4269}, {name:'NOTA', party:'None', votes:210}] },
-            { prabhag: '7', seat: 'C', winner: 'Rajshri Jijabhau Godbole', party: 'Vanchit', votes: 5968, candidates: [{name:'Rajshri Jijabhau Godbole', party:'Vanchit', votes:5968}, {name:'Priyanka Kamble', party:'NCVA', votes:5343}, {name:'NOTA', party:'None', votes:185}] },
-            { prabhag: '7', seat: 'D', winner: 'Prashant Ingole', party: 'Vanchit', votes: 6629, candidates: [{name:'Prashant Ingole', party:'Vanchit', votes:6629}, {name:'Abhijeet Kadam', party:'NCVA', votes:4144}, {name:'Munna Joregewar', party:'Shiv Sena', votes:1221}, {name:'NOTA', party:'None', votes:245}] },
+        // 13 Anomaly Grounds Directory
+        const ANOMALY_GROUNDS = {
+            "1": {
+                id: "1",
+                title: "Name / Gender / Age Inconsistencies",
+                desc: "Naam, gender ya age form me alag aur document me alag hai.",
+                example: "Form me age 32, document me age 28",
+                docs: ["Aadhaar Card", "Birth Certificate", "SSC Memo", "Passport"],
+                solution: "Sahi age aur naam ka proof document submit karein."
+            },
+            "2": {
+                id: "2",
+                title: "Parent-Child Age Gap < 15 Years",
+                desc: "Parent aur child ke beech age gap 15 saal se kam hai.",
+                example: "Parent: 30 yrs | Child: 20 yrs (Gap: 10 yrs)",
+                docs: ["Grandparents mapping proof", "Birth Certificate", "Family Relation Docs"],
+                solution: "Grandparents se mapping consider karein ya family proof dikhayein."
+            },
+            "3": {
+                id: "3",
+                title: "Parent-Child Age Gap > 50 Years",
+                desc: "Parent aur child ke beech age gap 50 saal se zyada hai.",
+                example: "Parent: 78 yrs | Child: 20 yrs (Gap: 58 yrs)",
+                docs: ["Family Relation Documents", "Aadhaar Card", "Birth Proof"],
+                solution: "Family documents se age aur relation verify karein."
+            },
+            "4": {
+                id: "4",
+                title: "Grandparent-Grandchild Age Gap < 40 Years",
+                desc: "Dada/Dadi aur Pota/Poti ke beech age gap 40 saal se kam hai.",
+                example: "Grandparent: 55 yrs | Grandchild: 20 yrs (Gap: 35 yrs)",
+                docs: ["Birth Proof", "Family Tree / Relation Documents"],
+                solution: "Birth proof aur family relation documents dikhayein."
+            },
+            "5": {
+                id: "5",
+                title: "Multiple Siblings with Doubtful Age Gap",
+                desc: "Bhai-behen ke beech age gap bahut kam ya doubtful hai.",
+                example: "Bhai 1 DOB: 01-01-2000 | Bhai 2 DOB: 01-07-2000 (Gap: 6 months)",
+                docs: ["DOB Proof Documents", "School Leaving Certificate", "Birth Certificate"],
+                solution: "Dono siblings ke DOB proof documents ready rakhein."
+            },
+            "6": {
+                id: "6",
+                title: "Implausible Age Progression",
+                desc: "Pichli list se current list tak age progression logical nahi hai.",
+                example: "2002 list me age 30, Ab age 50 (Sirf 5 saal ke gap me)",
+                docs: ["Age Proof Documents", "Old Voter Card / Roll Proof"],
+                solution: "Sahi age proof documents submit karein."
+            },
+            "7": {
+                id: "7",
+                title: "Elector Linked with Father Now, Mother Previously",
+                desc: "Pehle mother se linked tha, ab father se linked hai.",
+                example: "2002: Mother se linked | 2026: Father se linked",
+                docs: ["Family Relation Documents", "Ration Card", "Passport"],
+                solution: "Family relation documents se verification karein."
+            },
+            "8": {
+                id: "8",
+                title: "Previously Linked with Spouse, Now Father",
+                desc: "Pehle spouse se linked tha, ab father se linked hai.",
+                example: "2002: Spouse se linked | 2026: Father se linked",
+                docs: ["Marriage Certificate", "Family Documents"],
+                solution: "Marriage certificate ya family documents dikhayein."
+            },
+            "9": {
+                id: "9",
+                title: "Large Number of Descendants Claimed",
+                desc: "Ek hi vyakti ke bahut zyada descendants dikhaye gaye hain.",
+                example: "Ek parent se 8 ya usse zyada bachche linked hain",
+                docs: ["Family Structure Proof", "Ration Card", "Panchanama"],
+                solution: "Family structure clear karein aur sahi documents dikhayein."
+            },
+            "10": {
+                id: "10",
+                title: "Parent Details Differing Between Rolls",
+                desc: "Current roll aur previous roll me parent details alag hain.",
+                example: "2002: Father - Abdul Rahman | 2026: Father - Abdul Kareem",
+                docs: ["Correct Relation Proof", "Aadhaar Card", "School Record"],
+                solution: "Correct relation proof submit karein."
+            },
+            "11": {
+                id: "11",
+                title: "Father's Name Mismatch Between Rolls",
+                desc: "Father ka naam current aur previous roll me alag ya spelling mismatch hai.",
+                example: "2002: Mohammed Ahmed | 2026: Mohammed Ahamed",
+                docs: ["Aadhaar Card", "SSC / School Memo", "Passport", "Panchanama"],
+                solution: "Supporting documents aur spelling verification proof dikhayein."
+            },
+            "12": {
+                id: "12",
+                title: "Relationship Type Mismatch",
+                desc: "Relationship type pichli list se alag hai.",
+                example: "2002: Son | 2026: Spouse",
+                docs: ["Correct Relationship Proof", "Family Records"],
+                solution: "Correct relationship proof document dikhayein."
+            },
+            "13": {
+                id: "13",
+                title: "Relative's Name Mismatch",
+                desc: "Relative ka naam current aur previous roll me alag hai.",
+                example: "2002: Relative - Kareem | 2026: Relative - Rahim",
+                docs: ["Family Documents", "Aadhaar Proof"],
+                solution: "Family documents se verification karein."
+            }
+        };
 
-            // PRABHAG 8 (Congress: A,B | BJP: C,D)
-            { prabhag: '8', seat: 'A', winner: 'Sawant Satyapal Bhagozi', party: 'Congress', votes: 5586, candidates: [{name:'Sawant Satyapal Bhagozi', party:'Congress', votes:5586}, {name:'Sonkamble Sandip Rohidas', party:'BJP', votes:5324}, {name:'Dushyant Sonale', party:'Shiv Sena', votes:2024}, {name:'Yuvraj Godbole', party:'AIMIM', votes:516}, {name:'NOTA', party:'None', votes:159}] },
-            { prabhag: '8', seat: 'B', winner: 'Parvin Begum Sheikh Pasha', party: 'Congress', votes: 5608, candidates: [{name:'Parvin Begum Sheikh Pasha', party:'Congress', votes:5608}, {name:'Yewankar Mohinibai Vijay', party:'BJP', votes:5445}, {name:'Dr. Nilofar Begum', party:'Shiv Sena', votes:1783}, {name:'NOTA', party:'None', votes:321}] },
-            { prabhag: '8', seat: 'C', winner: 'Kavita Nagnath Gaddam', party: 'BJP', votes: 5716, candidates: [{name:'Kavita Nagnath Gaddam', party:'BJP', votes:5716}, {name:'Salima Begum Nurulla', party:'Congress', votes:5381}, {name:'Mehzabin Begum Sheikh', party:'Shiv Sena', votes:1942}, {name:'NOTA', party:'None', votes:208}] },
-            { prabhag: '8', seat: 'D', winner: 'Umeshsingh Ashoksingh Chauhan', party: 'BJP', votes: 5643, candidates: [{name:'Umeshsingh Ashoksingh Chauhan', party:'BJP', votes:5643}, {name:'Abbas Husen Rajjab Ali', party:'Congress', votes:4894}, {name:'Mudiraaj Vyankat', party:'Shiv Sena', votes:1328}, {name:'Sheikh Athar Ahmed', party:'AIMIM', votes:540}, {name:'Ayub Khan Shabbir', party:'Independent', votes:850}, {name:'NOTA', party:'None', votes:291}] },
-
-            // PRABHAG 9 (BJP: A,B,C,D - Sweep)
-            { prabhag: '9', seat: 'A', winner: 'Dr. Manjusha Ranvalkar', party: 'BJP', votes: 7225, candidates: [{name:'Dr. Manjusha Ranvalkar', party:'BJP', votes:7225}, {name:'Kashibai Gaikwad', party:'Shiv Sena', votes:2595}, {name:'Pawar Puja', party:'Vanchit', votes:1617}, {name:'NOTA', party:'None', votes:227}] },
-            { prabhag: '9', seat: 'B', winner: 'Swami Kishore Mallikarjun', party: 'BJP', votes: 7054, candidates: [{name:'Swami Kishore Mallikarjun', party:'BJP', votes:7054}, {name:'Vikram Singh Thakur', party:'Congress', votes:3104}, {name:'NOTA', party:'None', votes:185}] },
-            { prabhag: '9', seat: 'C', winner: 'Sadichha Soni Patil', party: 'BJP', votes: 6676, candidates: [{name:'Sadichha Soni Patil', party:'BJP', votes:6676}, {name:'Bhalerao Nandabai', party:'Shiv Sena', votes:2618}, {name:'NOTA', party:'None', votes:190}] },
-            { prabhag: '9', seat: 'D', winner: 'Balwantsing Govindsing', party: 'BJP', votes: 6616, candidates: [{name:'Balwantsing Govindsing', party:'BJP', votes:6616}, {name:'Anand Pandurang Patil', party:'Congress', votes:3199}, {name:'Navjyot Singh Gadiwale', party:'Shiv Sena (UBT)', votes:1220}, {name:'NOTA', party:'None', votes:215}] },
-
-            // PRABHAG 10 (BJP: A,B,C,D - Sweep)
-            { prabhag: '10', seat: 'A', winner: 'Priyanka Sangharatna Kamble', party: 'BJP', votes: 7182, candidates: [{name:'Priyanka Sangharatna Kamble', party:'BJP', votes:7182}, {name:'Anand Jadhav', party:'Shiv Sena (UBT)', votes:4691}, {name:'Sunil Manoharrao Sonkamble', party:'Shiv Sena', votes:1322}, {name:'NOTA', party:'None', votes:181}] },
-            { prabhag: '10', seat: 'B', winner: 'Sandhya Mahindra Demgunde', party: 'BJP', votes: 7623, candidates: [{name:'Sandhya Mahindra Demgunde', party:'BJP', votes:7623}, {name:'Lalita भगवान', party:'Congress', votes:6566}, {name:'NOTA', party:'None', votes:205}] },
-            { prabhag: '10', seat: 'C', winner: 'Sudarshana Mahesh Khomne', party: 'BJP', votes: 6934, candidates: [{name:'Sudarshana Mahesh Khomne', party:'BJP', votes:6934}, {name:'Abedabano Sheikh Babu', party:'Congress', votes:5194}, {name:'NOTA', party:'None', votes:155}] },
-            { prabhag: '10', seat: 'D', winner: 'Virendra Singh Jagjit Singh', party: 'BJP', votes: 6675, candidates: [{name:'Virendra Singh Jagjit Singh', party:'BJP', votes:6675}, {name:'Pawde Abhilash Rajesh', party:'Congress', votes:4439}, {name:'Nagshekar Nageshwar', party:'Shiv Sena', votes:1883}, {name:'Arjit Singh Chavan', party:'Shiv Sena (UBT)', votes:1133}, {name:'NOTA', party:'None', votes:132}] },
-
-            // PRABHAG 11 (AIMIM: A,B,C,D - Sweep)
-            { prabhag: '11', seat: 'A', winner: 'Asiya Begum Abdul Habib', party: 'AIMIM', votes: 9667, candidates: [{name:'Asiya Begum Abdul Habib', party:'AIMIM', votes:9667}, {name:'Zarina Begum', party:'Congress', votes:7759}, {name:'NOTA', party:'None', votes:236}] },
-            { prabhag: '11', seat: 'B', winner: 'Saima Khanam', party: 'AIMIM', votes: 9590, candidates: [{name:'Saima Khanam', party:'AIMIM', votes:9590}, {name:'Khadija Begum', party:'Congress', votes:5673}, {name:'Najma Begum', party:'NCP', votes:1736}, {name:'NOTA', party:'None', votes:310}] },
-            { prabhag: '11', seat: 'C', winner: 'Syed Fasihuddin', party: 'AIMIM', votes: 8701, candidates: [{name:'Syed Fasihuddin', party:'AIMIM', votes:8701}, {name:'Abdul Rahim', party:'Congress', votes:6429}, {name:'NOTA', party:'None', votes:198}] },
-            { prabhag: '11', seat: 'D', winner: 'Mohd Masood Ahmed Khan', party: 'AIMIM', votes: 10081, candidates: [{name:'Mohd Masood Ahmed Khan', party:'AIMIM', votes:10081}, {name:'Mohd Atikh', party:'Congress', votes:6332}, {name:'M. Khaliluddin', party:'Independent', votes:565}, {name:'Mohd Tohid Sheikh', party:'Shiv Sena (UBT)', votes:307}, {name:'NOTA', party:'None', votes:167}] },
-
-            // PRABHAG 12 (Congress: A,C | AIMIM: B,D)
-            { prabhag: '12', seat: 'A', winner: 'Abdul Gaffar Abdul सत्तार', party: 'Congress', votes: 11735, candidates: [{name:'Abdul Gaffar Abdul सत्तार', party:'Congress', votes:11735}, {name:'A Rashid A Gani', party:'AIMIM', votes:7331}, {name:'Dr Arshia Kausar', party:'NCP', votes:1197}, {name:'NOTA', party:'None', votes:88}] },
-            { prabhag: '12', seat: 'B', winner: 'Bibi Shaista Mohd Salman', party: 'AIMIM', votes: 9155, candidates: [{name:'Bibi Shaista Mohd Salman', party:'AIMIM', votes:9155}, {name:'Shamim Begum Sheikh', party:'Congress', votes:8700}, {name:'Sajeda Begum', party:'NCP', votes:1523}, {name:'NOTA', party:'None', votes:142}] },
-            { prabhag: '12', seat: 'C', winner: 'Halima Bi Sheikh Babu', party: 'Congress', votes: 9318, candidates: [{name:'Halima Bi Sheikh Babu', party:'Congress', votes:9318}, {name:'Khamar Sultanabi', party:'AIMIM', votes:9170}, {name:'NOTA', party:'None', votes:110}] },
-            { prabhag: '12', seat: 'D', winner: 'Altaf Hussain', party: 'AIMIM', votes: 8570, candidates: [{name:'Altaf Hussain', party:'AIMIM', votes:8570}, {name:'Syed Sher Ali', party:'Congress', votes:8199}, {name:'M. Mukhid', party:'NCP', votes:2489}, {name:'NOTA', party:'None', votes:165}] },
-
-            // PRABHAG 13 (AIMIM: A,B,C,D - Sweep)
-            { prabhag: '13', seat: 'A', winner: 'Dhongade Ashwini Dashrath', party: 'AIMIM', votes: 5308, candidates: [{name:'Dhongade Ashwini Dashrath', party:'AIMIM', votes:5308}, {name:'Kanchan Kamble', party:'BJP', votes:3202}, {name:'Sangeeta Kamble', party:'Congress', votes:2907}, {name:'Aarti Jondhale', party:'NCP', votes:2056}, {name:'NOTA', party:'None', votes:202}] },
-            { prabhag: '13', seat: 'B', winner: 'Shifa Tarannum Abdul Rauf', party: 'AIMIM', votes: 5357, candidates: [{name:'Shifa Tarannum Abdul Rauf', party:'AIMIM', votes:5357}, {name:'Komatwar Shanta', party:'BJP', votes:3899}, {name:'Abdul Fasiya', party:'Congress', votes:3009}, {name:'NOTA', party:'None', votes:115}] },
-            { prabhag: '13', seat: 'C', winner: 'Abdul Latif Abdul Majid', party: 'AIMIM', votes: 5687, candidates: [{name:'Abdul Latif Abdul Majid', party:'AIMIM', votes:5687}, {name:'Ravi Dangre Patil', party:'NCP', votes:2961}, {name:'Nagesh Gokulwar', party:'BJP', votes:2696}, {name:'NOTA', party:'None', votes:188}] },
-            { prabhag: '13', seat: 'D', winner: 'Syed Mujib Syed Mukhtar', party: 'AIMIM', votes: 4515, candidates: [{name:'Syed Mujib Syed Mukhtar', party:'AIMIM', votes:4515}, {name:'Mohd Irfan Ullah (Shera)', party:'NCP', votes:3560}, {name:'Bhalchandra Patki', party:'BJP', votes:2889}, {name:'Abdul Rahim', party:'Congress', votes:1951}, {name:'Harkare Gajanan', party:'Shiv Sena (UBT)', votes:1177}, {name:'NOTA', party:'None', votes:216}] },
-
-            // PRABHAG 14 (AIMIM: A,B,C | Congress: D)
-            { prabhag: '14', seat: 'A', winner: 'Muskan Naz Syed', party: 'AIMIM', votes: 6393, candidates: [{name:'Muskan Naz Syed', party:'AIMIM', votes:6393}, {name:'Shinge Poonam', party:'Congress', votes:6171}, {name:'Dhananjay Jondhale', party:'BJP', votes:1248}, {name:'NOTA', party:'None', votes:236}] },
-            { prabhag: '14', seat: 'B', winner: 'Shamim Begum A. Hafiz', party: 'AIMIM', votes: 6516, candidates: [{name:'Shamim Begum A. Hafiz', party:'AIMIM', votes:6516}, {name:'Shama Abdul Habib', party:'Congress', votes:5827}, {name:'Priyanka Bagde', party:'Shiv Sena', votes:2059}, {name:'NOTA', party:'None', votes:190}] },
-            { prabhag: '14', seat: 'C', winner: 'Qureshi Rehana Begum', party: 'AIMIM', votes: 6105, candidates: [{name:'Qureshi Rehana Begum', party:'AIMIM', votes:6105}, {name:'Idris Begum', party:'Congress', votes:5864}, {name:'Jyoti Dhuldhani', party:'Shiv Sena', votes:1568}, {name:'NOTA', party:'None', votes:175}] },
-            { prabhag: '14', seat: 'D', winner: 'Abdul Ahmed (Babu Bhai)', party: 'Congress', votes: 6643, candidates: [{name:'Abdul Ahmed (Babu Bhai)', party:'Congress', votes:6643}, {name:'Abdul Shamim Abdullah', party:'AIMIM', votes:5528}, {name:'Parade Kiran', party:'BJP', votes:1123}, {name:'Farooq Husen', party:'NCP', votes:1178}, {name:'NOTA', party:'None', votes:220}] },
-
-            // PRABHAG 15 (NCP: A,D | AIMIM: B | SS: C)
-            { prabhag: '15', seat: 'A', winner: 'A Habib Bawazir', party: 'NCP', votes: 4847, candidates: [{name:'A Habib Bawazir', party:'NCP', votes:4847}, {name:'Alamkhane Balaji', party:'BJP', votes:2654}, {name:'Sunil Gurukhude', party:'Shiv Sena', votes:4552}, {name:'Dr. Osama Naser', party:'AIMIM', votes:4585}, {name:'Mohd Ubaidur Rahman', party:'Congress', votes:1103}, {name:'NOTA', party:'None', votes:109}] },
-            { prabhag: '15', seat: 'B', winner: 'Sumaiya Gulfishan', party: 'AIMIM', votes: 4973, candidates: [{name:'Sumaiya Gulfishan', party:'AIMIM', votes:4973}, {name:'Raisa Begum', party:'NCP', votes:4951}, {name:'NOTA', party:'None', votes:155}] },
-            { prabhag: '15', seat: 'C', winner: 'Nilam Tuljesh Yadav', party: 'Shiv Sena', votes: 6411, candidates: [{name:'Nilam Tuljesh Yadav', party:'Shiv Sena', votes:6411}, {name:'Ayesha Sanobar', party:'NCP', votes:5200}, {name:'NOTA', party:'None', votes:192}] },
-            { prabhag: '15', seat: 'D', winner: 'Sabir Chaush नासेर चाऊस', party: 'NCP', votes: 5480, candidates: [{name:'Sabir Chaush नासेर चाऊस', party:'NCP', votes:5480}, {name:'Doidode Satyajit', party:'Shiv Sena', votes:3606}, {name:'Tak Akash Balaji', party:'BJP', votes:3346}, {name:'Sheikh Saeed Bawazir', party:'AIMIM', votes:3894}, {name:'Mohd Yusuf', party:'Congress', votes:1310}, {name:'NOTA', party:'None', votes:194}] },
-
-            // PRABHAG 16 (BJP: A,B,C,D - Sweep)
-            { prabhag: '16', seat: 'A', winner: 'Dipaksing Kashinathsing Rawat', party: 'BJP', votes: 6577, candidates: [{name:'Dipaksing Kashinathsing Rawat', party:'BJP', votes:6577}, {name:'Rawat Akshaysingh', party:'Shiv Sena', votes:5475}, {name:'Pradeep Dagdu Jadhav', party:'NCP', votes:2560}, {name:'NOTA', party:'None', votes:280}] },
-            { prabhag: '16', seat: 'B', winner: 'Bhartiya Ruchi Alkesh', party: 'BJP', votes: 6913, candidates: [{name:'Bhartiya Ruchi Alkesh', party:'BJP', votes:6913}, {name:'Kankar Minabai', party:'Shiv Sena', votes:3993}, {name:'NOTA', party:'None', votes:255}] },
-            { prabhag: '16', seat: 'C', winner: 'Thakur Amrutabai Bajrangsingh', party: 'BJP', votes: 6309, candidates: [{name:'Thakur Amrutabai Bajrangsingh', party:'BJP', votes:6309}, {name:'Thakur Yogita', party:'Shiv Sena', votes:4248}, {name:'NOTA', party:'None', votes:210}] },
-            { prabhag: '16', seat: 'D', winner: 'Yadav Tuljaram Ganeshlal', party: 'BJP', votes: 5640, candidates: [{name:'Yadav Tuljaram Ganeshlal', party:'BJP', votes:5640}, {name:'Sodi Dilipsing', party:'Shiv Sena', votes:4693}, {name:'Abdul Wahab', party:'Congress', votes:2332}, {name:'NOTA', party:'None', votes:198}] },
-
-            // PRABHAG 17 (BJP: A,B,C,D - Sweep)
-            { prabhag: '17', seat: 'A', winner: 'Yadav Prabhabai Ishwarlal', party: 'BJP', votes: 8255, candidates: [{name:'Yadav Prabhabai Ishwarlal', party:'BJP', votes:8255}, {name:'Khedkar Jyoti', party:'Shiv Sena', votes:5323}, {name:'NOTA', party:'None', votes:513}] },
-            { prabhag: '17', seat: 'B', winner: 'Kunjivale Manpreet Kaur', party: 'BJP', votes: 8848, candidates: [{name:'Kunjivale Manpreet Kaur', party:'BJP', votes:8848}, {name:'Gill Harminder Kaur', party:'Shiv Sena', votes:4577}, {name:'NOTA', party:'None', votes:310}] },
-            { prabhag: '17', seat: 'C', winner: 'Mutha Sumit Prakash', party: 'BJP', votes: 7725, candidates: [{name:'Mutha Sumit Prakash', party:'BJP', votes:7725}, {name:'Tabelevale Jaspal Singh', party:'Congress', votes:3371}, {name:'Yadav Birbal', party:'Shiv Sena', votes:2807}, {name:'NOTA', party:'None', votes:189}] },
-            { prabhag: '17', seat: 'D', winner: 'Navab Gurmit Singh', party: 'BJP', votes: 8606, candidates: [{name:'Navab Gurmit Singh', party:'BJP', votes:8606}, {name:'Bungai Ravinder Singh', party:'Shiv Sena', votes:5083}, {name:'NOTA', party:'None', votes:245}] },
-
-            // PRABHAG 18 (Congress: A,B,C,D - Sweep)
-            { prabhag: '18', seat: 'A', winner: 'Godbole Jyotsna Raju', party: 'Congress', votes: 8942, candidates: [{name:'Godbole Jyotsna Raju', party:'Congress', votes:8942}, {name:'Dhabale Mayuri Vilas', party:'MJP', votes:6531}, {name:'Shilpa Subhash Lokhande', party:'NCP', votes:789}, {name:'NOTA', party:'None', votes:224}] },
-            { prabhag: '18', seat: 'B', winner: 'Husen Shoeb Mazhar', party: 'Congress', votes: 7894, candidates: [{name:'Husen Shoeb Mazhar', party:'Congress', votes:7894}, {name:'Nazia Begum Syed', party:'MJP', votes:6943}, {name:'NOTA', party:'None', votes:210}] },
-            { prabhag: '18', seat: 'C', winner: 'Mahezbin Abdul Fahim', party: 'Congress', votes: 7994, candidates: [{name:'Mahezbin Abdul Fahim', party:'Congress', votes:7994}, {name:'Landge Kamalbai', party:'MJP', votes:5987}, {name:'NOTA', party:'None', votes:195}] },
-            { prabhag: '18', seat: 'D', winner: 'Mohsinkhan Mahemud Khan', party: 'Congress', votes: 7907, candidates: [{name:'Mohsinkhan Mahemud Khan', party:'Congress', votes:7907}, {name:'Gaffar Khan', party:'MJP', votes:5701}, {name:'Sumaiyya Begum', party:'NCP', votes:1136}, {name:'Mohd Shoebuddin', party:'AIMIM', votes:860}, {name:'NOTA', party:'None', votes:250}] },
-
-            // PRABHAG 19 (BJP: A,B,C,D - Sweep)
-            { prabhag: '19', seat: 'A', winner: 'Abhishek Rameshrao Saude', party: 'BJP', votes: 8372, candidates: [{name:'Abhishek Rameshrao Saude', party:'BJP', votes:8372}, {name:'Bhimrao Gaikwad', party:'Shiv Sena', votes:4363}, {name:'Shrikant Kamble', party:'BSP', votes:2683}, {name:'Jivak Raju Waghmare', party:'Independent', votes:1467}, {name:'NOTA', party:'None', votes:413}] },
-            { prabhag: '19', seat: 'B', winner: 'More Dipali Santosh', party: 'BJP', votes: 10961, candidates: [{name:'More Dipali Santosh', party:'BJP', votes:10961}, {name:'Jatale Vishwanath', party:'Shiv Sena', votes:5695}, {name:'NOTA', party:'None', votes:380}] },
-            { prabhag: '19', seat: 'C', winner: 'Kakde Sulochna Dhondiba', party: 'BJP', votes: 9241, candidates: [{name:'Kakde Sulochna Dhondiba', party:'BJP', votes:9241}, {name:'Gore Archana', party:'Shiv Sena', votes:5358}, {name:'NOTA', party:'None', votes:290}] },
-            { prabhag: '19', seat: 'D', winner: 'Kale Anuradha Raju', party: 'BJP', votes: 9524, candidates: [{name:'Kale Anuradha Raju', party:'BJP', votes:9524}, {name:'Vaidy Aarti Nandkumar', party:'Shiv Sena', votes:5132}, {name:'Deshmukh Kamal', party:'Congress', votes:2712}, {name:'NOTA', party:'None', votes:246}] },
-
-            // PRABHAG 20 (BJP: A,B,C,D,E - Sweep)
-            { prabhag: '20', seat: 'A', winner: 'Landge Niranjana Raju', party: 'BJP', votes: 11270, candidates: [{name:'Landge Niranjana Raju', party:'BJP', votes:11270}, {name:'Deepmala Gaikwad', party:'Vanchit', votes:3259}, {name:'Sanghamitra Kamble', party:'NCP', votes:2520}, {name:'Waghmare Jayshreebai', party:'Shiv Sena (UBT)', votes:701}, {name:'Sandhya Kamble', party:'Independent', votes:494}, {name:'NOTA', party:'None', votes:400}] },
-            { prabhag: '20', seat: 'B', winner: 'Mangala Deshmukh', party: 'BJP', votes: 10894, candidates: [{name:'Mangala Deshmukh', party:'BJP', votes:10894}, {name:'Yogita Yergevar', party:'Shiv Sena', votes:4104}, {name:'NOTA', party:'None', votes:310}] },
-            { prabhag: '20', seat: 'C', winner: 'Deshmukh Vaijnath Ishwarrao', party: 'BJP', votes: 10539, candidates: [{name:'Deshmukh Vaijnath Ishwarrao', party:'BJP', votes:10539}, {name:'Kanchan Gire Santosh', party:'Shiv Sena', votes:4251}, {name:'NOTA', party:'None', votes:345}] },
-            { prabhag: '20', seat: 'D', winner: 'Basvade Suvarna Satish', party: 'BJP', votes: 11290, candidates: [{name:'Basvade Suvarna Satish', party:'BJP', votes:11290}, {name:'Akurke Rekha Vinayakrao', party:'Shiv Sena', votes:3790}, {name:'NOTA', party:'None', votes:388}] },
-            { prabhag: '20', seat: 'E', winner: 'Ghogre Sanjay Shivajirao', party: 'BJP', votes: 11718, candidates: [{name:'Ghogre Sanjay Shivajirao', party:'BJP', votes:11718}, {name:'Girde Vinay Vishwambar', party:'Shiv Sena', votes:5596}, {name:'Pankaj Manohar Kokre', party:'Independent', votes:680}, {name:'Bharkad Deepak', party:'Sambhaji Brigade', votes:383}, {name:'NOTA', party:'None', votes:357}] }
+        // Complete Extracted Register Data
+        const INITIAL_REGISTER_DATA = [
+            { id: 1, sr: "2", name: "Rafikabegam Bismilakho", epic: "TIA1640044", mapping: "S", anomaly: "1" },
+            { id: 2, sr: "29", name: "Lalu Anbadas Mandve", epic: "TIA3356466", mapping: "P", anomaly: "11" },
+            { id: 3, sr: "39", name: "Savita Purushottam Ranavirakar", epic: "TIA1640002", mapping: "P", anomaly: "2" },
+            { id: 4, sr: "67", name: "KARUNA SHANTILAL RAUTRE", epic: "TIA2881449", mapping: "P", anomaly: "3" },
+            { id: 5, sr: "77", name: "Khasim Begum FaizKhan", epic: "TIA3269628", mapping: "P", anomaly: "2" },
+            { id: 6, sr: "81", name: "SHAIKH ATIQ SHAIKH SIRAJ", epic: "TIA3269529", mapping: "P", anomaly: "11" },
+            { id: 7, sr: "118", name: "SHAIKH RAFIQ SHAIKH SHARFODDIIN", epic: "TIA4133732", mapping: "P", anomaly: "4" },
+            { id: 8, sr: "151", name: "Lalita Bhanulal Gauge", epic: "TIA1640259", mapping: "S", anomaly: "1" },
+            { id: 9, sr: "152", name: "Ishwarlal Ramchandra Raujeyadav", epic: "TIA1640291", mapping: "P", anomaly: "11/2" },
+            { id: 10, sr: "154", name: "Kamalbai Ishwarlal Rautre", epic: "TIA1640275", mapping: "P", anomaly: "4" },
+            { id: 11, sr: "158", name: "Bhanulal Ramchandra Rautre", epic: "TIA1640101", mapping: "P", anomaly: "11" },
+            { id: 12, sr: "198", name: "Anitabai Radhakishan Yadav", epic: "TIA0089638", mapping: "S", anomaly: "1" },
+            { id: 13, sr: "212", name: "VARSHA SURESH YADAV", epic: "TIA3756848", mapping: "P", anomaly: "2" },
+            { id: 14, sr: "216", name: "Shobhabai Radhakishan Ratre", epic: "TIA1639921", mapping: "P", anomaly: "3" },
+            { id: 15, sr: "223", name: "SALEHA BEGUM", epic: "HLS1092956", mapping: "S", anomaly: "1" },
+            { id: 16, sr: "225", name: "VIKAS NARAYAN SIDHIWALE", epic: "TIA2881746", mapping: "P", anomaly: "11" },
+            { id: 17, sr: "226", name: "SACHIN NARAYAN SIDHIWALE", epic: "TIA2881720", mapping: "P", anomaly: "11" },
+            { id: 18, sr: "227", name: "GITA BAI CHANDAN LAL YADAV", epic: "TIA2881761", mapping: "P", anomaly: "2" },
+            { id: 19, sr: "260", name: "Najamuddin Khan", epic: "TIA3119369", mapping: "S", anomaly: "1" },
+            { id: 20, sr: "320", name: "BABULAL BAJRANGLAL", epic: "TIA2881464", mapping: "P", anomaly: "11" },
+            { id: 21, sr: "338", name: "Yasmeen Begum", epic: "HLS2832350", mapping: "S", anomaly: "1" },
+            { id: 22, sr: "358", name: "Ambila Ganesh Kalasakarasi", epic: "TIA2625333", mapping: "P", anomaly: "2" },
+            { id: 23, sr: "376", name: "KAILAS RAMDASRAO KURUDE", epic: "TIA3480902", mapping: "P", anomaly: "11" },
+            { id: 24, sr: "497", name: "Rehmat Khan Ameer Khan", epic: "HLS2405280", mapping: "S", anomaly: "1" },
+            { id: 25, sr: "508", name: "MOHSIN KHAN NAIM KHAN", epic: "TIA3776861", mapping: "P", anomaly: "11" },
+            { id: 26, sr: "534", name: "Md Fahimoddin Md Moinoddin", epic: "TIA2881431", mapping: "P", anomaly: "11/2" },
+            { id: 27, sr: "538", name: "SHAIKH MD.BADRODDIN SHAIKH MD. FAHIMODDIN", epic: "TIA2881399", mapping: "P", anomaly: "11" },
+            { id: 28, sr: "548", name: "NASEEB KHAN", epic: "HLS2406403", mapping: "S", anomaly: "1" },
+            { id: 29, sr: "586", name: "Abdul Qayyum", epic: "HLS1093327", mapping: "S", anomaly: "1" },
+            { id: 30, sr: "593", name: "Abdul Khadar Abdul Qayyum", epic: "TIA2881589", mapping: "P", anomaly: "11" },
+            { id: 31, sr: "613", name: "Noorjehan Habibkhan", epic: "HLS1090646", mapping: "S", anomaly: "1" },
+            { id: 32, sr: "630", name: "Yasmin Begum Gulaam Jilani", epic: "TIA1055995", mapping: "P", anomaly: "5/9" },
+            { id: 33, sr: "632", name: "Shaikh Sajeed Ahemed", epic: "TIA1032408", mapping: "P", anomaly: "5/9" },
+            { id: 34, sr: "637", name: "JAVEED AHMED GULAAM JILANI", epic: "TIA3119351", mapping: "P", anomaly: "9" },
+            { id: 35, sr: "643", name: "ZEBA KAUSAR SHAIKH MUJAHED", epic: "TIA4099552", mapping: "P", anomaly: "3/9" },
+            { id: 36, sr: "747", name: "AQUEEL SHAMSHUDDIN", epic: "TIA2881837", mapping: "P", anomaly: "11" },
+            { id: 37, sr: "761", name: "SHAIKH SALEEM SHAIKH IQBAL", epic: "TIA3776945", mapping: "P", anomaly: "9" },
+            { id: 38, sr: "842", name: "Aziz Abdul", epic: "HLS1093822", mapping: "S", anomaly: "1" },
+            { id: 39, sr: "844", name: "ABDUL LATEEF", epic: "TIA3768231", mapping: "S", anomaly: "1" },
+            { id: 40, sr: "867", name: "JAVERIYA TABASSUM", epic: "TIA4102653", mapping: "P", anomaly: "11" },
+            { id: 41, sr: "898", name: "Siddhant Zolage", epic: "TIA4079869", mapping: "P", anomaly: "11" },
+            { id: 42, sr: "910", name: "SHAIKH JAFAR", epic: "TIA4131694", mapping: "P", anomaly: "11" },
+            { id: 43, sr: "920", name: "Gauri Begum Abdul Rasheed", epic: "TIA1093673", mapping: "S", anomaly: "1" },
+            { id: 44, sr: "929", name: "Sahayara Begum M. Khasim", epic: "TIA2625499", mapping: "P", anomaly: "2" },
+            { id: 45, sr: "950", name: "SAYYED HASAN", epic: "HLS2407450", mapping: "S", anomaly: "1" },
+            { id: 46, sr: "962", name: "AFSARI BEGUM ILYAS KHAN", epic: "HLS1094036", mapping: "S", anomaly: "1" },
+            { id: 47, sr: "992", name: "Shaikh Jamil Shaikh Iqbal", epic: "TIA2728764", mapping: "P", anomaly: "9" },
+            { id: 48, sr: "998", name: "Asma Begum Shaikh Shabbir", epic: "TIA3979655", mapping: "P", anomaly: "2" },
+            { id: 49, sr: "1033", name: "Asha Santosh Kumar Pandharapurakar", epic: "TIA1009661", mapping: "P", anomaly: "3" },
+            { id: 50, sr: "1065", name: "Ahmed Khan", epic: "TIA3636404", mapping: "P", anomaly: "11" },
+            { id: 51, sr: "1072", name: "Mohammed Ahmed", epic: "TIA3636982", mapping: "P", anomaly: "11" },
+            { id: 52, sr: "1074", name: "Rafikha Begum Jamshid Khan", epic: "TIA1130897", mapping: "S", anomaly: "1" },
+            { id: 53, sr: "1080", name: "Shagufta Ambreen", epic: "TIA3685492", mapping: "P", anomaly: "11" },
+            { id: 54, sr: "1108", name: "Akhilaamed Shamshuddin Shaikh", epic: "TIA2506541", mapping: "P", anomaly: "5/11" },
+            { id: 55, sr: "1120", name: "ABDUL MATEEN ABDUL WAHAB", epic: "TIA3629367", mapping: "P", anomaly: "11" },
+            { id: 56, sr: "1121", name: "ABDUL MOHEET ABDUL WAHAB", epic: "TIA3629425", mapping: "P", anomaly: "11" },
+            { id: 57, sr: "1127", name: "Fahamidabegam Sadadaaliban", epic: "TIA1640168", mapping: "P", anomaly: "5/11" },
+            { id: 58, sr: "1160", name: "MOHAMMAD RIZWAN MOHAMMAD ALFEDDIN", epic: "TIA4306270", mapping: "P", anomaly: "11" },
+            { id: 59, sr: "1164", name: "Sayyed Shareekh", epic: "TIA4312138", mapping: "P", anomaly: "11" },
+            { id: 60, sr: "1178", name: "SHAHENAZ BEGUM ZAKIR ALI KHAN", epic: "TIA4345526", mapping: "P", anomaly: "5/9" },
+            { id: 61, sr: "1184", name: "MOHAMMED AZEEM", epic: "TIA4350120", mapping: "P", anomaly: "11" },
+            { id: 62, sr: "1193", name: "Saniya Fatema Mir Mujahid Ali Khan", epic: "TIA4381828", mapping: "P", anomaly: "3" },
+            { id: 63, sr: "1221", name: "Asma Begum Syed Safdar", epic: "TIA4418315", mapping: "P", anomaly: "3/4" },
+            { id: 64, sr: "1222", name: "FAHAD", epic: "TIA4418281", mapping: "P", anomaly: "11" },
+            { id: 65, sr: "1278", name: "SHAZIYA BEGUM AZHAR AHMED KHAN", epic: "TIA4526646", mapping: "P", anomaly: "9" },
+            { id: 66, sr: "1288", name: "FAISAL KHAN RAHEMAT KHAN", epic: "TIA4561478", mapping: "P", anomaly: "11" }
         ];
 
-        const partySummaryData = [
-            { name: 'BJP', seats: 45, color: 'bg-orange-500' },
-            { name: 'AIMIM', seats: 14, color: 'bg-green-700' },
-            { name: 'Congress', seats: 10, color: 'bg-blue-600' },
-            { name: 'Vanchit', seats: 5, color: 'bg-blue-900' },
-            { name: 'Shiv Sena', seats: 4, color: 'bg-yellow-500' },
-            { name: 'NCP', seats: 2, color: 'bg-green-500' },
-            { name: 'Azad', seats: 1, color: 'bg-gray-500' }
-        ];
-
-        function renderSummary() {
-            const container = document.getElementById('party-summary');
-            container.innerHTML = partySummaryData.map(p => `
-                <div class="party-card ${p.color} p-4 rounded-xl shadow-sm border-2 ${selectedParty === p.name ? 'active' : 'border-transparent'} text-white" 
-                     onclick="filterByParty('${p.name}')">
-                    <p class="text-[10px] font-bold opacity-75 uppercase tracking-tighter">${p.name}</p>
-                    <h3 class="text-3xl font-black">${p.seats}</h3>
-                </div>
-            `).join('');
-
-            const resetBtn = document.getElementById('reset-btn');
-            selectedParty !== 'All' ? resetBtn.classList.remove('hidden') : resetBtn.classList.add('hidden');
-        }
-
-        function filterByParty(party) {
-            selectedParty = (selectedParty === party) ? 'All' : party;
-            renderSummary();
-            renderResults();
-        }
-
-        document.getElementById('reset-btn').onclick = () => {
-            selectedParty = 'All';
-            renderSummary();
-            renderResults();
-        }
-
-        function openModal(id) {
-            const ward = electionData[id];
-            const modal = document.getElementById('modal');
-            const title = document.getElementById('modal-title');
-            const body = document.getElementById('modal-body');
-            const totalEl = document.getElementById('total-valid-votes');
-
-            const sorted = [...ward.candidates].sort((a,b) => b.votes - a.votes);
-            const totalVotes = sorted.reduce((sum, c) => sum + c.votes, 0);
-
-            title.innerText = `Prabhag ${ward.prabhag}-${ward.seat} Detailed Muqabla`;
-            totalEl.innerText = `Total Votes Polled: ${totalVotes.toLocaleString()}`;
-
-            body.innerHTML = sorted.map(c => `
-                <tr class="candidate-row hover:bg-blue-50/50 transition-colors">
-                    <td class="py-4 px-4 text-sm font-bold ${c.name === ward.winner ? 'text-green-600' : 'text-gray-700'} border-b">
-                        ${c.name} ${c.name === ward.winner ? '<span class="ml-2 text-[10px] bg-green-100 px-2 py-0.5 rounded-full border border-green-200">WINNER</span>' : ''}
-                    </td>
-                    <td class="py-4 px-4 text-xs font-semibold text-gray-500 border-b italic">${c.party}</td>
-                    <td class="py-4 px-4 text-sm font-black text-blue-800 border-b text-right">${c.votes.toLocaleString()}</td>
-                </tr>
-            `).join('');
-
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            document.body.classList.add('modal-active');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('opacity-0', 'pointer-events-none');
-            document.body.classList.remove('modal-active');
-        }
-
-        function renderResults() {
-            const filterText = document.getElementById('search-input').value.toLowerCase();
-            const container = document.getElementById('results-grid');
-            const countEl = document.getElementById('results-count');
-            const titleEl = document.getElementById('results-title');
-
-            const filtered = electionData.filter(item => {
-                const matchesParty = selectedParty === 'All' || item.party === selectedParty || (selectedParty === 'Shiv Sena' && item.party.includes('Shiv Sena'));
-                const matchesSearch = item.winner.toLowerCase().includes(filterText) || 
-                                     item.prabhag.includes(filterText) ||
-                                     item.candidates.some(c => c.name.toLowerCase().includes(filterText));
-                return matchesParty && matchesSearch;
-            }).sort((a, b) => {
-                if(parseInt(a.prabhag) !== parseInt(b.prabhag)) return parseInt(a.prabhag) - parseInt(b.prabhag);
-                return a.seat.localeCompare(b.seat);
+        function App() {
+            const [records, setRecords] = useState(() => {
+                const saved = localStorage.getItem("SIR_REGISTER_VOTERS_2026");
+                if (saved) {
+                    try { return JSON.parse(saved); } catch (e) { return INITIAL_REGISTER_DATA; }
+                }
+                return INITIAL_REGISTER_DATA;
             });
 
-            titleEl.innerText = selectedParty === 'All' ? 'Ward Muqabla Details' : `${selectedParty} Winners & Muqabla`;
-            countEl.innerText = `${filtered.length} / 81 Seats`;
+            const [user, setUser] = useState(null);
+            const [firebaseConnected, setFirebaseConnected] = useState(false);
+            const [firebaseError, setFirebaseError] = useState("");
+            const [searchQuery, setSearchQuery] = useState("");
+            const [filterAnomaly, setFilterAnomaly] = useState("ALL");
+            const [filterMapping, setFilterMapping] = useState("ALL");
+            const [activeTab, setActiveTab] = useState("REGISTER");
+            const [selectedRecord, setSelectedRecord] = useState(null);
+            const [editingRecord, setEditingRecord] = useState(null);
+            const [showExportModal, setShowExportModal] = useState(false);
+            const [toastMsg, setToastMsg] = useState("");
+            const [isSaving, setIsSaving] = useState(false);
+            const [hasUnsaved, setHasUnsaved] = useState(false);
 
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400 italic">No data found in this category.</div>`;
-                return;
-            }
+            // New Voter Form State
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [newName, setNewName] = useState("");
+            const [newEpic, setNewEpic] = useState("");
+            const [newSr, setNewSr] = useState("");
+            const [newMapping, setNewMapping] = useState("S");
+            const [newAnomaly, setNewAnomaly] = useState("1");
 
-            container.innerHTML = filtered.map((item, idx) => {
-                const sorted = [...item.candidates].sort((a,b) => b.votes - a.votes);
-                const runnerUp = sorted[1] || {name: 'N/A', party: 'N/A', votes: 0};
-                const margin = item.votes - runnerUp.votes;
+            // Toast helper
+            const showToast = (msg) => {
+                setToastMsg(msg);
+                setTimeout(() => setToastMsg(""), 3500);
+            };
 
-                return `
-                <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:border-blue-400 hover:shadow-md transition-all">
-                    <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center">
-                        <span class="text-sm font-black text-blue-800 tracking-wider">WARD ${item.prabhag}-${item.seat}</span>
-                        <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100 uppercase tracking-tighter">Official</span>
-                    </div>
+            // Firebase Auth and Firestore Initialization (Rule 1, 2, 3)
+            useEffect(() => {
+                if (!auth || !db) {
+                    setFirebaseError("Firebase SDK initialize nahi ho saka.");
+                    return;
+                }
 
-                    <div class="p-6 flex flex-col gap-6 flex-1">
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center shrink-0">
-                                <i data-lucide="award" class="w-8 h-8 text-blue-600"></i>
-                            </div>
-                            <div class="flex-1 overflow-hidden">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-lg font-black text-gray-900 leading-tight truncate">${item.winner}</h3>
-                                    <span class="text-[10px] font-bold px-2 py-1 rounded-md bg-blue-800 text-white ml-2 shrink-0">${item.party}</span>
+                let unsubscribeSnapshot = null;
+
+                const initFirebaseSync = async () => {
+                    try {
+                        // Rule 3: Auth first with detailed error catching
+                        let u = null;
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            const cred = await auth.signInWithCustomToken(__initial_auth_token);
+                            u = cred.user;
+                        } else {
+                            const cred = await auth.signInAnonymously();
+                            u = cred.user;
+                        }
+                        setUser(u);
+
+                        if (u) {
+                            // Rule 1 Path
+                            const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('voters').doc('mainDoc');
+                            
+                            // Rule 2 Simple Query / Snapshot with mandatory error callback
+                            unsubscribeSnapshot = docRef.onSnapshot(
+                                snapshot => {
+                                    setFirebaseConnected(true);
+                                    setFirebaseError("");
+                                    if (snapshot.exists) {
+                                        const data = snapshot.data();
+                                        if (data && data.records) {
+                                            setRecords(data.records);
+                                            localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(data.records));
+                                        }
+                                    }
+                                }, 
+                                err => {
+                                    console.error("Firestore error:", err);
+                                    setFirebaseConnected(false);
+                                    if (err.code === 'permission-denied') {
+                                        setFirebaseError("Permission Denied: Firebase Console -> Firestore Database -> Rules me 'allow read, write: if true;' karein.");
+                                    } else {
+                                        setFirebaseError("Firestore Error: " + err.message);
+                                    }
+                                }
+                            );
+                        }
+                    } catch (e) {
+                        console.error("Firebase auth error:", e);
+                        setFirebaseConnected(false);
+                        if (e.code === 'auth/operation-not-allowed') {
+                            setFirebaseError("Anonymous Auth Disabled: Firebase Console -> Authentication -> Sign-in method me Anonymous Enable karein.");
+                        } else {
+                            setFirebaseError("Firebase Auth Error: " + (e.message || "Connection failed"));
+                        }
+                    }
+                };
+
+                initFirebaseSync();
+
+                return () => {
+                    if (unsubscribeSnapshot) unsubscribeSnapshot();
+                };
+            }, []);
+
+            // Save Records (LocalStorage + Firestore)
+            const saveAllChanges = async (currentRecords = records) => {
+                setIsSaving(true);
+                localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(currentRecords));
+                
+                if (db) {
+                    try {
+                        const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('voters').doc('mainDoc');
+                        await docRef.set({
+                            records: currentRecords,
+                            lastUpdated: new Date().toISOString(),
+                            updatedBy: auth.currentUser?.uid || 'anonymous'
+                        }, { merge: true });
+                        setFirebaseConnected(true);
+                        setFirebaseError("");
+                        showToast("✓ Sabhi Changes Firebase Cloud me Save Ho Gaye!");
+                    } catch (e) {
+                        console.error("Cloud save error:", e);
+                        setFirebaseError("Cloud Save Error: " + e.message);
+                        showToast("⚠️ Local Storage me save hua. Cloud Permission check karein.");
+                    }
+                } else {
+                    showToast("✓ Saved to Local Storage!");
+                }
+
+                setIsSaving(false);
+                setHasUnsaved(false);
+            };
+
+            // Firebase Auth and Firestore Initialization (Rule 1, 2, 3)
+            useEffect(() => {
+                if (!auth || !db) return;
+
+                const initFirebaseSync = async () => {
+                    try {
+                        // Rule 3: Auth first
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously();
+                        }
+                    } catch (e) {
+                        console.log("Firebase Auth notice:", e);
+                    }
+                };
+
+                initFirebaseSync();
+
+                const unsubscribeAuth = auth.onAuthStateChanged(u => {
+                    setUser(u);
+                    if (u) {
+                        setFirebaseConnected(true);
+                        // Rule 1 Path: /artifacts/{appId}/public/data/voters/mainDoc
+                        const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('voters').doc('mainDoc');
+                        
+                        // Rule 2 Simple Query / Snapshot
+                        docRef.onSnapshot(snapshot => {
+                            if (snapshot.exists) {
+                                const data = snapshot.data();
+                                if (data && data.records) {
+                                    setRecords(data.records);
+                                    localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(data.records));
+                                }
+                            }
+                        }, err => console.log("Firebase listener error:", err));
+                    }
+                });
+
+                return () => unsubscribeAuth();
+            }, []);
+
+            // Save Records (LocalStorage + Firestore)
+            const saveAllChanges = async (currentRecords = records) => {
+                setIsSaving(true);
+                localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(currentRecords));
+                
+                if (db && user) {
+                    try {
+                        // Rule 1 Path
+                        const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('voters').doc('mainDoc');
+                        await docRef.set({
+                            records: currentRecords,
+                            lastUpdated: new Date().toISOString(),
+                            updatedBy: user.uid
+                        }, { merge: true });
+                    } catch (e) {
+                        console.log("Cloud save fallback to local storage:", e);
+                    }
+                }
+
+                setIsSaving(false);
+                setHasUnsaved(false);
+                showToast("✓ Sabhi Changes Firebase Cloud me Save Ho Gaye!");
+            };
+
+            // Update State & Auto Save
+            const updateStateAndSave = (newRecords) => {
+                setRecords(newRecords);
+                setHasUnsaved(true);
+                localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(newRecords));
+                if (db && user) {
+                    saveAllChanges(newRecords);
+                }
+            };
+
+            // Quick Toggle Ground 4 and 11
+            const handleToggle4and11 = (id) => {
+                const updated = records.map(item => {
+                    if (item.id === id) {
+                        let newCode = item.anomaly;
+                        if (item.anomaly.includes("11")) {
+                            newCode = item.anomaly.replace("11", "4");
+                        } else if (item.anomaly.includes("4")) {
+                            newCode = item.anomaly.replace("4", "11");
+                        }
+                        return { ...item, anomaly: newCode };
+                    }
+                    return item;
+                });
+                updateStateAndSave(updated);
+                showToast("⚡ Ground 4 ↔ 11 Switched & Firebase Sync Saved!");
+            };
+
+            // Icons init
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [activeTab, selectedRecord, showAddModal, editingRecord, showExportModal, records, searchQuery]);
+
+            const parseAnomalyCodes = (anomalyStr) => {
+                if (!anomalyStr) return [];
+                return anomalyStr.toString().split('/').map(s => s.trim());
+            };
+
+            // Filter logic
+            const filteredRecords = useMemo(() => {
+                const q = searchQuery.toLowerCase().trim();
+                return records.filter(item => {
+                    const matchSearch = q === "" || 
+                        item.sr.toString().toLowerCase().includes(q) ||
+                        (item.name && item.name.toLowerCase().includes(q)) ||
+                        (item.epic && item.epic.toLowerCase().includes(q));
+                    
+                    const itemAnomalies = parseAnomalyCodes(item.anomaly);
+                    const matchAnomaly = filterAnomaly === "ALL" || itemAnomalies.includes(filterAnomaly);
+                    const matchMapping = filterMapping === "ALL" || item.mapping === filterMapping;
+
+                    return matchSearch && matchAnomaly && matchMapping;
+                });
+            }, [records, searchQuery, filterAnomaly, filterMapping]);
+
+            // Stats
+            const stats = useMemo(() => {
+                const total = records.length;
+                const selfCount = records.filter(r => r.mapping === 'S').length;
+                const progenyCount = records.filter(r => r.mapping === 'P').length;
+
+                const freq = {};
+                records.forEach(r => {
+                    const codes = parseAnomalyCodes(r.anomaly);
+                    codes.forEach(c => {
+                        freq[c] = (freq[c] || 0) + 1;
+                    });
+                });
+
+                return { total, selfCount, progenyCount, freq };
+            }, [records]);
+
+            // Edit record
+            const handleSaveEdit = (e) => {
+                e.preventDefault();
+                if (!editingRecord) return;
+                const updated = records.map(r => r.id === editingRecord.id ? editingRecord : r);
+                updateStateAndSave(updated);
+                setEditingRecord(null);
+                showToast("✓ Voter Record Edit Saved!");
+            };
+
+            // Add record
+            const handleAddRecord = (e) => {
+                e.preventDefault();
+                if (!newSr.trim() || !newName.trim()) return;
+
+                const newEntry = {
+                    id: Date.now(),
+                    sr: newSr.trim(),
+                    name: newName.trim(),
+                    epic: newEpic.trim().toUpperCase() || "N/A",
+                    mapping: newMapping,
+                    anomaly: newAnomaly.trim()
+                };
+
+                const updated = [newEntry, ...records];
+                updateStateAndSave(updated);
+                setNewSr("");
+                setNewName("");
+                setNewEpic("");
+                setShowAddModal(false);
+                showToast("✓ Naya Voter Added & Saved!");
+            };
+
+            // Delete record
+            const handleDeleteRecord = (id) => {
+                if (confirm("Kya aap is voter record ko delete karna chahte hain?")) {
+                    const updated = records.filter(r => r.id !== id);
+                    updateStateAndSave(updated);
+                    if (selectedRecord && selectedRecord.id === id) {
+                        setSelectedRecord(null);
+                    }
+                    showToast("🗑 Voter Record Deleted & Saved!");
+                }
+            };
+
+            // GENERATE COMPLETE SINGLE-FILE INDEX.HTML FOR GITHUB PAGES
+            const generateFullSingleFileHtml = () => {
+                const docHtml = document.documentElement.outerHTML;
+                const recordsJson = JSON.stringify(records, null, 8);
+                const updatedHtml = docHtml.replace(
+                    /const INITIAL_REGISTER_DATA = \[[\s\S]*?\];/,
+                    `const INITIAL_REGISTER_DATA = ${recordsJson};`
+                );
+                return "<!DOCTYPE html>\n<html lang=\"hi\">\n" + updatedHtml + "\n</html>";
+            };
+
+            // Download index.html file
+            const downloadIndexHtmlFile = () => {
+                const htmlContent = generateFullSingleFileHtml();
+                const blob = new Blob([htmlContent], { type: "text/html" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "index.html";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("📥 Ready index.html File Downloaded For GitHub Pages!");
+            };
+
+            // Copy HTML to Clipboard
+            const copyFullCodeToClipboard = () => {
+                const htmlContent = generateFullSingleFileHtml();
+                const textarea = document.createElement('textarea');
+                textarea.value = htmlContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("📋 Complete index.html Code Copied To Clipboard!");
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col relative">
+                    
+                    {/* Toast Notification */}
+                    {toastMsg && (
+                        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-bold px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-bounce">
+                            <i data-lucide="check-circle-2" className="w-5 h-5 text-emerald-400"></i>
+                            <span className="text-sm">{toastMsg}</span>
+                        </div>
+                    )}
+
+                    {/* Top Header */}
+                    <header className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white shadow-xl no-print">
+                        <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white/10 p-3 rounded-2xl border border-white/20 backdrop-blur-md">
+                                        <i data-lucide="shield-check" className="w-8 h-8 text-yellow-400"></i>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-yellow-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded tracking-wider uppercase">SIR UPDATE 2026</span>
+                                            <span className="text-xs text-blue-200">Discrepancy & Anomaly Verification Portal</span>
+                                        </div>
+                                        <h1 className="text-xl sm:text-2xl font-black tracking-tight mt-0.5">Voter Register & Anomaly Analyzer</h1>
+                                    </div>
                                 </div>
-                                <p class="text-sm font-bold text-blue-700 mt-1 uppercase tracking-tighter">${item.votes.toLocaleString()} Votes</p>
+
+                                <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+                                    
+                                    {/* Firebase Live Badge */}
+                                    <div className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border ${
+                                        firebaseConnected 
+                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
+                                            : firebaseError
+                                            ? 'bg-red-500/20 text-red-300 border-red-500/30'
+                                            : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                    }`}>
+                                        <span className={`w-2 h-2 rounded-full ${firebaseConnected ? 'bg-emerald-400 animate-ping' : 'bg-red-400'}`}></span>
+                                        {firebaseConnected ? '🔥 voters-ac217 Connected' : firebaseError ? '⚠️ Firebase Issue' : 'Connecting...'}
+                                    </div>
+
+                                    {/* Save Button */}
+                                    <button 
+                                        onClick={() => saveAllChanges()}
+                                        disabled={isSaving}
+                                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black flex items-center gap-2 shadow-lg transition-all active:scale-95 ${
+                                            hasUnsaved 
+                                                ? "bg-amber-500 hover:bg-amber-400 text-slate-950 animate-pulse" 
+                                                : "bg-emerald-600 hover:bg-emerald-500 text-white"
+                                        }`}
+                                    >
+                                        <i data-lucide="save" className="w-4 h-4"></i>
+                                        {isSaving ? "Saving..." : hasUnsaved ? "💾 Save Changes Required" : "✓ Saved"}
+                                    </button>
+
+                                    {/* Export / Download Code Button */}
+                                    <button 
+                                        onClick={() => setShowExportModal(true)}
+                                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
+                                    >
+                                        <i data-lucide="github" className="w-4 h-4"></i>
+                                        Export index.html
+                                    </button>
+
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md transition-all"
+                                    >
+                                        <i data-lucide="user-plus" className="w-4 h-4"></i>
+                                        Add Voter
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Stat Chips */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-4 border-t border-white/10">
+                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                    <p className="text-[11px] text-slate-300 font-medium">Total Flagged Voters</p>
+                                    <p className="text-2xl font-black text-white mt-0.5">{stats.total}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                    <p className="text-[11px] text-blue-300 font-medium">Ground 4 (Grandparent Gap)</p>
+                                    <p className="text-2xl font-black text-blue-300 mt-0.5">{stats.freq['4'] || 0}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                    <p className="text-[11px] text-yellow-300 font-medium">Ground 11 (Father Mismatch)</p>
+                                    <p className="text-2xl font-black text-yellow-300 mt-0.5">{stats.freq['11'] || 0}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                    <p className="text-[11px] text-purple-300 font-medium">Progeny (P) Count</p>
+                                    <p className="text-2xl font-black text-purple-300 mt-0.5">{stats.progenyCount}</p>
+                                </div>
                             </div>
                         </div>
+                    </header>
 
-                        <div class="relative flex items-center justify-center">
-                            <div class="absolute w-full h-px bg-gray-100"></div>
-                            <span class="relative bg-white px-4 text-[10px] font-black text-gray-300 uppercase tracking-widest">VS Muqabla</span>
-                        </div>
-
-                        <div class="flex items-center gap-4 opacity-75">
-                            <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center shrink-0">
-                                <i data-lucide="user-minus" class="w-8 h-8 text-gray-400"></i>
+                    {/* Firebase Diagnostic Status Banner */}
+                    {firebaseError && (
+                        <div className="bg-red-500 text-white px-4 py-3 shadow-md no-print border-b border-red-600">
+                            <div className="max-w-7xl mx-auto flex items-center justify-between text-xs font-bold gap-2">
+                                <div className="flex items-center gap-2">
+                                    <i data-lucide="alert-triangle" className="w-5 h-5 flex-shrink-0"></i>
+                                    <span>FIREBASE CONNECT ISSUE: {firebaseError}</span>
+                                </div>
+                                <button 
+                                    onClick={() => window.location.reload()} 
+                                    className="bg-white text-red-900 px-3 py-1 rounded-lg text-xs font-black shadow hover:bg-slate-100"
+                                >
+                                    Retry Connection
+                                </button>
                             </div>
-                            <div class="flex-1 overflow-hidden">
-                                <h4 class="text-md font-bold text-gray-600 truncate">${runnerUp.name}</h4>
-                                <p class="text-xs font-bold text-red-400 mt-1 uppercase italic">Lost by ${margin.toLocaleString()} votes</p>
+                        </div>
+                    )}
+
+                    {/* MODAL 2: Individual Voter Notice Sheet */}
+                    {selectedRecord && (
+                        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+                            <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+                                
+                                <div className="bg-gradient-to-r from-blue-950 via-indigo-900 to-slate-900 text-white p-6 rounded-t-3xl relative">
+                                    <button 
+                                        onClick={() => setSelectedRecord(null)}
+                                        className="absolute right-5 top-5 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
+                                    >
+                                        <i data-lucide="x" className="w-5 h-5"></i>
+                                    </button>
+                                    <span className="bg-yellow-400 text-slate-950 font-black text-xs px-2.5 py-1 rounded tracking-wider">
+                                        ELECTION VERIFICATION NOTICE SHEET
+                                    </span>
+                                    
+                                    <div className="mt-3 space-y-1">
+                                        <h2 className="text-2xl font-black">
+                                            {selectedRecord.name || "Elector Name"}
+                                        </h2>
+                                        <div className="flex flex-wrap gap-3 text-xs text-blue-200">
+                                            <span>EPIC NO: <strong className="text-white font-mono">{selectedRecord.epic || "N/A"}</strong></span>
+                                            <span>•</span>
+                                            <span>SERIAL NO: <strong className="text-white font-mono">{selectedRecord.sr}</strong></span>
+                                            <span>•</span>
+                                            <span>CATEGORY: <strong className="text-yellow-300">{selectedRecord.mapping === 'S' ? 'SELF' : 'PROGENY'}</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 space-y-6">
+                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-start gap-3">
+                                        <i data-lucide="shield-alert" className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                                        <div className="text-xs text-amber-950">
+                                            <p className="font-bold text-sm">NOTICE KA MATLAB REJECT HONA NAHI HAI</p>
+                                            <p className="mt-0.5">Yeh sirf verification ke liye hai. Niche diye gaye required documents BLO ko dikha kar clear karayein.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center justify-between">
+                                            <span>Flagged Discrepancy Grounds</span>
+                                            <span className="text-xs font-normal text-slate-500">SIR Update 2026</span>
+                                        </h3>
+
+                                        {parseAnomalyCodes(selectedRecord.anomaly).map((code, idx) => {
+                                            const ground = ANOMALY_GROUNDS[code];
+                                            return (
+                                                <div key={idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="bg-amber-100 text-amber-950 font-black px-2.5 py-0.5 rounded text-xs">
+                                                            ANOMALY GROUND #{code}
+                                                        </span>
+                                                        <span className="text-xs font-bold text-slate-700">
+                                                            {ground?.title}
+                                                        </span>
+                                                    </div>
+
+                                                    <p className="text-sm font-bold text-slate-800">
+                                                        {ground?.desc}
+                                                    </p>
+
+                                                    <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
+                                                        <span className="font-bold text-slate-500 block mb-1">Required Verification Documents:</span>
+                                                        <div className="flex flex-wrap gap-1.5 mt-1">
+                                                            {ground?.docs.map((doc, dIdx) => (
+                                                                <span key={dIdx} className="bg-blue-50 text-blue-900 px-2 py-1 rounded border border-blue-200 font-semibold">
+                                                                    ✓ {doc}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                                                        <i data-lucide="check-circle" className="w-4 h-4 text-emerald-600"></i>
+                                                        Action Required: {ground?.solution}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="border-t border-slate-200 pt-4 space-y-2">
+                                        <h4 className="font-bold text-xs uppercase text-slate-500 tracking-wider">
+                                            BLO Verification Checklist
+                                        </h4>
+                                        <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
+                                            <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                                            Aadhaar / Passport / DOB Proof verified
+                                        </label>
+                                        <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
+                                            <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                                            Family relation / Progeny mapping checked
+                                        </label>
+                                        <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
+                                            <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                                            Verification report updated in BLO App
+                                        </label>
+                                    </div>
+
+                                </div>
+
+                                <div className="bg-slate-50 p-4 rounded-b-3xl border-t border-slate-200 flex justify-between items-center">
+                                    <button 
+                                        onClick={() => window.print()}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-colors shadow-sm"
+                                    >
+                                        <i data-lucide="printer" className="w-4 h-4"></i>
+                                        Print Notice Slip
+                                    </button>
+                                    <button 
+                                        onClick={() => setSelectedRecord(null)}
+                                        className="bg-slate-900 text-white font-bold px-5 py-2 rounded-xl text-xs hover:bg-slate-800 transition-colors"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div class="bg-blue-50/30 px-6 py-4 border-t border-gray-50 mt-auto flex justify-between items-center">
-                        <button onclick="openModal(${electionData.indexOf(item)})" class="text-xs font-black text-blue-800 hover:text-blue-900 flex items-center gap-1 uppercase tracking-tighter group transition-all">
-                            View All ${item.candidates.length} Candidates <i data-lucide="chevron-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                        </button>
-                    </div>
-                </div>`;
-            }).join('');
-            
-            lucide.createIcons();
+                    {/* MODAL 3: Edit Record Modal */}
+                    {editingRecord && (
+                        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+                            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="edit-3" className="w-5 h-5 text-blue-600"></i>
+                                        Edit Voter Entry & Save
+                                    </h3>
+                                    <button onClick={() => setEditingRecord(null)} className="text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" className="w-5 h-5"></i>
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleSaveEdit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Elector Name
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            value={editingRecord.name}
+                                            onChange={(e) => setEditingRecord({ ...editingRecord, name: e.target.value })}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            EPIC Number
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            value={editingRecord.epic}
+                                            onChange={(e) => setEditingRecord({ ...editingRecord, epic: e.target.value })}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-mono uppercase"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Serial Number (SR NO)
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            value={editingRecord.sr}
+                                            onChange={(e) => setEditingRecord({ ...editingRecord, sr: e.target.value })}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Anomaly Ground Code(s)
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            value={editingRecord.anomaly}
+                                            onChange={(e) => setEditingRecord({ ...editingRecord, anomaly: e.target.value })}
+                                            placeholder="e.g. 4 ya 11 ya 5/9"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold"
+                                        />
+                                    </div>
+
+                                    <div className="pt-3 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setEditingRecord(null)}
+                                            className="w-1/2 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="w-1/2 py-2.5 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-500 shadow-md"
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODAL 4: Add New Voter Entry */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+                            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="user-plus" className="w-5 h-5 text-emerald-600"></i>
+                                        Add New Voter Entry
+                                    </h3>
+                                    <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" className="w-5 h-5"></i>
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleAddRecord} className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Elector's Name
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            required
+                                            value={newName}
+                                            onChange={(e) => setNewName(e.target.value)}
+                                            placeholder="e.g. MOHAMMED AHMAD"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-bold"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            EPIC Number
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            value={newEpic}
+                                            onChange={(e) => setNewEpic(e.target.value)}
+                                            placeholder="e.g. TIA3636982"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-mono uppercase"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Serial Number (SR NO)
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            required
+                                            value={newSr}
+                                            onChange={(e) => setNewSr(e.target.value)}
+                                            placeholder="e.g. 1072"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-bold"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Mapping Category
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewMapping("S")}
+                                                className={`py-2 text-xs font-bold rounded-xl border ${newMapping === 'S' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-300'}`}
+                                            >
+                                                SELF (S)
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewMapping("P")}
+                                                className={`py-2 text-xs font-bold rounded-xl border ${newMapping === 'P' ? 'bg-purple-600 text-white border-purple-600' : 'bg-slate-50 text-slate-700 border-slate-300'}`}
+                                            >
+                                                PROGENY (P)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                                            Anomaly Ground Code(s)
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            required
+                                            value={newAnomaly}
+                                            onChange={(e) => setNewAnomaly(e.target.value)}
+                                            placeholder="e.g. 4 ya 11 ya 5/9"
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-medium"
+                                        />
+                                    </div>
+
+                                    <div className="pt-3 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowAddModal(false)}
+                                            className="w-1/2 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="w-1/2 py-2.5 text-xs font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-500 shadow-md"
+                                        >
+                                            Save Entry
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800 no-print mt-auto">
+                        <p>© 2026 Electoral Roll Verification Portal. JANKARI HI SURAKSHA HAI – SAHI BHARO, SAHI RAHO!</p>
+                    </footer>
+                </div>
+            );
         }
 
-        // Event Listeners
-        document.querySelector('.modal-overlay').addEventListener('click', closeModal);
-        document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', closeModal));
-        document.getElementById('search-input').oninput = () => renderResults();
-
-        window.onload = () => {
-            renderSummary();
-            renderResults();
-            lucide.createIcons();
-        };
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
-
