@@ -1,1001 +1,1499 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIR Anomaly & Voter Register Portal 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BLO Logical Discrepancies & Notice Portal 2026 - Part 111</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM CDN (cdnjs - GitHub Pages Compatible) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-    <!-- Babel for JSX -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase Compat SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
+                        eciBlue: '#0f172a',
+                        eciHeader: '#1e3a8a',
+                        selfBadge: '#2563eb',
+                        progenyBadge: '#7c3aed',
+                        resolvedBg: '#10b981',
+                        pendingBg: '#f59e0b',
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; color: black; }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+<body class="h-full flex flex-col bg-slate-100 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
 
-    <div id="root"></div>
+    <!-- LOGIN SCREEN OVERLAY (Appears on Page Open) -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="bg-eciHeader p-6 text-white text-center relative">
+                <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-white/20">
+                    <i class="fa-solid fa-user-shield text-amber-400 text-2xl"></i>
+                </div>
+                <h2 class="text-lg font-bold">BLO Portal Login</h2>
+                <p class="text-xs text-blue-200 mt-1">AC 87 - NANDED SOUTH | PART NO. 111</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="p-5 space-y-4 text-xs">
+                <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 text-blue-900 text-[11px] flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-blue-600 text-base shrink-0"></i>
+                    <span>Dashboard access karne ke liye Security Password enter karein.</span>
+                </div>
 
-    <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Enter Security Password</label>
+                    <input type="password" id="loginPasswordInput" required placeholder="Enter Password" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-sm">
+                    <p id="loginError" class="text-[11px] text-rose-600 font-semibold mt-1.5 hidden">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i> Galat Password! Phir se try karein.
+                    </p>
+                </div>
 
-        // User's Firebase Web App Configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyC0XJ0hQjhuSkFjx-RnIJeUSRzHRISNt4E",
-          authDomain: "voters-ac217.firebaseapp.com",
-          projectId: "voters-ac217",
-          storageBucket: "voters-ac217.firebasestorage.app",
-          messagingSenderId: "98307843068",
-          appId: "1:98307843068:web:b091e8b6de83ed9ffc0879"
+                <button type="submit" class="w-full py-2.5 bg-blue-900 hover:bg-blue-800 text-white font-bold rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login To Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT (Hidden until logged in) -->
+    <div id="mainDashboardApp" class="flex-1 flex flex-col hidden">
+
+        <!-- Mobile-optimized Top Navbar -->
+        <header class="bg-eciHeader text-white sticky top-0 z-30 shadow-lg border-b border-blue-900">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-2">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center border border-white/20 shrink-0">
+                        <i class="fa-solid fa-user-shield text-blue-300 text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-sm sm:text-base font-bold tracking-tight leading-tight flex items-center gap-2">
+                            BLO Notice & Anomaly Portal
+                        </h1>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] text-amber-300 font-bold bg-white/10 px-2 py-0.5 rounded border border-white/20">PART NO. 111</span>
+                            <span class="text-[10px] text-blue-200 font-medium hidden sm:inline">AC 87 - NANDED SOUTH MAHARASHTRA</span>
+                            <!-- Live Firebase Status Badge -->
+                            <span id="syncBadge" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/30 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Connecting Firebase...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openAddModal()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition shadow-sm flex items-center gap-1">
+                        <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Add Elector</span>
+                    </button>
+                    <button onclick="exportCSV()" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition shadow-sm flex items-center gap-1">
+                        <i class="fa-solid fa-download text-xs"></i> <span class="hidden sm:inline">Export</span>
+                    </button>
+                    <button onclick="reseedDataPrompt()" class="px-2 py-1.5 bg-white/10 hover:bg-white/20 text-white/90 text-xs rounded-lg transition border border-white/20" title="Reset Default Data">
+                        <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                    </button>
+                    <button onclick="handleLogout()" class="px-2 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg transition shadow-sm flex items-center gap-1" title="Lock Dashboard">
+                        <i class="fa-solid fa-lock text-xs"></i> <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Responsive Body -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 space-y-4">
+
+            <!-- BLO Officer Profile Mini Header -->
+            <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-3.5 rounded-2xl shadow-sm border border-blue-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-amber-400/20 text-amber-300 rounded-xl flex items-center justify-center text-xl font-bold shrink-0 border border-amber-400/30">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold tracking-wider text-blue-200 uppercase">Booth Level Officer (BLO)</span>
+                            <span class="text-[9px] font-bold text-amber-300 bg-amber-400/20 px-1.5 py-0.2 rounded border border-amber-400/30">PART 111</span>
+                        </div>
+                        <h2 class="text-sm sm:text-base font-extrabold text-white leading-tight">DATTA SHALIGRAM SHINDE</h2>
+                        <p class="text-[11px] text-blue-200">AC 87 – NANDED SOUTH MAHARASHTRA</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl border border-white/15 text-xs font-medium">
+                    <i class="fa-solid fa-phone text-emerald-400"></i>
+                    <span>BLO Contact: <strong class="text-white font-mono me-1">9607335572</strong></span>
+                    <a href="tel:9607335572" class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-bold">Call</a>
+                </div>
+            </div>
+
+            <!-- Top Summary Cards Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+                
+                <!-- Total Electors Card -->
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Electors (Part 111)</p>
+                        <h2 id="stat-total" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-0.5">0</h2>
+                        <p class="text-[10px] text-slate-500 mt-0.5"><i class="fa-solid fa-database text-blue-500 me-1"></i> Firebase Live Records</p>
+                    </div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+
+                <!-- SELF Category Card -->
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SELF Category</p>
+                        <div class="flex items-baseline gap-1.5 mt-0.5">
+                            <h2 id="stat-self" class="text-2xl sm:text-3xl font-extrabold text-selfBadge">0</h2>
+                            <span id="stat-self-pct" class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full">0.0%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-0.5"><i class="fa-solid fa-user me-1"></i> Self Mapped</p>
+                    </div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 text-selfBadge rounded-xl flex items-center justify-center text-lg sm:text-xl">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                </div>
+
+                <!-- PROGENY Category Card -->
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">PROGENY Category</p>
+                        <div class="flex items-baseline gap-1.5 mt-0.5">
+                            <h2 id="stat-progeny" class="text-2xl sm:text-3xl font-extrabold text-progenyBadge">0</h2>
+                            <span id="stat-progeny-pct" class="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded-full">0.0%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-0.5"><i class="fa-solid fa-users-between-lines me-1"></i> Family Linked</p>
+                    </div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-50 text-progenyBadge rounded-xl flex items-center justify-center text-lg sm:text-xl">
+                        <i class="fa-solid fa-people-roof"></i>
+                    </div>
+                </div>
+
+                <!-- Resolution Progress Card -->
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+                    <div class="w-full me-2">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Resolved Progress</p>
+                        <div class="flex items-baseline justify-between mt-0.5">
+                            <h2 id="stat-resolved" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</h2>
+                            <span id="stat-resolved-pct" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">0.0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                            <div id="stat-progress-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg sm:text-xl shrink-0">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Analytical Charts Grid Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                
+                <!-- Category Ratio Chart (Doughnut) -->
+                <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-chart-pie text-blue-600"></i> Category Ratio (Self vs Progeny)
+                            </h3>
+                        </div>
+                        <div class="relative h-48 sm:h-52 mt-3 flex items-center justify-center">
+                            <canvas id="categoryDoughnutChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-around text-center text-xs">
+                        <div>
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 me-1"></span>
+                            <span class="text-slate-500 font-medium">SELF:</span>
+                            <strong id="pie-self-text" class="text-slate-800 ms-1">0 (0.0%)</strong>
+                        </div>
+                        <div>
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-600 me-1"></span>
+                            <span class="text-slate-500 font-medium">PROGENY:</span>
+                            <strong id="pie-progeny-text" class="text-slate-800 ms-1">0 (0.0%)</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anomaly Rules Distribution Bar Chart -->
+                <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-chart-column text-indigo-600"></i> Anomaly Types Count & Percentage
+                            </h3>
+                            <span id="total-anomaly-flags-badge" class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Total Flags: 0</span>
+                        </div>
+                        <div class="relative h-48 sm:h-52 mt-3">
+                            <canvas id="anomalyBarChart"></canvas>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2 text-right"><i class="fa-solid fa-cloud-check text-emerald-600 me-1"></i> Firebase Realtime Sync Enabled - Part No. 111.</p>
+                </div>
+
+            </div>
+
+            <!-- Master Data Control Bar & Search -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                
+                <div class="p-3.5 sm:p-4 border-b border-slate-200 bg-slate-50/80 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-blue-600"></i> Electors Discrepancy & Notice List (Part 111)
+                            </h2>
+                            <p class="text-[11px] text-slate-500">Call electors directly or tap 'View Notice' to print or share WhatsApp slip.</p>
+                        </div>
+                        <div class="text-[11px] text-slate-500 font-medium bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs">
+                            Showing <strong id="showing-count" class="text-blue-600">0</strong> of <strong id="total-table-count">0</strong> Records
+                        </div>
+                    </div>
+
+                    <!-- Search & Filters Toolbar -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2">
+                        
+                        <!-- Search Input -->
+                        <div class="lg:col-span-5 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                            <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search Name, EPIC, Sr No, Mobile, Rule..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white">
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div class="lg:col-span-2">
+                            <select id="categoryFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white text-slate-700 font-medium">
+                                <option value="ALL">All Categories</option>
+                                <option value="S">SELF (S)</option>
+                                <option value="P">PROGENY (P)</option>
+                            </select>
+                        </div>
+
+                        <!-- Anomaly Rule Filter -->
+                        <div class="lg:col-span-3">
+                            <select id="ruleFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white text-slate-700 font-medium">
+                                <option value="ALL">All Anomaly Rules</option>
+                                <option value="1">Rule 1 (Name/Gender/Age)</option>
+                                <option value="2">Rule 2 (Parent Gap < 15y)</option>
+                                <option value="3">Rule 3 (Parent Gap > 50y)</option>
+                                <option value="4">Rule 4 (Grandparent Gap < 40y)</option>
+                                <option value="5">Rule 5 (Multiple Siblings Gap)</option>
+                                <option value="6">Rule 6 (Age Progression)</option>
+                                <option value="7">Rule 7 (Father-Mother Link)</option>
+                                <option value="8">Rule 8 (Spouse-Father Link)</option>
+                                <option value="9">Rule 9 (Large Descendants)</option>
+                                <option value="10">Rule 10 (Parent Details Differ)</option>
+                                <option value="11">Rule 11 (Father Name Mismatch)</option>
+                                <option value="12">Rule 12 (Relationship Mismatch)</option>
+                                <option value="13">Rule 13 (Relative Name Mismatch)</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="lg:col-span-2">
+                            <select id="statusFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white text-slate-700 font-medium">
+                                <option value="ALL">All Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Resolved">Resolved</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Desktop Table View (Hidden on mobile) -->
+                <div class="hidden md:block overflow-x-auto custom-scroll">
+                    <table class="w-full text-left text-xs text-slate-600 border-collapse">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold text-[11px] tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-3 text-center w-12">Sr.</th>
+                                <th class="py-3 px-3 min-w-[170px]">Elector Name & Mobile</th>
+                                <th class="py-3 px-3 min-w-[100px]">EPIC</th>
+                                <th class="py-3 px-3 text-center w-24">Category</th>
+                                <th class="py-3 px-3 min-w-[110px]">Anomaly Rules</th>
+                                <th class="py-3 px-3 text-center w-24">Status</th>
+                                <th class="py-3 px-3 text-center min-w-[240px]">Actions & Notice</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyDesktop" class="divide-y divide-slate-200 bg-white">
+                            <!-- Dynamic Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View (Visible only on Mobile screens) -->
+                <div id="mobileCardContainer" class="block md:hidden p-3 space-y-3 bg-slate-100/50">
+                    <!-- Dynamic Mobile Cards injected via JS -->
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-3 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 text-center text-[11px] text-slate-400">
+                Election Commission of India • SIR BLO Logic Verification Module 2026 • Part No. 111
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ================= MODALS SECTION ================= -->
+
+    <!-- QUICK MOBILE SYNC MODAL -->
+    <div id="phoneModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="bg-emerald-700 px-4 py-3 text-white flex justify-between items-center">
+                <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-amber-300"></i> Firebase Mobile Sync
+                </h3>
+                <button onclick="closePhoneModal()" class="text-white/70 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="phoneForm" onsubmit="savePhone(event)" class="p-4 space-y-3 text-xs">
+                <input type="hidden" id="phoneIndex">
+                <div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Elector Name</span>
+                    <strong id="phoneElectorName" class="font-bold text-slate-900 text-sm block mt-0.5"></strong>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Enter Mobile Number</label>
+                    <input type="tel" id="inputPhoneNum" required placeholder="Enter 10 Digit Mobile Number" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono text-sm">
+                    <p class="text-[10px] text-emerald-600 mt-1"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Save karte hi Firebase par real-time sync ho jayega.</p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closePhoneModal()" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+                    <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs flex items-center gap-1">
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Sync
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VIEW NOTICE & REQUIRED DOCUMENTS MODAL -->
+    <div id="noticeModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
+            
+            <!-- Notice Header -->
+            <div class="bg-blue-900 px-4 py-3 text-white flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-envelope-open-text text-amber-400 text-base"></i>
+                    <div>
+                        <h3 class="font-bold text-xs sm:text-sm">ELECTION COMMISSION NOTICE DETAILS</h3>
+                        <p class="text-[10px] text-blue-200">AC 87 - NANDED SOUTH | PART NO. 111</p>
+                    </div>
+                </div>
+                <button onclick="closeNoticeModal()" class="text-white/70 hover:text-white p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+
+            <!-- Notice Body Container -->
+            <div class="p-4 overflow-y-auto custom-scroll space-y-3.5 text-xs">
+                
+                <!-- Notice Banner Header -->
+                <div class="p-3 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-amber-900 text-xs"><i class="fa-solid fa-triangle-exclamation text-amber-600 me-1"></i> NOTICE TYPE: VERIFICATION ONLY</span>
+                        <span id="noticeStatusBadge"></span>
+                    </div>
+                    <p class="text-[11px] text-amber-800">Yeh Notice reject hone ke liye nahi, sirf data verification ke liye lagaya gaya hai.</p>
+                </div>
+
+                <!-- BLO Officer Profile Card inside Receipt -->
+                <div class="bg-gradient-to-r from-blue-950 to-indigo-900 text-white p-3 rounded-xl border border-blue-800 flex items-center justify-between text-[11px] shadow-xs">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[9px] font-bold tracking-wider text-amber-300 uppercase block"><i class="fa-solid fa-user-shield me-1"></i> Booth Level Officer (BLO)</span>
+                            <span class="text-[9px] font-bold text-amber-200 bg-amber-400/20 px-1 rounded">Part 111</span>
+                        </div>
+                        <strong class="text-xs font-bold text-white block">DATTA SHALIGRAM SHINDE</strong>
+                        <p class="text-[10px] text-blue-200">AC 87 – NANDED SOUTH MAHARASHTRA</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] text-blue-200 block">BLO Contact</span>
+                        <a href="tel:9607335572" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold font-mono inline-flex items-center gap-1 text-[10px]">
+                            <i class="fa-solid fa-phone"></i> 9607335572
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Elector Profile Details -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                        <div><span class="text-slate-400 font-medium">Serial No:</span> <strong id="noticeSr" class="text-slate-800"></strong></div>
+                        <div><span class="text-slate-400 font-medium">EPIC No:</span> <strong id="noticeEpic" class="text-slate-800 font-mono"></strong></div>
+                    </div>
+                    <div><span class="text-slate-400 font-medium">Elector's Name:</span> <strong id="noticeName" class="text-slate-900 text-sm block"></strong></div>
+                    <div class="flex items-center justify-between">
+                        <div><span class="text-slate-400 font-medium">Category Mapping:</span> <span id="noticeCat"></span></div>
+                        <div><span class="text-slate-400 font-medium">Mobile:</span> <strong id="noticePhone" class="text-emerald-700 font-mono"></strong></div>
+                    </div>
+                </div>
+
+                <!-- Flagged Anomalies & Required Documents Section -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-slate-800 text-xs border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-nodes text-blue-600"></i> Flagged Anomaly & Required Documents
+                    </h4>
+                    
+                    <div id="noticeRulesList" class="space-y-2.5">
+                        <!-- Dynamic list of rules & required documents -->
+                    </div>
+                </div>
+
+                <!-- Custom Dynamic BLO Verification Suggestion Box -->
+                <div id="noticeInstructionBox" class="p-3 rounded-xl border border-blue-200/80 bg-blue-50/70 text-[11px] space-y-1">
+                    <!-- Dynamic suggestion inserted via JS based on Mapping (SELF vs PROGENY) -->
+                </div>
+
+            </div>
+
+            <!-- Notice Footer with WhatsApp & Print Options -->
+            <div class="p-3 bg-slate-100 border-t border-slate-200 flex flex-wrap justify-between items-center shrink-0 text-xs gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="shareWhatsAppReceipt()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Share WhatsApp Slip
+                    </button>
+                    <button onclick="printNotice()" class="px-3 py-1.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 transition flex items-center gap-1">
+                        <i class="fa-solid fa-print"></i> Print Slip
+                    </button>
+                </div>
+                <button onclick="closeNoticeModal()" class="px-4 py-1.5 bg-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-300 transition">Close</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- EDIT ELECTOR MODAL -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-eciHeader px-4 py-3 text-white flex justify-between items-center">
+                <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Elector Anomaly Record (Part 111)
+                </h3>
+                <button onclick="closeEditModal()" class="text-white/70 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="editForm" onsubmit="saveEdit(event)" class="p-4 space-y-3 text-xs">
+                <input type="hidden" id="editIndex">
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Serial No.</label>
+                        <input type="number" id="editSr" required class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">EPIC No.</label>
+                        <input type="text" id="editEpic" required class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Elector Name</label>
+                    <input type="text" id="editName" required class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Mobile Number (Calling & WhatsApp Sync)</label>
+                    <input type="tel" id="editPhone" placeholder="Mobile Number Enter Karein" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Category</label>
+                        <select id="editCat" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="S">SELF (S)</option>
+                            <option value="P">PROGENY (P)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
+                        <select id="editStatus" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Pending">Pending</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Anomaly Rules (Comma Separated)</label>
+                    <input type="text" id="editRules" required placeholder="e.g. 11 or 3, 9" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Rules 1 to 13 enter karein.</p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Verification Remarks / Notes</label>
+                    <textarea id="editNotes" rows="2" placeholder="Docs checked..." class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeEditModal()" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+                    <button type="submit" class="px-4 py-1.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-xl shadow-xs">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD NEW ELECTOR MODAL -->
+    <div id="addModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-emerald-700 px-4 py-3 text-white flex justify-between items-center">
+                <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Add New Elector Record (Part 111)
+                </h3>
+                <button onclick="closeAddModal()" class="text-white/70 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="addForm" onsubmit="saveAdd(event)" class="p-4 space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Serial No.</label>
+                        <input type="number" id="addSr" required class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">EPIC No.</label>
+                        <input type="text" id="addEpic" required class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none uppercase">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+                    <input type="text" id="addName" required class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Mobile Number</label>
+                    <input type="tel" id="addPhone" placeholder="Mobile Number Enter Karein" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Category</label>
+                        <select id="addCat" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="S">SELF (S)</option>
+                            <option value="P" selected>PROGENY (P)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
+                        <select id="addStatus" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="Pending" selected>Pending</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Anomaly Rules (Comma Separated)</label>
+                    <input type="text" id="addRules" required placeholder="e.g. 11 or 4, 9" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeAddModal()" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+                    <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-xs">Add Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-3.5 py-2.5 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toastMsg">Action completed!</span>
+    </div>
+
+    <!-- FIREBASE MODULE SCRIPT & APPLICATION LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithCustomToken, 
+            signInAnonymously, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            updateDoc, 
+            deleteDoc, 
+            onSnapshot, 
+            writeBatch 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Required Security Password for Login
+        const SECURITY_PASSWORD = "Doctor@786";
+
+        // User Provided Firebase Configuration
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyC0XJ0hQjhuSkFjx-RnIJeUSRzHRISNt4E",
+            authDomain: "voters-ac217.firebaseapp.com",
+            projectId: "voters-ac217",
+            storageBucket: "voters-ac217.firebasestorage.app",
+            messagingSenderId: "98307843068",
+            appId: "1:98307843068:web:b091e8b6de83ed9ffc0879"
         };
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'voters-ac217-app';
 
         // Initialize Firebase
-        let firebaseApp = null;
-        let auth = null;
-        let db = null;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        try {
-            if (!firebase.apps.length) {
-                firebaseApp = firebase.initializeApp(firebaseConfig);
+        // App Id Path Rule
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'voters-ac217';
+        const electorsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'electors');
+
+        // Anomaly Rules Map
+        const anomalyRulesMap = {
+            "1": { title: "Name / Gender / Age Inconsistencies", desc: "Form aur documents me Name, Gender ya Age alag/mismatch hai.", docs: ["Aadhaar Card", "Birth Certificate", "SSC / School Leaving Memo", "Passport"] },
+            "2": { title: "Parent-Child Age Gap < 15 Years", desc: "Parent aur Child ke beech age gap 15 saal se kam ka hai.", docs: ["Grandparents Mapping Proof", "Child Birth Certificate", "School Records"] },
+            "3": { title: "Parent-Child Age Gap > 50 Years", desc: "Parent aur Child ke beech age gap 50 saal se zyada ka hai.", docs: ["Family Tree Proof", "Parent & Child Aadhaar / EPIC", "Ration Card"] },
+            "4": { title: "Grandparent-Grandchild Age Gap < 40 Years", desc: "Grandparent aur Grandchild me age gap 40 saal se kam ka hai.", docs: ["Birth Proof", "Family Relation Certificate", "Grandparent's Record"] },
+            "5": { title: "Multiple Siblings Doubtful Age Difference", desc: "Bhai-behen ke beech age gap doubtful/bahut kam hai.", docs: ["DOB Proof for all siblings", "School Leaving Certificates", "Aadhaar Cards"] },
+            "6": { title: "Implausible Age Progression", desc: "Pichli electoral roll se ab tak umar ka progression unnatural hai.", docs: ["Age Proof Document", "Previous Electoral Roll Extract", "Aadhaar Card"] },
+            "7": { title: "Linked with Father Presently, Mother Previously", desc: "Pehle mother se link tha, ab father se linked hua hai.", docs: ["Family Relationship Proof", "Parents' Aadhaar / EPIC", "Ration Card"] },
+            "8": { title: "Linked with Spouse Presently, Father Previously", desc: "Pehle spouse se link tha, ab father se link hua hai.", docs: ["Marriage Certificate", "Family Document Proof"] },
+            "9": { title: "Large Number of Descendants Claimed", desc: "Ek individual se 8 ya usse zyada descendants linked dikhaye gaye hain.", docs: ["Family Structure Declaration", "Ration Card / Panchanama Copy"] },
+            "10": { title: "Parent Details Differing", desc: "Current aur previous roll me parent ki details differ kar rahi hain.", docs: ["Correct Relation Proof", "Parent's Official ID Card"] },
+            "11": { title: "Father's Name Mismatch", desc: "Father ke name spelling me current aur previous roll me farq hai.", docs: ["Father's Aadhaar Card / EPIC", "School Leaving Certificate", "Affidavit (if required)"] },
+            "12": { title: "Relationship Type Mismatch", desc: "Relationship type pichli list se alag hai (e.g. Son vs Spouse).", docs: ["Correct Relationship Proof", "Marriage Certificate / Birth Cert"] },
+            "13": { title: "Relative's Name Mismatch", desc: "Relative ka name current aur pichle roll me match nahi ho raha.", docs: ["Relative's Photo ID Proof", "Family Relationship Certificate"] }
+        };
+
+        // Complete Initial 66 Electors
+        const initialElectors = [
+            { sr: 2, name: "Rafikabegam Bismilakho", epic: "TIA1640044", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 29, name: "Lalu Anbadas Mandve", epic: "TIA3356466", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 39, name: "Savita Purushottam Ranavirakar", epic: "TIA1640002", cat: "P", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 67, name: "KARUNA SHANTILAL RAUTRE", epic: "TIA2881449", cat: "P", rules: ["3"], status: "Pending", phone: "", notes: "" },
+            { sr: 77, name: "Khasim Begum Faizkhan", epic: "TIA3269628", cat: "P", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 81, name: "SHAIKH ATIQ SHAIKH SIRAJ", epic: "TIA3269529", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 118, name: "SHAIKH RAFIQ SHAIKH SHARFODDIIN", epic: "TIA4133732", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 151, name: "Lalita Bhanulal Rauge", epic: "TIA1640259", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 152, name: "Ishwarlal Ramchandra Raujeyadav", epic: "TIA1640291", cat: "P", rules: ["11", "2"], status: "Pending", phone: "", notes: "" },
+            { sr: 154, name: "Kamalbai Ishwarlal Rautre", epic: "TIA1640275", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 158, name: "Bhanulal Ramchandra Rautre", epic: "TIA1640101", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 198, name: "Anitabai Radhakishan Yadav", epic: "TIA0089638", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 212, name: "VARSHA SURESH YADAV", epic: "TIA3756848", cat: "P", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 216, name: "Shobhabai Radhakishan Ratre", epic: "TIA1639921", cat: "P", rules: ["3"], status: "Pending", phone: "", notes: "" },
+            { sr: 223, name: "SALEHA BEGUM", epic: "HLS1092956", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 225, name: "VIKAS NARAYAN SIDHIWALE", epic: "TIA2881746", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 226, name: "SACHIN NARAYAN SIDHIWALE", epic: "TIA2881720", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 227, name: "GITA BAI CHANDAN LAL YADAV", epic: "TIA2881761", cat: "P", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 260, name: "Najamuddin Khan", epic: "TIA3119369", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 320, name: "BABULAL BAJRANGLAL", epic: "TIA2881464", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 338, name: "Yasmeen Begum", epic: "HLS2832350", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 358, name: "Ambila Ganesh Kalasakarasi", epic: "TIA2625333", cat: "P", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 376, name: "KAILAS RAMDASRAO KURUDE", epic: "TIA3480902", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 497, name: "Rehmat Khan Ameer Khan", epic: "HLS2405280", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 508, name: "MOHSIN KHAN NAIM KHAN", epic: "TIA3776861", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 534, name: "Md Fahimoddin Md Moinoddin", epic: "TIA2881431", cat: "P", rules: ["11", "2"], status: "Pending", phone: "", notes: "" },
+            { sr: 538, name: "SHAIKH MD.BADRODDIN SHAIKH MD. FAHIMODDIN", epic: "TIA2881399", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 548, name: "NASEEB KHAN", epic: "HLS2406403", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 586, name: "Abdul Qayyum", epic: "HLS1093327", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 593, name: "Abdul Khadar Abdul Qayyum", epic: "TIA2881589", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 613, name: "Noorjehan Habibkhan", epic: "HLS1090646", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 630, name: "Yasmin Begum Gulaam Jilani", epic: "TIA1055995", cat: "P", rules: ["5", "9"], status: "Pending", phone: "", notes: "" },
+            { sr: 632, name: "Shaikh Sajeed Ahemed", epic: "TIA1032408", cat: "P", rules: ["5", "9"], status: "Pending", phone: "", notes: "" },
+            { sr: 637, name: "JAVEED AHMED GULAM JILANI", epic: "TIA3119351", cat: "P", rules: ["9"], status: "Pending", phone: "", notes: "" },
+            { sr: 643, name: "ZEBA KAUSAR SHAIKH MUJAHED", epic: "TIA4099552", cat: "P", rules: ["3", "9"], status: "Pending", phone: "", notes: "" },
+            { sr: 747, name: "AQUEEL SHAMSHUDDIN", epic: "TIA2881837", cat: "P", rules: ["9"], status: "Pending", phone: "", notes: "" },
+            { sr: 761, name: "SHAIKH SALEEM SHAIKH IQBAL", epic: "TIA3776945", cat: "P", rules: ["9"], status: "Pending", phone: "", notes: "" },
+            { sr: 842, name: "Aziz Abdul", epic: "HLS1093822", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 844, name: "ABDUL LATEEF", epic: "TIA3768231", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 867, name: "JAVERIYA TABASSUM", epic: "TIA4102653", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 898, name: "Siddhant Zolage", epic: "TIA4079869", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 910, name: "SHAIKH JAFAR", epic: "TIA4131694", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 920, name: "Gauri Begum Abdul Rasheed", epic: "TIA1093673", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 929, name: "Sahayara Begum M. Khasim", epic: "TIA2625499", cat: "P", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 950, name: "SAYYED HASAN", epic: "HLS2407450", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 962, name: "AFSARI BEGUM ILYAS KHAN", epic: "HLS1094036", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 992, name: "Shaikh Jamil Shaikh Iqbal", epic: "TIA2728764", cat: "S", rules: ["9"], status: "Pending", phone: "", notes: "" },
+            { sr: 998, name: "Asma Begum Shaikh Shabbir", epic: "TIA3979655", cat: "S", rules: ["2"], status: "Pending", phone: "", notes: "" },
+            { sr: 1033, name: "Asha Santosh Kumar Pandharapurakar", epic: "TIA1009661", cat: "P", rules: ["3"], status: "Pending", phone: "", notes: "" },
+            { sr: 1065, name: "Ahmed Khan", epic: "TIA3636404", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 1072, name: "Mohammed Ahmed", epic: "TIA3636982", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1074, name: "Rafikha Begum Jamshid Khan", epic: "TIA1130897", cat: "S", rules: ["1"], status: "Pending", phone: "", notes: "" },
+            { sr: 1080, name: "Shagufta Ambreen", epic: "TIA3685492", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1108, name: "Akhilaahamed Shamshuddin Shaikh", epic: "TIA2506541", cat: "P", rules: ["5", "11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1120, name: "ABDUL MATEEN ABDUL WAHAB", epic: "TIA3629367", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 1121, name: "ABDUL MOHEET ABDUL WAHAB", epic: "TIA3629425", cat: "P", rules: ["4"], status: "Pending", phone: "", notes: "" },
+            { sr: 1127, name: "Fahamidabegam Sadadaaliban", epic: "TIA1640168", cat: "P", rules: ["5", "11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1160, name: "MOHAMMAD RIZWAN MOHAMMAD ALFODDIN", epic: "TIA4306270", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1164, name: "Sayyed Shareekh", epic: "TIA4312138", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1178, name: "SHAHENAZ BEGUM ZAKIR ALI KHAN", epic: "TIA4345526", cat: "P", rules: ["5", "9"], status: "Pending", phone: "", notes: "" },
+            { sr: 1184, name: "MOHAMMED AZEEM", epic: "TIA4350120", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1193, name: "Saniya Fatema Mir Mujahid Ali Khan", epic: "TIA4381828", cat: "P", rules: ["3"], status: "Pending", phone: "", notes: "" },
+            { sr: 1221, name: "Asma Begum Syed Safdar", epic: "TIA4418315", cat: "P", rules: ["3"], status: "Pending", phone: "", notes: "" },
+            { sr: 1222, name: "FAHAD", epic: "TIA4418281", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" },
+            { sr: 1278, name: "SHAZIYA BEGUM AZHAR AHMED KHAN", epic: "TIA4526646", cat: "P", rules: ["9"], status: "Pending", phone: "", notes: "" },
+            { sr: 1288, name: "FAISAL KHAN RAHEMAT KHAN", epic: "TIA4561478", cat: "P", rules: ["11"], status: "Pending", phone: "", notes: "" }
+        ];
+
+        let electors = [];
+        let categoryDoughnutChartInstance = null;
+        let anomalyBarChartInstance = null;
+        let currentActiveElector = null;
+        let currentUser = null;
+
+        // --- LOGIN & SESSION HANDLERS ---
+        window.handleLoginSubmit = function(e) {
+            e.preventDefault();
+            const passwordVal = document.getElementById('loginPasswordInput').value.trim();
+            if (passwordVal === SECURITY_PASSWORD) {
+                sessionStorage.setItem('blo_app_logged_in', 'true');
+                unlockDashboard();
+                showToast("Welcome! Dashboard Unlocked.", "success");
             } else {
-                firebaseApp = firebase.app();
-            }
-            auth = firebase.auth();
-            db = firebase.firestore();
-        } catch (e) {
-            console.error("Firebase init error:", e);
-        }
-
-        // 13 Anomaly Grounds Directory
-        const ANOMALY_GROUNDS = {
-            "1": {
-                id: "1",
-                title: "Name / Gender / Age Inconsistencies",
-                desc: "Naam, gender ya age form me alag aur document me alag hai.",
-                example: "Form me age 32, document me age 28",
-                docs: ["Aadhaar Card", "Birth Certificate", "SSC Memo", "Passport"],
-                solution: "Sahi age aur naam ka proof document submit karein."
-            },
-            "2": {
-                id: "2",
-                title: "Parent-Child Age Gap < 15 Years",
-                desc: "Parent aur child ke beech age gap 15 saal se kam hai.",
-                example: "Parent: 30 yrs | Child: 20 yrs (Gap: 10 yrs)",
-                docs: ["Grandparents mapping proof", "Birth Certificate", "Family Relation Docs"],
-                solution: "Grandparents se mapping consider karein ya family proof dikhayein."
-            },
-            "3": {
-                id: "3",
-                title: "Parent-Child Age Gap > 50 Years",
-                desc: "Parent aur child ke beech age gap 50 saal se zyada hai.",
-                example: "Parent: 78 yrs | Child: 20 yrs (Gap: 58 yrs)",
-                docs: ["Family Relation Documents", "Aadhaar Card", "Birth Proof"],
-                solution: "Family documents se age aur relation verify karein."
-            },
-            "4": {
-                id: "4",
-                title: "Grandparent-Grandchild Age Gap < 40 Years",
-                desc: "Dada/Dadi aur Pota/Poti ke beech age gap 40 saal se kam hai.",
-                example: "Grandparent: 55 yrs | Grandchild: 20 yrs (Gap: 35 yrs)",
-                docs: ["Birth Proof", "Family Tree / Relation Documents"],
-                solution: "Birth proof aur family relation documents dikhayein."
-            },
-            "5": {
-                id: "5",
-                title: "Multiple Siblings with Doubtful Age Gap",
-                desc: "Bhai-behen ke beech age gap bahut kam ya doubtful hai.",
-                example: "Bhai 1 DOB: 01-01-2000 | Bhai 2 DOB: 01-07-2000 (Gap: 6 months)",
-                docs: ["DOB Proof Documents", "School Leaving Certificate", "Birth Certificate"],
-                solution: "Dono siblings ke DOB proof documents ready rakhein."
-            },
-            "6": {
-                id: "6",
-                title: "Implausible Age Progression",
-                desc: "Pichli list se current list tak age progression logical nahi hai.",
-                example: "2002 list me age 30, Ab age 50 (Sirf 5 saal ke gap me)",
-                docs: ["Age Proof Documents", "Old Voter Card / Roll Proof"],
-                solution: "Sahi age proof documents submit karein."
-            },
-            "7": {
-                id: "7",
-                title: "Elector Linked with Father Now, Mother Previously",
-                desc: "Pehle mother se linked tha, ab father se linked hai.",
-                example: "2002: Mother se linked | 2026: Father se linked",
-                docs: ["Family Relation Documents", "Ration Card", "Passport"],
-                solution: "Family relation documents se verification karein."
-            },
-            "8": {
-                id: "8",
-                title: "Previously Linked with Spouse, Now Father",
-                desc: "Pehle spouse se linked tha, ab father se linked hai.",
-                example: "2002: Spouse se linked | 2026: Father se linked",
-                docs: ["Marriage Certificate", "Family Documents"],
-                solution: "Marriage certificate ya family documents dikhayein."
-            },
-            "9": {
-                id: "9",
-                title: "Large Number of Descendants Claimed",
-                desc: "Ek hi vyakti ke bahut zyada descendants dikhaye gaye hain.",
-                example: "Ek parent se 8 ya usse zyada bachche linked hain",
-                docs: ["Family Structure Proof", "Ration Card", "Panchanama"],
-                solution: "Family structure clear karein aur sahi documents dikhayein."
-            },
-            "10": {
-                id: "10",
-                title: "Parent Details Differing Between Rolls",
-                desc: "Current roll aur previous roll me parent details alag hain.",
-                example: "2002: Father - Abdul Rahman | 2026: Father - Abdul Kareem",
-                docs: ["Correct Relation Proof", "Aadhaar Card", "School Record"],
-                solution: "Correct relation proof submit karein."
-            },
-            "11": {
-                id: "11",
-                title: "Father's Name Mismatch Between Rolls",
-                desc: "Father ka naam current aur previous roll me alag ya spelling mismatch hai.",
-                example: "2002: Mohammed Ahmed | 2026: Mohammed Ahamed",
-                docs: ["Aadhaar Card", "SSC / School Memo", "Passport", "Panchanama"],
-                solution: "Supporting documents aur spelling verification proof dikhayein."
-            },
-            "12": {
-                id: "12",
-                title: "Relationship Type Mismatch",
-                desc: "Relationship type pichli list se alag hai.",
-                example: "2002: Son | 2026: Spouse",
-                docs: ["Correct Relationship Proof", "Family Records"],
-                solution: "Correct relationship proof document dikhayein."
-            },
-            "13": {
-                id: "13",
-                title: "Relative's Name Mismatch",
-                desc: "Relative ka naam current aur previous roll me alag hai.",
-                example: "2002: Relative - Kareem | 2026: Relative - Rahim",
-                docs: ["Family Documents", "Aadhaar Proof"],
-                solution: "Family documents se verification karein."
+                document.getElementById('loginError').classList.remove('hidden');
             }
         };
 
-        // Complete Extracted Register Data
-        const INITIAL_REGISTER_DATA = [
-            { id: 1, sr: "2", name: "Rafikabegam Bismilakho", epic: "TIA1640044", mapping: "S", anomaly: "1" },
-            { id: 2, sr: "29", name: "Lalu Anbadas Mandve", epic: "TIA3356466", mapping: "P", anomaly: "11" },
-            { id: 3, sr: "39", name: "Savita Purushottam Ranavirakar", epic: "TIA1640002", mapping: "P", anomaly: "2" },
-            { id: 4, sr: "67", name: "KARUNA SHANTILAL RAUTRE", epic: "TIA2881449", mapping: "P", anomaly: "3" },
-            { id: 5, sr: "77", name: "Khasim Begum FaizKhan", epic: "TIA3269628", mapping: "P", anomaly: "2" },
-            { id: 6, sr: "81", name: "SHAIKH ATIQ SHAIKH SIRAJ", epic: "TIA3269529", mapping: "P", anomaly: "11" },
-            { id: 7, sr: "118", name: "SHAIKH RAFIQ SHAIKH SHARFODDIIN", epic: "TIA4133732", mapping: "P", anomaly: "4" },
-            { id: 8, sr: "151", name: "Lalita Bhanulal Gauge", epic: "TIA1640259", mapping: "S", anomaly: "1" },
-            { id: 9, sr: "152", name: "Ishwarlal Ramchandra Raujeyadav", epic: "TIA1640291", mapping: "P", anomaly: "11/2" },
-            { id: 10, sr: "154", name: "Kamalbai Ishwarlal Rautre", epic: "TIA1640275", mapping: "P", anomaly: "4" },
-            { id: 11, sr: "158", name: "Bhanulal Ramchandra Rautre", epic: "TIA1640101", mapping: "P", anomaly: "11" },
-            { id: 12, sr: "198", name: "Anitabai Radhakishan Yadav", epic: "TIA0089638", mapping: "S", anomaly: "1" },
-            { id: 13, sr: "212", name: "VARSHA SURESH YADAV", epic: "TIA3756848", mapping: "P", anomaly: "2" },
-            { id: 14, sr: "216", name: "Shobhabai Radhakishan Ratre", epic: "TIA1639921", mapping: "P", anomaly: "3" },
-            { id: 15, sr: "223", name: "SALEHA BEGUM", epic: "HLS1092956", mapping: "S", anomaly: "1" },
-            { id: 16, sr: "225", name: "VIKAS NARAYAN SIDHIWALE", epic: "TIA2881746", mapping: "P", anomaly: "11" },
-            { id: 17, sr: "226", name: "SACHIN NARAYAN SIDHIWALE", epic: "TIA2881720", mapping: "P", anomaly: "11" },
-            { id: 18, sr: "227", name: "GITA BAI CHANDAN LAL YADAV", epic: "TIA2881761", mapping: "P", anomaly: "2" },
-            { id: 19, sr: "260", name: "Najamuddin Khan", epic: "TIA3119369", mapping: "S", anomaly: "1" },
-            { id: 20, sr: "320", name: "BABULAL BAJRANGLAL", epic: "TIA2881464", mapping: "P", anomaly: "11" },
-            { id: 21, sr: "338", name: "Yasmeen Begum", epic: "HLS2832350", mapping: "S", anomaly: "1" },
-            { id: 22, sr: "358", name: "Ambila Ganesh Kalasakarasi", epic: "TIA2625333", mapping: "P", anomaly: "2" },
-            { id: 23, sr: "376", name: "KAILAS RAMDASRAO KURUDE", epic: "TIA3480902", mapping: "P", anomaly: "11" },
-            { id: 24, sr: "497", name: "Rehmat Khan Ameer Khan", epic: "HLS2405280", mapping: "S", anomaly: "1" },
-            { id: 25, sr: "508", name: "MOHSIN KHAN NAIM KHAN", epic: "TIA3776861", mapping: "P", anomaly: "11" },
-            { id: 26, sr: "534", name: "Md Fahimoddin Md Moinoddin", epic: "TIA2881431", mapping: "P", anomaly: "11/2" },
-            { id: 27, sr: "538", name: "SHAIKH MD.BADRODDIN SHAIKH MD. FAHIMODDIN", epic: "TIA2881399", mapping: "P", anomaly: "11" },
-            { id: 28, sr: "548", name: "NASEEB KHAN", epic: "HLS2406403", mapping: "S", anomaly: "1" },
-            { id: 29, sr: "586", name: "Abdul Qayyum", epic: "HLS1093327", mapping: "S", anomaly: "1" },
-            { id: 30, sr: "593", name: "Abdul Khadar Abdul Qayyum", epic: "TIA2881589", mapping: "P", anomaly: "11" },
-            { id: 31, sr: "613", name: "Noorjehan Habibkhan", epic: "HLS1090646", mapping: "S", anomaly: "1" },
-            { id: 32, sr: "630", name: "Yasmin Begum Gulaam Jilani", epic: "TIA1055995", mapping: "P", anomaly: "5/9" },
-            { id: 33, sr: "632", name: "Shaikh Sajeed Ahemed", epic: "TIA1032408", mapping: "P", anomaly: "5/9" },
-            { id: 34, sr: "637", name: "JAVEED AHMED GULAAM JILANI", epic: "TIA3119351", mapping: "P", anomaly: "9" },
-            { id: 35, sr: "643", name: "ZEBA KAUSAR SHAIKH MUJAHED", epic: "TIA4099552", mapping: "P", anomaly: "3/9" },
-            { id: 36, sr: "747", name: "AQUEEL SHAMSHUDDIN", epic: "TIA2881837", mapping: "P", anomaly: "11" },
-            { id: 37, sr: "761", name: "SHAIKH SALEEM SHAIKH IQBAL", epic: "TIA3776945", mapping: "P", anomaly: "9" },
-            { id: 38, sr: "842", name: "Aziz Abdul", epic: "HLS1093822", mapping: "S", anomaly: "1" },
-            { id: 39, sr: "844", name: "ABDUL LATEEF", epic: "TIA3768231", mapping: "S", anomaly: "1" },
-            { id: 40, sr: "867", name: "JAVERIYA TABASSUM", epic: "TIA4102653", mapping: "P", anomaly: "11" },
-            { id: 41, sr: "898", name: "Siddhant Zolage", epic: "TIA4079869", mapping: "P", anomaly: "11" },
-            { id: 42, sr: "910", name: "SHAIKH JAFAR", epic: "TIA4131694", mapping: "P", anomaly: "11" },
-            { id: 43, sr: "920", name: "Gauri Begum Abdul Rasheed", epic: "TIA1093673", mapping: "S", anomaly: "1" },
-            { id: 44, sr: "929", name: "Sahayara Begum M. Khasim", epic: "TIA2625499", mapping: "P", anomaly: "2" },
-            { id: 45, sr: "950", name: "SAYYED HASAN", epic: "HLS2407450", mapping: "S", anomaly: "1" },
-            { id: 46, sr: "962", name: "AFSARI BEGUM ILYAS KHAN", epic: "HLS1094036", mapping: "S", anomaly: "1" },
-            { id: 47, sr: "992", name: "Shaikh Jamil Shaikh Iqbal", epic: "TIA2728764", mapping: "P", anomaly: "9" },
-            { id: 48, sr: "998", name: "Asma Begum Shaikh Shabbir", epic: "TIA3979655", mapping: "P", anomaly: "2" },
-            { id: 49, sr: "1033", name: "Asha Santosh Kumar Pandharapurakar", epic: "TIA1009661", mapping: "P", anomaly: "3" },
-            { id: 50, sr: "1065", name: "Ahmed Khan", epic: "TIA3636404", mapping: "P", anomaly: "11" },
-            { id: 51, sr: "1072", name: "Mohammed Ahmed", epic: "TIA3636982", mapping: "P", anomaly: "11" },
-            { id: 52, sr: "1074", name: "Rafikha Begum Jamshid Khan", epic: "TIA1130897", mapping: "S", anomaly: "1" },
-            { id: 53, sr: "1080", name: "Shagufta Ambreen", epic: "TIA3685492", mapping: "P", anomaly: "11" },
-            { id: 54, sr: "1108", name: "Akhilaamed Shamshuddin Shaikh", epic: "TIA2506541", mapping: "P", anomaly: "5/11" },
-            { id: 55, sr: "1120", name: "ABDUL MATEEN ABDUL WAHAB", epic: "TIA3629367", mapping: "P", anomaly: "11" },
-            { id: 56, sr: "1121", name: "ABDUL MOHEET ABDUL WAHAB", epic: "TIA3629425", mapping: "P", anomaly: "11" },
-            { id: 57, sr: "1127", name: "Fahamidabegam Sadadaaliban", epic: "TIA1640168", mapping: "P", anomaly: "5/11" },
-            { id: 58, sr: "1160", name: "MOHAMMAD RIZWAN MOHAMMAD ALFEDDIN", epic: "TIA4306270", mapping: "P", anomaly: "11" },
-            { id: 59, sr: "1164", name: "Sayyed Shareekh", epic: "TIA4312138", mapping: "P", anomaly: "11" },
-            { id: 60, sr: "1178", name: "SHAHENAZ BEGUM ZAKIR ALI KHAN", epic: "TIA4345526", mapping: "P", anomaly: "5/9" },
-            { id: 61, sr: "1184", name: "MOHAMMED AZEEM", epic: "TIA4350120", mapping: "P", anomaly: "11" },
-            { id: 62, sr: "1193", name: "Saniya Fatema Mir Mujahid Ali Khan", epic: "TIA4381828", mapping: "P", anomaly: "3" },
-            { id: 63, sr: "1221", name: "Asma Begum Syed Safdar", epic: "TIA4418315", mapping: "P", anomaly: "3/4" },
-            { id: 64, sr: "1222", name: "FAHAD", epic: "TIA4418281", mapping: "P", anomaly: "11" },
-            { id: 65, sr: "1278", name: "SHAZIYA BEGUM AZHAR AHMED KHAN", epic: "TIA4526646", mapping: "P", anomaly: "9" },
-            { id: 66, sr: "1288", name: "FAISAL KHAN RAHEMAT KHAN", epic: "TIA4561478", mapping: "P", anomaly: "11" }
-        ];
+        window.handleLogout = function() {
+            sessionStorage.removeItem('blo_app_logged_in');
+            document.getElementById('mainDashboardApp').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('loginPasswordInput').value = '';
+            showToast("Dashboard Locked Successfully.", "info");
+        };
 
-        function App() {
-            const [records, setRecords] = useState(() => {
-                const saved = localStorage.getItem("SIR_REGISTER_VOTERS_2026");
-                if (saved) {
-                    try { return JSON.parse(saved); } catch (e) { return INITIAL_REGISTER_DATA; }
+        function unlockDashboard() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('mainDashboardApp').classList.remove('hidden');
+            renderAll();
+        }
+
+        function checkInitialLogin() {
+            if (sessionStorage.getItem('blo_app_logged_in') === 'true') {
+                unlockDashboard();
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('mainDashboardApp').classList.add('hidden');
+            }
+        }
+
+        // --- FIREBASE AUTH & REALTIME SUBSCRIPTION ---
+        async function initAuthAndFirebase() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
-                return INITIAL_REGISTER_DATA;
-            });
+            } catch (err) {
+                console.warn("Custom token auth failed, signing in anonymously:", err);
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {
+                    console.error("Anonymous auth failed:", e);
+                }
+            }
+        }
 
-            const [user, setUser] = useState(null);
-            const [firebaseConnected, setFirebaseConnected] = useState(false);
-            const [firebaseError, setFirebaseError] = useState("");
-            const [searchQuery, setSearchQuery] = useState("");
-            const [filterAnomaly, setFilterAnomaly] = useState("ALL");
-            const [filterMapping, setFilterMapping] = useState("ALL");
-            const [activeTab, setActiveTab] = useState("REGISTER");
-            const [selectedRecord, setSelectedRecord] = useState(null);
-            const [editingRecord, setEditingRecord] = useState(null);
-            const [showExportModal, setShowExportModal] = useState(false);
-            const [toastMsg, setToastMsg] = useState("");
-            const [isSaving, setIsSaving] = useState(false);
-            const [hasUnsaved, setHasUnsaved] = useState(false);
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (currentUser) {
+                updateSyncBadge("Firebase Connected", "emerald");
+                subscribeToFirestore();
+            } else {
+                updateSyncBadge("Auth Failed", "rose");
+            }
+        });
 
-            // New Voter Form State
-            const [showAddModal, setShowAddModal] = useState(false);
-            const [newName, setNewName] = useState("");
-            const [newEpic, setNewEpic] = useState("");
-            const [newSr, setNewSr] = useState("");
-            const [newMapping, setNewMapping] = useState("S");
-            const [newAnomaly, setNewAnomaly] = useState("1");
+        // Realtime Firestore Listener
+        function subscribeToFirestore() {
+            if (!currentUser) return;
 
-            // Toast helper
-            const showToast = (msg) => {
-                setToastMsg(msg);
-                setTimeout(() => setToastMsg(""), 3500);
-            };
-
-            // Firebase Auth and Firestore Initialization (Rule 1, 2, 3)
-            useEffect(() => {
-                if (!auth || !db) {
-                    setFirebaseError("Firebase SDK initialize nahi ho saka.");
+            onSnapshot(electorsCollectionRef, async (snapshot) => {
+                if (snapshot.empty) {
+                    updateSyncBadge("Seeding Database...", "amber");
+                    await seedInitialElectorsToFirebase();
                     return;
                 }
 
-                let unsubscribeSnapshot = null;
+                let loaded = [];
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    loaded.push({ id: docSnap.id, ...data });
+                });
 
-                const initFirebaseSync = async () => {
-                    try {
-                        // Rule 3: Auth first with detailed error catching
-                        let u = null;
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            const cred = await auth.signInWithCustomToken(__initial_auth_token);
-                            u = cred.user;
-                        } else {
-                            const cred = await auth.signInAnonymously();
-                            u = cred.user;
-                        }
-                        setUser(u);
-
-                        if (u) {
-                            // Rule 1 Path
-                            const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('voters').doc('mainDoc');
-                            
-                            // Rule 2 Simple Query / Snapshot with mandatory error callback
-                            unsubscribeSnapshot = docRef.onSnapshot(
-                                snapshot => {
-                                    setFirebaseConnected(true);
-                                    setFirebaseError("");
-                                    if (snapshot.exists) {
-                                        const data = snapshot.data();
-                                        if (data && data.records) {
-                                            setRecords(data.records);
-                                            localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(data.records));
-                                        }
-                                    }
-                                }, 
-                                err => {
-                                    console.error("Firestore error:", err);
-                                    setFirebaseConnected(false);
-                                    if (err.code === 'permission-denied') {
-                                        setFirebaseError("Permission Denied: Firebase Console -> Firestore Database -> Rules me 'allow read, write: if true;' karein.");
-                                    } else {
-                                        setFirebaseError("Firestore Error: " + err.message);
-                                    }
-                                }
-                            );
-                        }
-                    } catch (e) {
-                        console.error("Firebase auth error:", e);
-                        setFirebaseConnected(false);
-                        if (e.code === 'auth/operation-not-allowed') {
-                            setFirebaseError("Anonymous Auth Disabled: Firebase Console -> Authentication -> Sign-in method me Anonymous Enable karein.");
-                        } else {
-                            setFirebaseError("Firebase Auth Error: " + (e.message || "Connection failed"));
-                        }
-                    }
-                };
-
-                initFirebaseSync();
-
-                return () => {
-                    if (unsubscribeSnapshot) unsubscribeSnapshot();
-                };
-            }, []);
-
-            // Save Records (LocalStorage + Firestore)
-            const saveAllChanges = async (currentRecords = records) => {
-                setIsSaving(true);
-                localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(currentRecords));
+                loaded.sort((a, b) => a.sr - b.sr);
+                electors = loaded;
                 
-                if (db) {
-                    try {
-                        const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('voters').doc('mainDoc');
-                        await docRef.set({
-                            records: currentRecords,
-                            lastUpdated: new Date().toISOString(),
-                            updatedBy: auth.currentUser?.uid || 'anonymous'
-                        }, { merge: true });
-                        setFirebaseConnected(true);
-                        setFirebaseError("");
-                        showToast("✓ Sabhi Changes Firebase Cloud me Save Ho Gaye!");
-                    } catch (e) {
-                        console.error("Cloud save error:", e);
-                        setFirebaseError("Cloud Save Error: " + e.message);
-                        showToast("⚠️ Local Storage me save hua. Cloud Permission check karein.");
-                    }
-                } else {
-                    showToast("✓ Saved to Local Storage!");
-                }
-
-                setIsSaving(false);
-                setHasUnsaved(false);
-            };
-
-            // Update State & Auto Save
-            const updateStateAndSave = (newRecords) => {
-                setRecords(newRecords);
-                setHasUnsaved(true);
-                localStorage.setItem("SIR_REGISTER_VOTERS_2026", JSON.stringify(newRecords));
-                if (db && auth?.currentUser) {
-                    saveAllChanges(newRecords);
-                }
-            };
-
-            // Quick Toggle Ground 4 and 11
-            const handleToggle4and11 = (id) => {
-                const updated = records.map(item => {
-                    if (item.id === id) {
-                        let newCode = item.anomaly;
-                        if (item.anomaly.includes("11")) {
-                            newCode = item.anomaly.replace("11", "4");
-                        } else if (item.anomaly.includes("4")) {
-                            newCode = item.anomaly.replace("4", "11");
-                        }
-                        return { ...item, anomaly: newCode };
-                    }
-                    return item;
-                });
-                updateStateAndSave(updated);
-                showToast("⚡ Ground 4 ↔ 11 Switched & Firebase Sync Saved!");
-            };
-
-            // Icons init
-            useEffect(() => {
-                if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    try { window.lucide.createIcons(); } catch (e) {}
-                }
-            }, [activeTab, selectedRecord, showAddModal, editingRecord, showExportModal, records, searchQuery]);
-
-            const parseAnomalyCodes = (anomalyStr) => {
-                if (!anomalyStr) return [];
-                return anomalyStr.toString().split('/').map(s => s.trim());
-            };
-
-            // Filter logic
-            const filteredRecords = useMemo(() => {
-                const q = searchQuery.toLowerCase().trim();
-                return records.filter(item => {
-                    const matchSearch = q === "" || 
-                        item.sr.toString().toLowerCase().includes(q) ||
-                        (item.name && item.name.toLowerCase().includes(q)) ||
-                        (item.epic && item.epic.toLowerCase().includes(q));
-                    
-                    const itemAnomalies = parseAnomalyCodes(item.anomaly);
-                    const matchAnomaly = filterAnomaly === "ALL" || itemAnomalies.includes(filterAnomaly);
-                    const matchMapping = filterMapping === "ALL" || item.mapping === filterMapping;
-
-                    return matchSearch && matchAnomaly && matchMapping;
-                });
-            }, [records, searchQuery, filterAnomaly, filterMapping]);
-
-            // Stats
-            const stats = useMemo(() => {
-                const total = records.length;
-                const selfCount = records.filter(r => r.mapping === 'S').length;
-                const progenyCount = records.filter(r => r.mapping === 'P').length;
-
-                const freq = {};
-                records.forEach(r => {
-                    const codes = parseAnomalyCodes(r.anomaly);
-                    codes.forEach(c => {
-                        freq[c] = (freq[c] || 0) + 1;
-                    });
-                });
-
-                return { total, selfCount, progenyCount, freq };
-            }, [records]);
-
-            // Edit record
-            const handleSaveEdit = (e) => {
-                e.preventDefault();
-                if (!editingRecord) return;
-                const updated = records.map(r => r.id === editingRecord.id ? editingRecord : r);
-                updateStateAndSave(updated);
-                setEditingRecord(null);
-                showToast("✓ Voter Record Edit Saved!");
-            };
-
-            // Add record
-            const handleAddRecord = (e) => {
-                e.preventDefault();
-                if (!newSr.trim() || !newName.trim()) return;
-
-                const newEntry = {
-                    id: Date.now(),
-                    sr: newSr.trim(),
-                    name: newName.trim(),
-                    epic: newEpic.trim().toUpperCase() || "N/A",
-                    mapping: newMapping,
-                    anomaly: newAnomaly.trim()
-                };
-
-                const updated = [newEntry, ...records];
-                updateStateAndSave(updated);
-                setNewSr("");
-                setNewName("");
-                setNewEpic("");
-                setShowAddModal(false);
-                showToast("✓ Naya Voter Added & Saved!");
-            };
-
-            // Delete record
-            const handleDeleteRecord = (id) => {
-                if (confirm("Kya aap is voter record ko delete karna chahte hain?")) {
-                    const updated = records.filter(r => r.id !== id);
-                    updateStateAndSave(updated);
-                    if (selectedRecord && selectedRecord.id === id) {
-                        setSelectedRecord(null);
-                    }
-                    showToast("🗑 Voter Record Deleted & Saved!");
-                }
-            };
-
-            // GENERATE COMPLETE SINGLE-FILE INDEX.HTML FOR GITHUB PAGES
-            const generateFullSingleFileHtml = () => {
-                const docHtml = document.documentElement.outerHTML;
-                const recordsJson = JSON.stringify(records, null, 8);
-                const updatedHtml = docHtml.replace(
-                    /const INITIAL_REGISTER_DATA = \[[\s\S]*?\];/,
-                    `const INITIAL_REGISTER_DATA = ${recordsJson};`
-                );
-                return "<!DOCTYPE html>\n<html lang=\"hi\">\n" + updatedHtml + "\n</html>";
-            };
-
-            // Download index.html file
-            const downloadIndexHtmlFile = () => {
-                const htmlContent = generateFullSingleFileHtml();
-                const blob = new Blob([htmlContent], { type: "text/html" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "index.html";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast("📥 Ready index.html File Downloaded For GitHub Pages!");
-            };
-
-            // Copy HTML to Clipboard
-            const copyFullCodeToClipboard = () => {
-                const htmlContent = generateFullSingleFileHtml();
-                const textarea = document.createElement('textarea');
-                textarea.value = htmlContent;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast("📋 Complete index.html Code Copied To Clipboard!");
-            };
-
-            return (
-                <div className="min-h-screen flex flex-col relative">
-                    
-                    {/* Toast Notification */}
-                    {toastMsg && (
-                        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-bold px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-bounce">
-                            <i data-lucide="check-circle-2" className="w-5 h-5 text-emerald-400"></i>
-                            <span className="text-sm">{toastMsg}</span>
-                        </div>
-                    )}
-
-                    {/* Top Header */}
-                    <header className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white shadow-xl no-print">
-                        <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-white/10 p-3 rounded-2xl border border-white/20 backdrop-blur-md">
-                                        <i data-lucide="shield-check" className="w-8 h-8 text-yellow-400"></i>
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="bg-yellow-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded tracking-wider uppercase">SIR UPDATE 2026</span>
-                                            <span className="text-xs text-blue-200">Discrepancy & Anomaly Verification Portal</span>
-                                        </div>
-                                        <h1 className="text-xl sm:text-2xl font-black tracking-tight mt-0.5">Voter Register & Anomaly Analyzer</h1>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-                                    
-                                    {/* Firebase Live Badge */}
-                                    <div className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border ${
-                                        firebaseConnected 
-                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
-                                            : firebaseError
-                                            ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                                            : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                                    }`}>
-                                        <span className={`w-2 h-2 rounded-full ${firebaseConnected ? 'bg-emerald-400 animate-ping' : 'bg-red-400'}`}></span>
-                                        {firebaseConnected ? '🔥 voters-ac217 Connected' : firebaseError ? '⚠️ Firebase Issue' : 'Connecting...'}
-                                    </div>
-
-                                    {/* Save Button */}
-                                    <button 
-                                        onClick={() => saveAllChanges()}
-                                        disabled={isSaving}
-                                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black flex items-center gap-2 shadow-lg transition-all active:scale-95 ${
-                                            hasUnsaved 
-                                                ? "bg-amber-500 hover:bg-amber-400 text-slate-950 animate-pulse" 
-                                                : "bg-emerald-600 hover:bg-emerald-500 text-white"
-                                        }`}
-                                    >
-                                        <i data-lucide="save" className="w-4 h-4"></i>
-                                        {isSaving ? "Saving..." : hasUnsaved ? "💾 Save Changes Required" : "✓ Saved"}
-                                    </button>
-
-                                    {/* Export / Download Code Button */}
-                                    <button 
-                                        onClick={() => setShowExportModal(true)}
-                                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all"
-                                    >
-                                        <i data-lucide="github" className="w-4 h-4"></i>
-                                        Export index.html
-                                    </button>
-
-                                    <button 
-                                        onClick={() => setShowAddModal(true)}
-                                        className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md transition-all"
-                                    >
-                                        <i data-lucide="user-plus" className="w-4 h-4"></i>
-                                        Add Voter
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Stat Chips */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-4 border-t border-white/10">
-                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                                    <p className="text-[11px] text-slate-300 font-medium">Total Flagged Voters</p>
-                                    <p className="text-2xl font-black text-white mt-0.5">{stats.total}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                                    <p className="text-[11px] text-blue-300 font-medium">Ground 4 (Grandparent Gap)</p>
-                                    <p className="text-2xl font-black text-blue-300 mt-0.5">{stats.freq['4'] || 0}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                                    <p className="text-[11px] text-yellow-300 font-medium">Ground 11 (Father Mismatch)</p>
-                                    <p className="text-2xl font-black text-yellow-300 mt-0.5">{stats.freq['11'] || 0}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                                    <p className="text-[11px] text-purple-300 font-medium">Progeny (P) Count</p>
-                                    <p className="text-2xl font-black text-purple-300 mt-0.5">{stats.progenyCount}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
-
-                    {/* Firebase Diagnostic Status Banner */}
-                    {firebaseError && (
-                        <div className="bg-red-500 text-white px-4 py-3 shadow-md no-print border-b border-red-600">
-                            <div className="max-w-7xl mx-auto flex items-center justify-between text-xs font-bold gap-2">
-                                <div className="flex items-center gap-2">
-                                    <i data-lucide="alert-triangle" className="w-5 h-5 flex-shrink-0"></i>
-                                    <span>FIREBASE CONNECT ISSUE: {firebaseError}</span>
-                                </div>
-                                <button 
-                                    onClick={() => window.location.reload()} 
-                                    className="bg-white text-red-900 px-3 py-1 rounded-lg text-xs font-black shadow hover:bg-slate-100"
-                                >
-                                    Retry Connection
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* MODAL 2: Individual Voter Notice Sheet */}
-                    {selectedRecord && (
-                        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-                            <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-                                
-                                <div className="bg-gradient-to-r from-blue-950 via-indigo-900 to-slate-900 text-white p-6 rounded-t-3xl relative">
-                                    <button 
-                                        onClick={() => setSelectedRecord(null)}
-                                        className="absolute right-5 top-5 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
-                                    >
-                                        <i data-lucide="x" className="w-5 h-5"></i>
-                                    </button>
-                                    <span className="bg-yellow-400 text-slate-950 font-black text-xs px-2.5 py-1 rounded tracking-wider">
-                                        ELECTION VERIFICATION NOTICE SHEET
-                                    </span>
-                                    
-                                    <div className="mt-3 space-y-1">
-                                        <h2 className="text-2xl font-black">
-                                            {selectedRecord.name || "Elector Name"}
-                                        </h2>
-                                        <div className="flex flex-wrap gap-3 text-xs text-blue-200">
-                                            <span>EPIC NO: <strong className="text-white font-mono">{selectedRecord.epic || "N/A"}</strong></span>
-                                            <span>•</span>
-                                            <span>SERIAL NO: <strong className="text-white font-mono">{selectedRecord.sr}</strong></span>
-                                            <span>•</span>
-                                            <span>CATEGORY: <strong className="text-yellow-300">{selectedRecord.mapping === 'S' ? 'SELF' : 'PROGENY'}</strong></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 space-y-6">
-                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-start gap-3">
-                                        <i data-lucide="shield-alert" className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
-                                        <div className="text-xs text-amber-950">
-                                            <p className="font-bold text-sm">NOTICE KA MATLAB REJECT HONA NAHI HAI</p>
-                                            <p className="mt-0.5">Yeh sirf verification ke liye hai. Niche diye gaye required documents BLO ko dikha kar clear karayein.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center justify-between">
-                                            <span>Flagged Discrepancy Grounds</span>
-                                            <span className="text-xs font-normal text-slate-500">SIR Update 2026</span>
-                                        </h3>
-
-                                        {parseAnomalyCodes(selectedRecord.anomaly).map((code, idx) => {
-                                            const ground = ANOMALY_GROUNDS[code];
-                                            return (
-                                                <div key={idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="bg-amber-100 text-amber-950 font-black px-2.5 py-0.5 rounded text-xs">
-                                                            ANOMALY GROUND #{code}
-                                                        </span>
-                                                        <span className="text-xs font-bold text-slate-700">
-                                                            {ground?.title}
-                                                        </span>
-                                                    </div>
-
-                                                    <p className="text-sm font-bold text-slate-800">
-                                                        {ground?.desc}
-                                                    </p>
-
-                                                    <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                                                        <span className="font-bold text-slate-500 block mb-1">Required Verification Documents:</span>
-                                                        <div className="flex flex-wrap gap-1.5 mt-1">
-                                                            {ground?.docs.map((doc, dIdx) => (
-                                                                <span key={dIdx} className="bg-blue-50 text-blue-900 px-2 py-1 rounded border border-blue-200 font-semibold">
-                                                                    ✓ {doc}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
-                                                        <i data-lucide="check-circle" className="w-4 h-4 text-emerald-600"></i>
-                                                        Action Required: {ground?.solution}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    <div className="border-t border-slate-200 pt-4 space-y-2">
-                                        <h4 className="font-bold text-xs uppercase text-slate-500 tracking-wider">
-                                            BLO Verification Checklist
-                                        </h4>
-                                        <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
-                                            <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                                            Aadhaar / Passport / DOB Proof verified
-                                        </label>
-                                        <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
-                                            <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                                            Family relation / Progeny mapping checked
-                                        </label>
-                                        <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
-                                            <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                                            Verification report updated in BLO App
-                                        </label>
-                                    </div>
-
-                                </div>
-
-                                <div className="bg-slate-50 p-4 rounded-b-3xl border-t border-slate-200 flex justify-between items-center">
-                                    <button 
-                                        onClick={() => window.print()}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-colors shadow-sm"
-                                    >
-                                        <i data-lucide="printer" className="w-4 h-4"></i>
-                                        Print Notice Slip
-                                    </button>
-                                    <button 
-                                        onClick={() => setSelectedRecord(null)}
-                                        className="bg-slate-900 text-white font-bold px-5 py-2 rounded-xl text-xs hover:bg-slate-800 transition-colors"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
-
-                            </div>
-                        </div>
-                    )}
-
-                    {/* MODAL 3: Edit Record Modal */}
-                    {editingRecord && (
-                        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-                            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
-                                        <i data-lucide="edit-3" className="w-5 h-5 text-blue-600"></i>
-                                        Edit Voter Entry & Save
-                                    </h3>
-                                    <button onClick={() => setEditingRecord(null)} className="text-slate-400 hover:text-slate-600">
-                                        <i data-lucide="x" className="w-5 h-5"></i>
-                                    </button>
-                                </div>
-
-                                <form onSubmit={handleSaveEdit} className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Elector Name
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            value={editingRecord.name}
-                                            onChange={(e) => setEditingRecord({ ...editingRecord, name: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            EPIC Number
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            value={editingRecord.epic}
-                                            onChange={(e) => setEditingRecord({ ...editingRecord, epic: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-mono uppercase"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Serial Number (SR NO)
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            value={editingRecord.sr}
-                                            onChange={(e) => setEditingRecord({ ...editingRecord, sr: e.target.value })}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Anomaly Ground Code(s)
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            value={editingRecord.anomaly}
-                                            onChange={(e) => setEditingRecord({ ...editingRecord, anomaly: e.target.value })}
-                                            placeholder="e.g. 4 ya 11 ya 5/9"
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-bold"
-                                        />
-                                    </div>
-
-                                    <div className="pt-3 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            onClick={() => setEditingRecord(null)}
-                                            className="w-1/2 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button 
-                                            type="submit"
-                                            className="w-1/2 py-2.5 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-500 shadow-md"
-                                        >
-                                            Save Changes
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* MODAL 4: Add New Voter Entry */}
-                    {showAddModal && (
-                        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-                            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
-                                        <i data-lucide="user-plus" className="w-5 h-5 text-emerald-600"></i>
-                                        Add New Voter Entry
-                                    </h3>
-                                    <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
-                                        <i data-lucide="x" className="w-5 h-5"></i>
-                                    </button>
-                                </div>
-
-                                <form onSubmit={handleAddRecord} className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Elector's Name
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            required
-                                            value={newName}
-                                            onChange={(e) => setNewName(e.target.value)}
-                                            placeholder="e.g. MOHAMMED AHMAD"
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-bold"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            EPIC Number
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            value={newEpic}
-                                            onChange={(e) => setNewEpic(e.target.value)}
-                                            placeholder="e.g. TIA3636982"
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-mono uppercase"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Serial Number (SR NO)
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            required
-                                            value={newSr}
-                                            onChange={(e) => setNewSr(e.target.value)}
-                                            placeholder="e.g. 1072"
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-bold"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Mapping Category
-                                        </label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setNewMapping("S")}
-                                                className={`py-2 text-xs font-bold rounded-xl border ${newMapping === 'S' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-300'}`}
-                                            >
-                                                SELF (S)
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setNewMapping("P")}
-                                                className={`py-2 text-xs font-bold rounded-xl border ${newMapping === 'P' ? 'bg-purple-600 text-white border-purple-600' : 'bg-slate-50 text-slate-700 border-slate-300'}`}
-                                            >
-                                                PROGENY (P)
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                                            Anomaly Ground Code(s)
-                                        </label>
-                                        <input 
-                                            type="text"
-                                            required
-                                            value={newAnomaly}
-                                            onChange={(e) => setNewAnomaly(e.target.value)}
-                                            placeholder="e.g. 4 ya 11 ya 5/9"
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm outline-none font-medium"
-                                        />
-                                    </div>
-
-                                    <div className="pt-3 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            onClick={() => setShowAddModal(false)}
-                                            className="w-1/2 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button 
-                                            type="submit"
-                                            className="w-1/2 py-2.5 text-xs font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-500 shadow-md"
-                                        >
-                                            Save Entry
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Footer */}
-                    <footer className="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800 no-print mt-auto">
-                        <p>© 2026 Electoral Roll Verification Portal. JANKARI HI SURAKSHA HAI – SAHI BHARO, SAHI RAHO!</p>
-                    </footer>
-                </div>
-            );
+                updateSyncBadge("Live Synced", "emerald");
+                renderAll();
+            }, (error) => {
+                console.error("Firestore error:", error);
+                updateSyncBadge("Sync Error", "rose");
+                showToast("Firebase sync me error aaya!", "warning");
+            });
         }
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        // Seed Initial Records to Firebase
+        async function seedInitialElectorsToFirebase() {
+            if (!currentUser) return;
+            try {
+                const batch = writeBatch(db);
+                initialElectors.forEach((item) => {
+                    const docRef = doc(electorsCollectionRef, String(item.sr));
+                    batch.set(docRef, item);
+                });
+                await batch.commit();
+                showToast("Initial 66 Electors Firebase par upload ho gaye!", "success");
+            } catch (e) {
+                console.error("Seeding error:", e);
+                showToast("Seeding failed: " + e.message, "warning");
+            }
+        }
+
+        window.reseedDataPrompt = function() {
+            if (confirm("Kya aap saara database Firebase par default 66 electors me reset/re-seed karna chahte hain?")) {
+                seedInitialElectorsToFirebase();
+            }
+        };
+
+        function updateSyncBadge(text, color) {
+            const badge = document.getElementById('syncBadge');
+            if(!badge) return;
+            
+            if (color === 'emerald') {
+                badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${text}`;
+            } else if (color === 'amber') {
+                badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/30 flex items-center gap-1";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> ${text}`;
+            } else {
+                badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-400/30 flex items-center gap-1";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ${text}`;
+            }
+        }
+
+        // Render Functions
+        function renderAll() {
+            renderDesktopAndMobileData();
+            renderStatsAndCharts();
+        }
+
+        window.applyFilters = function() {
+            renderDesktopAndMobileData();
+        };
+
+        function renderDesktopAndMobileData() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const catVal = document.getElementById('categoryFilter').value;
+            const ruleVal = document.getElementById('ruleFilter').value;
+            const statusVal = document.getElementById('statusFilter').value;
+
+            const tbody = document.getElementById('tableBodyDesktop');
+            const mobileContainer = document.getElementById('mobileCardContainer');
+
+            tbody.innerHTML = '';
+            mobileContainer.innerHTML = '';
+
+            let displayedCount = 0;
+
+            electors.forEach((item, originalIndex) => {
+                const matchesSearch = item.name.toLowerCase().includes(searchVal) || 
+                                      item.epic.toLowerCase().includes(searchVal) || 
+                                      item.sr.toString().includes(searchVal) ||
+                                      (item.phone && item.phone.toLowerCase().includes(searchVal)) ||
+                                      item.rules.some(r => r.includes(searchVal));
+                
+                const matchesCat = (catVal === 'ALL') || (item.cat === catVal);
+                const matchesRule = (ruleVal === 'ALL') || (item.rules.includes(ruleVal));
+                const matchesStatus = (statusVal === 'ALL') || (item.status === statusVal);
+
+                if (matchesSearch && matchesCat && matchesRule && matchesStatus) {
+                    displayedCount++;
+
+                    const catBadge = item.cat === 'S' 
+                        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-300/50">SELF (S)</span>`
+                        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-300/50">PROGENY (P)</span>`;
+
+                    const ruleBadges = item.rules.map(r => 
+                        `<span class="inline-block px-1.5 py-0.5 m-0.5 rounded text-[10px] font-bold bg-slate-800 text-blue-300">Rule ${r}</span>`
+                    ).join('');
+
+                    const statusBadge = item.status === 'Resolved'
+                        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1"><i class="fa-solid fa-check text-emerald-600"></i> Resolved</span>`
+                        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1"><i class="fa-solid fa-clock text-amber-600"></i> Pending</span>`;
+
+                    // Separate Call / Phone Edit Button HTML
+                    const callBtnHTML = item.phone 
+                        ? `<div class="inline-flex items-center gap-1">
+                            <a href="tel:${item.phone}" title="Call ${item.phone}" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold transition shadow-2xs inline-flex items-center gap-1">
+                                <i class="fa-solid fa-phone-flip text-white"></i> Call
+                            </a>
+                            <button onclick="openPhoneModal(${originalIndex})" title="Edit Mobile Number" class="p-1 text-slate-400 hover:text-slate-700">
+                                <i class="fa-solid fa-pen text-[10px]"></i>
+                            </button>
+                           </div>`
+                        : `<button onclick="openPhoneModal(${originalIndex})" title="Add Mobile Number" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-semibold border border-slate-300 inline-flex items-center gap-1">
+                            <i class="fa-solid fa-mobile-screen"></i> + Add No.
+                           </button>`;
+
+                    // Direct Toggle Resolve Button
+                    const toggleBtn = item.status === 'Resolved'
+                        ? `<button onclick="toggleResolve(${originalIndex})" title="Reopen Case" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg border border-amber-300 text-[11px] font-semibold transition inline-flex items-center gap-1"><i class="fa-solid fa-rotate-left text-amber-600"></i> Reopen</button>`
+                        : `<button onclick="toggleResolve(${originalIndex})" title="Mark Resolved" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-300 text-[11px] font-semibold transition inline-flex items-center gap-1"><i class="fa-solid fa-circle-check text-emerald-600"></i> Mark Resolved</button>`;
+
+                    // 1. Desktop Row
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-3 text-center font-extrabold text-slate-800">${item.sr}</td>
+                        <td class="py-2.5 px-3 font-semibold text-slate-800">
+                            <div>${item.name}</div>
+                            ${item.phone ? `<p class="text-[10px] text-emerald-700 font-mono font-medium"><i class="fa-solid fa-phone text-emerald-600 me-1"></i>${item.phone}</p>` : ''}
+                            ${item.notes ? `<p class="text-[10px] text-slate-500 font-normal"><i class="fa-solid fa-sticky-note me-1"></i>${item.notes}</p>` : ''}
+                        </td>
+                        <td class="py-2.5 px-3 font-mono font-medium text-slate-600">${item.epic}</td>
+                        <td class="py-2.5 px-3 text-center">${catBadge}</td>
+                        <td class="py-2.5 px-3">${ruleBadges}</td>
+                        <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+                        <td class="py-2.5 px-3 text-center">
+                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                <button onclick="openNoticeModal(${originalIndex})" class="px-2.5 py-1 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-[11px] font-bold transition shadow-2xs inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-envelope-open-text text-amber-400"></i> View Notice
+                                </button>
+                                ${callBtnHTML}
+                                ${toggleBtn}
+                                <button onclick="openEditModal(${originalIndex})" title="Edit Details" class="p-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    // 2. Mobile Card Layout
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-2.5";
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">Sr No. ${item.sr}</span>
+                                <h3 class="text-sm font-bold text-slate-900 leading-tight">${item.name}</h3>
+                                <p class="text-xs font-mono font-medium text-slate-500 mt-0.5">${item.epic}</p>
+                                ${item.phone ? `<p class="text-xs font-mono font-bold text-emerald-700 mt-1"><i class="fa-solid fa-phone text-emerald-600 me-1"></i>${item.phone}</p>` : ''}
+                            </div>
+                            <div class="text-right shrink-0">
+                                ${statusBadge}
+                                <div class="mt-1">${catBadge}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <div>
+                                <span class="text-[10px] font-semibold text-slate-400 block mb-0.5">ANOMALY FLAGS</span>
+                                ${ruleBadges}
+                            </div>
+                        </div>
+
+                        <!-- Separate Button Row 1: Notice & Call / Mobile Sync -->
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <button onclick="openNoticeModal(${originalIndex})" class="flex-1 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-envelope-open-text text-amber-400"></i> View Notice
+                            </button>
+                            ${item.phone ? `
+                                <div class="flex items-center gap-1">
+                                    <a href="tel:${item.phone}" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-2xs">
+                                        <i class="fa-solid fa-phone-flip"></i> Call
+                                    </a>
+                                    <button onclick="openPhoneModal(${originalIndex})" class="p-1.5 text-slate-500 hover:text-slate-800 bg-slate-100 rounded-lg border border-slate-200" title="Edit Mobile">
+                                        <i class="fa-solid fa-pen text-xs"></i>
+                                    </button>
+                                </div>
+                            ` : `
+                                <button onclick="openPhoneModal(${originalIndex})" class="py-1.5 px-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-semibold border border-slate-300 flex items-center gap-1">
+                                    <i class="fa-solid fa-mobile-screen"></i> + Add Mobile
+                                </button>
+                            `}
+                        </div>
+
+                        <!-- Separate Button Row 2: Status Resolve & Edit -->
+                        <div class="pt-1.5 flex items-center justify-between gap-2">
+                            <div class="flex-1">
+                                ${toggleBtn}
+                            </div>
+                            <button onclick="openEditModal(${originalIndex})" class="py-1 px-2.5 bg-slate-100 text-slate-700 rounded-lg border border-slate-300 text-xs font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                        </div>
+                    `;
+                    mobileContainer.appendChild(card);
+                }
+            });
+
+            document.getElementById('showing-count').innerText = displayedCount;
+            document.getElementById('total-table-count').innerText = electors.length;
+        }
+
+        // Direct Toggle Resolve Status
+        window.toggleResolve = async function(index) {
+            if (!currentUser) return;
+            const item = electors[index];
+            const newStatus = item.status === 'Resolved' ? 'Pending' : 'Resolved';
+
+            try {
+                const docRef = doc(electorsCollectionRef, String(item.sr));
+                await updateDoc(docRef, { status: newStatus });
+                showToast(`${item.name} status updated to ${newStatus}`, "success");
+            } catch (e) {
+                console.error("Firebase update failed:", e);
+                showToast("Update error: " + e.message, "warning");
+            }
+        };
+
+        // Render Analytics Charts
+        function renderStatsAndCharts() {
+            const total = electors.length;
+            let selfCount = 0;
+            let progenyCount = 0;
+            let resolvedCount = 0;
+
+            const ruleCounts = { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0, "13": 0 };
+            let totalFlaggedAnomalies = 0;
+
+            electors.forEach(item => {
+                if (item.cat === 'S') selfCount++;
+                if (item.cat === 'P') progenyCount++;
+                if (item.status === 'Resolved') resolvedCount++;
+
+                if (Array.isArray(item.rules)) {
+                    item.rules.forEach(r => {
+                        if (ruleCounts[r] !== undefined) ruleCounts[r]++;
+                        else ruleCounts[r] = 1;
+                        totalFlaggedAnomalies++;
+                    });
+                }
+            });
+
+            const selfPct = total > 0 ? ((selfCount / total) * 100).toFixed(1) : "0.0";
+            const progenyPct = total > 0 ? ((progenyCount / total) * 100).toFixed(1) : "0.0";
+            const resolvedPct = total > 0 ? ((resolvedCount / total) * 100).toFixed(1) : "0.0";
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-self').innerText = selfCount;
+            document.getElementById('stat-self-pct').innerText = `${selfPct}%`;
+            document.getElementById('stat-progeny').innerText = progenyCount;
+            document.getElementById('stat-progeny-pct').innerText = `${progenyPct}%`;
+            document.getElementById('stat-resolved').innerText = resolvedCount;
+            document.getElementById('stat-resolved-pct').innerText = `${resolvedPct}%`;
+            document.getElementById('stat-progress-bar').style.width = `${resolvedPct}%`;
+            
+            document.getElementById('pie-self-text').innerText = `${selfCount} (${selfPct}%)`;
+            document.getElementById('pie-progeny-text').innerText = `${progenyCount} (${progenyPct}%)`;
+            document.getElementById('total-anomaly-flags-badge').innerText = `Total Flags: ${totalFlaggedAnomalies}`;
+
+            // Doughnut Chart
+            const ctxDoughnut = document.getElementById('categoryDoughnutChart').getContext('2d');
+            if (categoryDoughnutChartInstance) categoryDoughnutChartInstance.destroy();
+
+            categoryDoughnutChartInstance = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                plugins: [ChartDataLabels],
+                data: {
+                    labels: ['SELF (S)', 'PROGENY (P)'],
+                    datasets: [{
+                        data: [selfCount, progenyCount],
+                        backgroundColor: ['#2563eb', '#7c3aed'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (value, ctx) => {
+                                let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                if (sum === 0) return '0%';
+                                return ((value * 100) / sum).toFixed(1) + "%";
+                            }
+                        }
+                    },
+                    cutout: '62%'
+                }
+            });
+
+            // Bar Chart
+            const ctxBar = document.getElementById('anomalyBarChart').getContext('2d');
+            if (anomalyBarChartInstance) anomalyBarChartInstance.destroy();
+
+            const barLabels = Object.keys(ruleCounts).map(r => `R-${r}`);
+            const barData = Object.values(ruleCounts);
+
+            anomalyBarChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                plugins: [ChartDataLabels],
+                data: {
+                    labels: barLabels,
+                    datasets: [{
+                        label: 'Flags Count',
+                        data: barData,
+                        backgroundColor: '#1e3a8a',
+                        hoverBackgroundColor: '#2563eb',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#0f172a',
+                            font: { size: 9, weight: 'bold' },
+                            formatter: (value) => {
+                                if (value === 0) return '';
+                                let pct = totalFlaggedAnomalies > 0 ? ((value / totalFlaggedAnomalies) * 100).toFixed(1) : 0;
+                                return `${value} (${pct}%)`;
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0, font: { size: 9 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }
+                    }
+                }
+            });
+        }
+
+        // --- QUICK PHONE MODAL LOGIC ---
+        window.openPhoneModal = function(index) {
+            const item = electors[index];
+            document.getElementById('phoneIndex').value = index;
+            document.getElementById('phoneElectorName').innerText = `${item.name} (Sr No. ${item.sr})`;
+            document.getElementById('inputPhoneNum').value = item.phone || '';
+            document.getElementById('phoneModal').classList.remove('hidden');
+        };
+
+        window.closePhoneModal = function() {
+            document.getElementById('phoneModal').classList.add('hidden');
+        };
+
+        window.savePhone = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const index = document.getElementById('phoneIndex').value;
+            const item = electors[index];
+            const newPhone = document.getElementById('inputPhoneNum').value.trim();
+
+            try {
+                const docRef = doc(electorsCollectionRef, String(item.sr));
+                await updateDoc(docRef, { phone: newPhone });
+                closePhoneModal();
+                showToast("Mobile number Firebase par live sync ho gaya!", "success");
+            } catch (err) {
+                console.error("Phone sync error:", err);
+                showToast("Sync fail hua: " + err.message, "warning");
+            }
+        };
+
+        // --- OPEN NOTICE MODAL ---
+        window.openNoticeModal = function(index) {
+            const item = electors[index];
+            currentActiveElector = item;
+
+            document.getElementById('noticeSr').innerText = item.sr;
+            document.getElementById('noticeEpic').innerText = item.epic;
+            document.getElementById('noticeName').innerText = item.name;
+            document.getElementById('noticePhone').innerText = item.phone || 'Not Available';
+
+            document.getElementById('noticeCat').innerHTML = item.cat === 'S'
+                ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">SELF (S)</span>`
+                : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">PROGENY (P)</span>`;
+
+            document.getElementById('noticeStatusBadge').innerHTML = item.status === 'Resolved'
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-check me-1"></i>Resolved</span>`
+                : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-clock me-1"></i>Pending Verification</span>`;
+
+            const container = document.getElementById('noticeRulesList');
+            container.innerHTML = '';
+
+            item.rules.forEach(r => {
+                const info = anomalyRulesMap[r] || {
+                    title: `Anomaly Rule ${r}`,
+                    desc: "Data discrepancy flagged for verification.",
+                    docs: ["Aadhaar Card", "Identity Proof", "Family Records"]
+                };
+
+                const ruleBox = document.createElement('div');
+                ruleBox.className = "p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2";
+                
+                const docsListHTML = info.docs.map(doc => 
+                    `<li class="flex items-center gap-1.5 text-slate-700"><i class="fa-solid fa-square-check text-emerald-600 text-xs"></i> <span>${doc}</span></li>`
+                ).join('');
+
+                ruleBox.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-blue-900 text-xs"><i class="fa-solid fa-flag text-rose-500 me-1"></i> Rule ${r}: ${info.title}</span>
+                        <span class="px-1.5 py-0.5 bg-slate-800 text-blue-300 rounded text-[10px] font-bold">Flag ${r}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600">${info.desc}</p>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 space-y-1">
+                        <strong class="text-emerald-800 text-[11px] block"><i class="fa-solid fa-folder-open text-amber-500 me-1"></i> Submission Checklist / Documents Needed:</strong>
+                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] font-medium pt-1">
+                            ${docsListHTML}
+                        </ul>
+                    </div>
+                `;
+                container.appendChild(ruleBox);
+            });
+
+            // Dynamic Instruction Box update based on Mapping (SELF vs PROGENY)
+            const instrBox = document.getElementById('noticeInstructionBox');
+            if (instrBox) {
+                if (item.cat === 'S') {
+                    instrBox.className = "p-3 rounded-xl border border-blue-200 bg-blue-50/80 text-[11px] space-y-1";
+                    instrBox.innerHTML = `
+                        <strong class="text-blue-900 block text-xs"><i class="fa-solid fa-lightbulb text-amber-500 me-1.5"></i> BLO Verification Suggestion (SELF Mapping):</strong>
+                        <p class="text-slate-700 leading-relaxed font-medium mt-1">Elector ki mapping <strong>SELF (S)</strong> hai. Is anomaly ko remove karne ke liye Parents ya Grandparents ke sath mapping/linkage karwayein. Agar details match success hoti hain, toh ye anomaly auto-clear / remove ho jayegi.</p>
+                    `;
+                } else {
+                    instrBox.className = "p-3 rounded-xl border border-purple-200 bg-purple-50/80 text-[11px] space-y-1";
+                    instrBox.innerHTML = `
+                        <strong class="text-purple-900 block text-xs"><i class="fa-solid fa-lightbulb text-amber-500 me-1.5"></i> BLO Verification Suggestion (PROGENY Mapping):</strong>
+                        <p class="text-slate-700 leading-relaxed font-medium mt-1">Elector ki mapping <strong>PROGENY (P)</strong> hai. Family Tree / Birth Proof ya Parents/Spouse ke supporting documents verify karke Form/Verification complete karein aur Resolved mark karein.</p>
+                    `;
+                }
+            }
+
+            document.getElementById('noticeModal').classList.remove('hidden');
+        };
+
+        window.closeNoticeModal = function() {
+            document.getElementById('noticeModal').classList.add('hidden');
+        };
+
+        // --- SHARE WHATSAPP RECEIPT LOGIC ---
+        window.shareWhatsAppReceipt = function() {
+            if (!currentActiveElector) return;
+
+            const item = currentActiveElector;
+            const catText = item.cat === 'S' ? 'SELF (S)' : 'PROGENY (P)';
+            
+            let rulesText = "";
+            let docsList = [];
+
+            item.rules.forEach(r => {
+                const info = anomalyRulesMap[r] || { title: `Rule ${r}`, docs: ["Aadhaar Card", "Identity Proof"] };
+                rulesText += `• *Rule ${r}:* ${info.title}\n`;
+                info.docs.forEach(d => {
+                    if(!docsList.includes(d)) docsList.push(d);
+                });
+            });
+
+            let docsText = docsList.map(d => `✓ ${d}`).join('\n');
+
+            const suggestionText = item.cat === 'S'
+                ? `💡 *BLO Suggestion:* Elector ki mapping SELF (S) hai. Parents/Grandparents se mapping karwa kar ye anomaly remove ki ja sakti hai (agar match success hota hai).`
+                : `💡 *BLO Suggestion:* Elector ki mapping PROGENY (P) hai. Family Tree / Birth Proof documents verify karein.`;
+
+            const msg = `*ELECTION COMMISSION OF INDIA*\n` +
+                `*SIR VERIFICATION NOTICE SLIP 2026*\n` +
+                `------------------------------------\n` +
+                `📍 *Part No:* 111\n` +
+                `👤 *Elector Name:* ${item.name}\n` +
+                `🆔 *EPIC No:* ${item.epic}\n` +
+                `🔢 *Serial No:* ${item.sr}\n` +
+                `📱 *Mobile:* ${item.phone || 'N/A'}\n` +
+                `🏷️ *Category:* ${catText}\n` +
+                `📌 *Status:* ${item.status}\n\n` +
+                `⚠️ *Flagged Anomaly Rules:*\n${rulesText}\n` +
+                `📑 *Required Documents Checklist:*\n${docsText}\n\n` +
+                `${suggestionText}\n\n` +
+                `------------------------------------\n` +
+                `🏛️ *BOOTH LEVEL OFFICER (BLO) DETAILS:*\n` +
+                `• *BLO Name:* DATTA SHALIGRAM SHINDE\n` +
+                `• *Designation:* Booth Level Officer (BLO)\n` +
+                `• *Constituency:* AC 87 - NANDED SOUTH MAHARASHTRA (PART NO. 111)\n` +
+                `• *BLO Mobile:* 9607335572\n\n` +
+                `_Note: Kripya ye zaroori documents verify karwane ke liye BLO Officer se sampark karein._`;
+
+            const encodedMsg = encodeURIComponent(msg);
+            let url = `https://api.whatsapp.com/send?text=${encodedMsg}`;
+
+            if (item.phone) {
+                const cleanPhone = item.phone.replace(/[^0-9]/g, '');
+                if (cleanPhone.length >= 10) {
+                    const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                    url = `https://api.whatsapp.com/send?phone=${fullPhone}&text=${encodedMsg}`;
+                }
+            }
+
+            window.open(url, '_blank');
+            showToast("WhatsApp receipt slip share link tayar hai!", "success");
+        };
+
+        window.printNotice = function() {
+            if(!currentActiveElector) return;
+            window.print();
+        };
+
+        // --- EDIT MODAL LOGIC ---
+        window.openEditModal = function(index) {
+            const item = electors[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editSr').value = item.sr;
+            document.getElementById('editEpic').value = item.epic;
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editPhone').value = item.phone || '';
+            document.getElementById('editCat').value = item.cat;
+            document.getElementById('editStatus').value = item.status;
+            document.getElementById('editRules').value = item.rules.join(', ');
+            document.getElementById('editNotes').value = item.notes || '';
+
+            document.getElementById('editModal').classList.remove('hidden');
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').classList.add('hidden');
+        };
+
+        window.saveEdit = async function(e) {
+            e.preventDefault();
+            if(!currentUser) return;
+
+            const index = document.getElementById('editIndex').value;
+            const rulesStr = document.getElementById('editRules').value;
+            const cleanRules = rulesStr.split(',').map(r => r.trim()).filter(r => r !== "");
+
+            const updatedObj = {
+                sr: parseInt(document.getElementById('editSr').value),
+                epic: document.getElementById('editEpic').value.toUpperCase(),
+                name: document.getElementById('editName').value,
+                phone: document.getElementById('editPhone').value.trim(),
+                cat: document.getElementById('editCat').value,
+                status: document.getElementById('editStatus').value,
+                rules: cleanRules,
+                notes: document.getElementById('editNotes').value
+            };
+
+            try {
+                const docRef = doc(electorsCollectionRef, String(updatedObj.sr));
+                await setDoc(docRef, updatedObj, { merge: true });
+                closeEditModal();
+                showToast("Firebase par changes save ho gaye!", "success");
+            } catch (err) {
+                console.error("Save error:", err);
+                showToast("Save fail hua: " + err.message, "warning");
+            }
+        };
+
+        // --- ADD MODAL LOGIC ---
+        window.openAddModal = function() {
+            document.getElementById('addForm').reset();
+            document.getElementById('addModal').classList.remove('hidden');
+        };
+
+        window.closeAddModal = function() {
+            document.getElementById('addModal').classList.add('hidden');
+        };
+
+        window.saveAdd = async function(e) {
+            e.preventDefault();
+            if(!currentUser) return;
+
+            const rulesStr = document.getElementById('addRules').value;
+            const cleanRules = rulesStr.split(',').map(r => r.trim()).filter(r => r !== "");
+
+            const newItem = {
+                sr: parseInt(document.getElementById('addSr').value),
+                epic: document.getElementById('addEpic').value.toUpperCase(),
+                name: document.getElementById('addName').value,
+                phone: document.getElementById('addPhone').value.trim(),
+                cat: document.getElementById('addCat').value,
+                status: document.getElementById('addStatus').value,
+                rules: cleanRules,
+                notes: "New Entry"
+            };
+
+            try {
+                const docRef = doc(electorsCollectionRef, String(newItem.sr));
+                await setDoc(docRef, newItem);
+                closeAddModal();
+                showToast("Naya record Firebase par add ho gaya!", "success");
+            } catch (err) {
+                console.error("Add record error:", err);
+                showToast("Add fail hua: " + err.message, "warning");
+            }
+        };
+
+        // --- EXPORT TO CSV ---
+        window.exportCSV = function() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Sr No,Elector Name,Mobile,EPIC,Category,Anomaly Rules,Status,Notes\n";
+
+            electors.forEach(item => {
+                const rulesStr = `"${item.rules.join(';')}"`;
+                const nameStr = `"${item.name.replace(/"/g, '""')}"`;
+                const phoneStr = `"${item.phone || ''}"`;
+                csvContent += `${item.sr},${nameStr},${phoneStr},${item.epic},${item.cat === 'S' ? 'SELF' : 'PROGENY'},${rulesStr},${item.status},"${item.notes || ''}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `BLO_Notice_Report_Part111_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast("CSV File Export ho gayi!", "info");
+        };
+
+        // Helper Toast Notification
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = msg;
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
+            } else if (type === 'warning') {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-sm";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-blue-400 text-sm";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initialize App Login & Firebase on window load
+        window.addEventListener('DOMContentLoaded', () => {
+            initAuthAndFirebase();
+            checkInitialLogin();
+        });
     </script>
 </body>
 </html>
