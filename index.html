@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elector Anomaly Tracker</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -26,10 +28,10 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <button onclick="window.manualSync()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center border border-indigo-500 transition-colors shadow-sm">
-                        <i class="fa-solid fa-rotate mr-1" id="sync-icon"></i> <span class="hidden sm:inline-block">Sync Data</span>
+                        <i class="fa-solid fa-cloud-arrow-up mr-2" id="sync-icon"></i> <span class="hidden sm:inline-block">Sync Data to Firebase</span>
                     </button>
                     <div id="firebase-status" class="text-sm font-medium bg-indigo-800 px-3 py-1 rounded-full border border-indigo-600 text-yellow-300 flex items-center">
-                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> Starting...
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> Firebase Start...
                     </div>
                 </div>
             </div>
@@ -66,16 +68,16 @@
         <div class="bg-white rounded-t-xl shadow-sm border border-gray-200 p-4 space-y-4">
             <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
                 <div class="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
-                    <input type="number" id="search-srno" placeholder="Sr No." class="w-full md:w-40 px-3 py-2 border border-gray-300 rounded-lg outline-none">
-                    <input type="text" id="search-query" placeholder="Naam ya EPIC..." class="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg outline-none">
-                    <select id="filter-status" class="w-full md:w-auto px-3 py-2 border border-gray-300 rounded-lg outline-none">
+                    <input type="number" id="search-srno" placeholder="Sr No." class="w-full md:w-40 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="search-query" placeholder="Naam ya EPIC..." class="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select id="filter-status" class="w-full md:w-auto px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="ALL">Sabhi Status (All)</option>
                         <option value="PENDING">Sirf Pending</option>
                         <option value="RESOLVED">Sirf Resolved</option>
                     </select>
                 </div>
                 <div class="flex flex-col md:flex-row w-full xl:w-auto gap-4 items-center">
-                    <select id="filter-anomaly" class="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg bg-indigo-50 text-indigo-800 font-medium outline-none">
+                    <select id="filter-anomaly" class="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg bg-indigo-50 text-indigo-800 font-medium outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="ALL">Koyi bhi Anomaly (All Types)</option>
                     </select>
                     <button onclick="window.openAddModal()" class="w-full md:w-auto bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center transition-colors shadow-sm whitespace-nowrap">
@@ -103,8 +105,7 @@
         </div>
     </main>
 
-    <!-- Modals -->
-    <!-- Add/Edit Modal -->
+    <!-- Modals (Add/Edit) -->
     <div id="form-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60 hidden">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white">
@@ -114,20 +115,20 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Serial Number *</label>
-                    <input type="number" id="form-id" class="w-full px-3 py-2 border rounded-lg" required>
+                    <input type="number" id="form-id" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Elector Name *</label>
-                    <input type="text" id="form-name" class="w-full px-3 py-2 border rounded-lg" required>
+                    <input type="text" id="form-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">EPIC Number *</label>
-                    <input type="text" id="form-epic" class="w-full px-3 py-2 border rounded-lg uppercase" required>
+                    <input type="text" id="form-epic" class="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 uppercase" required>
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 border-t flex justify-end space-x-3">
-                <button onclick="window.closeFormModal()" class="bg-gray-200 px-4 py-2 rounded-lg">Cancel</button>
-                <button onclick="window.saveRecordForm()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg">Save</button>
+                <button onclick="window.closeFormModal()" class="bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2 rounded-lg font-medium transition-colors">Cancel</button>
+                <button onclick="window.saveRecordForm()" class="bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-2 rounded-lg font-medium transition-colors">Save</button>
             </div>
         </div>
     </div>
@@ -136,42 +137,39 @@
     <div id="view-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60 hidden">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
             <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-eye mr-2"></i> Details</h3>
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-eye mr-2"></i> Voter Details</h3>
                 <button onclick="window.closeModal()"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                <div class="mb-6 bg-gray-50 p-4 rounded-xl border grid grid-cols-2 gap-4">
-                    <div><p class="text-xs text-gray-500 font-bold">Serial Number</p><p id="modal-srno" class="font-bold text-lg"></p></div>
-                    <div><p class="text-xs text-gray-500 font-bold">EPIC</p><p id="modal-epic" class="font-bold text-indigo-700"></p></div>
-                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold">Name</p><p id="modal-name" class="font-bold"></p></div>
+                <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200 grid grid-cols-2 gap-4">
+                    <div><p class="text-xs text-gray-500 font-bold uppercase">Serial Number</p><p id="modal-srno" class="font-bold text-lg"></p></div>
+                    <div><p class="text-xs text-gray-500 font-bold uppercase">EPIC</p><p id="modal-epic" class="font-bold text-indigo-700"></p></div>
+                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Name</p><p id="modal-name" class="font-bold"></p></div>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 font-bold mb-3">Selected Anomalies</p>
+                    <p class="text-sm text-gray-500 font-bold uppercase mb-3">Selected Anomalies</p>
                     <div id="modal-anomalies-container"></div>
                 </div>
                 <div class="mt-6 border-t pt-4" id="modal-status-container"></div>
             </div>
             <div class="bg-gray-50 px-6 py-4 border-t flex justify-end">
-                <button onclick="window.closeModal()" class="bg-gray-200 px-4 py-2 rounded-lg">Close</button>
+                <button onclick="window.closeModal()" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-medium px-4 py-2 rounded-lg">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl items-center z-50 hidden">
-        <i class="fa-solid fa-circle-check text-green-400"></i>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center z-50 hidden transition-opacity">
+        <i class="fa-solid fa-circle-check text-green-400 text-lg"></i>
         <span id="toast-message" class="font-medium text-sm ml-2"></span>
     </div>
 
-    <!-- ONE SINGLE SCRIPT TAG FOR EVERYTHING -->
+    <!-- MAIN LOGIC (UI + Firebase) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // 1. DATA INITIALIZATION
-        // ==========================================
         const ANOMALY_TYPES = [
             "1. Name / Gender / Age related inconsistencies",
             "2. Parent-child age gap less than 15 years",
@@ -188,109 +186,493 @@
             "13. Relative's name mismatch between current & previous roll"
         ];
 
+        // 280 Records Array
         const RAW_DATA = [
-            { id: 32, name: "Abdulgaffar Abduljilani Qureshi", epic: "TIA4001038" },
-            { id: 36, name: "MERGEWAR SHUBHAM SONAJI", epic: "TIA3481546" },
-            { id: 40, name: "Naseema Begum", epic: "TIA3976628" },
-            { id: 41, name: "Irfana Begum", epic: "TIA3976636" },
-            { id: 44, name: "YOUNUS KHAN", epic: "TIA3573615" },
-            { id: 56, name: "Mohammad Anwar Abdul Habib", epic: "HLS1090174" },
-            { id: 58, name: "Neha Firdose Shaikh Taufiq", epic: "TIA4003059" },
-            { id: 67, name: "HINA KAUSAR MOHAMMAD GAUS", epic: "TIA2729457" },
-            { id: 69, name: "Nasreen Begum Mohammed Imran", epic: "TIA3613833" },
-            { id: 70, name: "MOHAMMED AFROZ MOHAMMED AFSAR", epic: "TIA4021309" },
-            { id: 73, name: "SALEEMUDDIN AHMED", epic: "HLS2411197" },
-            { id: 74, name: "SHAHANA PARVEEN", epic: "HLS2410587" },
-            { id: 75, name: "GAUS MOHIUDDIN AHMED", epic: "TIA3752888" },
-            { id: 76, name: "FURQUANUDDIN", epic: "TIA4084661" },
-            { id: 83, name: "RAJIYA SULTANA GULAM MAJID", epic: "TIA3602729" },
-            { id: 84, name: "AYESHA BEGUM QAISER CHOUSE", epic: "HLS1093335" },
-            { id: 85, name: "Shameem Begum", epic: "TIA3608833" },
-            { id: 86, name: "WAJEED KHAN", epic: "ΤΙΑ1640440" },
-            { id: 87, name: "Rasheed Khan", epic: "ΤΙΑ1640408" },
-            { id: 89, name: "Mohammed Abdul Naeem", epic: "TIA3753597" },
-            { id: 91, name: "Tabassum Begum", epic: "TIA3754686" },
-            { id: 97, name: "Nadeem Hussain Shaikh", epic: "TIA1640432" },
-            { id: 99, name: "Abdul Rauf Khan", epic: "HLS2405405" },
-            { id: 103, name: "Wajeed Ali Khan", epic: "HLS2410272" },
-            { id: 104, name: "SHAIKH RAHEEM", epic: "HLS1093749" },
-            { id: 108, name: "Javeed Khan", epic: "TIA3120508" },
-            { id: 117, name: "Mohammed Jafar Khan", epic: "HLS1090851" },
-            { id: 124, name: "Mohammed Ansar Qureshi", epic: "TIA4168142" },
-            { id: 132, name: "Mohammed Rafiq", epic: "HLS2407617" },
-            { id: 156, name: "Sameer Khan Sajeed Khan", epic: "TIA3753779" },
-            { id: 161, name: "Gousiya Begum", epic: "HLS1093608" },
-            { id: 163, name: "Mohammad Faiz", epic: "TIA3682697" },
-            { id: 164, name: "Masarrat Jahan", epic: "HLS2407070" },
-            { id: 167, name: "SYED FAHAID ABBAS", epic: "HLS2407039" },
-            { id: 179, name: "Farnaz Begum Shaikh Shameem", epic: "TIA3867116" },
-            { id: 184, name: "ABDUL SHAFI ABDUL HABEEB", epic: "HLS2406825" },
-            { id: 190, name: "Abdul Rauf Abdul Raheman", epic: "HLS1092584" },
-            { id: 194, name: "Rehana Md. Khaja", epic: "HLS2405462" },
-            { id: 213, name: "Vishal Sanjay Gajewar", epic: "TIA3660081" },
-            { id: 222, name: "Shyam Kishanrao Mantri", epic: "ΤΙΑ1075803" },
-            { id: 231, name: "Mohammad Abdul Qayyum MOHAMMAD", epic: "HLS2408532" },
-            { id: 236, name: "MOHD JAVEED AHMED", epic: "HLS2405777" },
-            { id: 237, name: "Mohammed Sajid Ahmed", epic: "HLS1090893" },
-            { id: 240, name: "Atikh Ahmed Khan", epic: "HLS1090158" },
-            { id: 241, name: "shafeeq Ahmed khan", epic: "HLS1090190" },
-            { id: 242, name: "Fasal Hussain Khan", epic: "HLS1090265" },
-            { id: 248, name: "Feroz Khan Jamilkhan", epic: "HLS1090083" },
-            { id: 250, name: "Farzana Begum", epic: "HLS2408383" },
-            { id: 252, name: "Maruf Khan Abdul Rauf Khan", epic: "HLS1090885" },
-            { id: 255, name: "RAFIYA BEGUM MOHAMMED FAROOQ", epic: "HLS1092550" },
-            { id: 256, name: "Mohammed Farooq", epic: "HLS1092832" },
-            { id: 260, name: "Mohammed Nihal Mohammed Farooq", epic: "HLS1093202" },
-            { id: 265, name: "Mohammad Saleem", epic: "HLS1091164" },
-            { id: 266, name: "MOHAMMAD SHAHEBAZ MOHAMMAD SALEEM", epic: "TIA2506608" },
-            { id: 276, name: "FAHIMUNNISA BEGUM GOUSE KHAN", epic: "HLS1093566" },
-            { id: 281, name: "SIRAJ ALI KHAN AMEER KHAN", epic: "HLS2831303" },
-            { id: 283, name: "Afarozakhan Farozakhan", epic: "HLS2831014" },
-            { id: 289, name: "KHAISARI BEGUM MAQSOOD KHAN", epic: "HLS2407732" },
-            { id: 290, name: "MANZOOR KHAN JAFAR KHAN", epic: "HLS2406767" },
-            { id: 295, name: "Begum Arefa", epic: "HLS2408615" },
-            { id: 298, name: "Khan Naser", epic: "HLS2405306" },
-            { id: 301, name: "HAFSA BEGUM MAQBOOL ALI KHAN", epic: "TIA4039731" },
-            { id: 303, name: "Pravin Jeevanrao Indurkar", epic: "HLS1091032" },
-            { id: 315, name: "AFROZ KHANAM", epic: "ΤΙΑ1056217" },
-            { id: 316, name: "Aaliya khanam Yousuf Khan", epic: "TIA1056209" },
-            { id: 320, name: "MINHAJ A. MAJEED KHAN", epic: "HLS2407559" },
-            { id: 346, name: "MOHAMMED FASIUR RAHEMAN", epic: "HLS1093038" },
-            { id: 351, name: "RIYAZ AHMED", epic: "HLS1092600" },
-            { id: 366, name: "Mohammed Majeed", epic: "HLS1092733" },
-            { id: 367, name: "Mohammed Javeed", epic: "HLS2406924" },
-            { id: 370, name: "mohammed juned qureshi", epic: "HLS1092402" },
-            { id: 373, name: "Mohammed Aijaz Qureshi", epic: "HLS1093103" },
-            { id: 374, name: "Habiba Begum Qureshi", epic: "HLS1092055" },
-            { id: 375, name: "Jaleel She Ratan Shaikh", epic: "HLS2407856" },
-            { id: 390, name: "QUAZI AHTESHAMUDDIN", epic: "HLS1090786" },
-            { id: 391, name: "JABEEN BEGUM", epic: "HLS1090570" },
-            { id: 393, name: "Mohammad Ahesan Md Aesmael", epic: "HLS2405686" },
-            { id: 403, name: "ABDUL SAMAD KHAN", epic: "TIA3755014" },
-            { id: 425, name: "Akhtari Begum Mohammad Fayyazuddin", epic: "ΤΙΑ1075779" },
-            { id: 426, name: "Mohammed Riyazuddin", epic: "TIA3041035" },
-            { id: 433, name: "NASREEN BEGUM", epic: "HLS2410066" },
-            { id: 436, name: "Samreennaaz Abdulgaffar Qureshi", epic: "TIA3976362" },
-            { id: 440, name: "MOHAMMAD SALIM MOHAMMAD YUSUF QURESHI", epic: "HLS1094812" },
-            { id: 447, name: "Syed Noman", epic: "TIA3120532" },
-            { id: 450, name: "Khan Imranali", epic: "HLS1098581" },
-            { id: 453, name: "Md Muddassir Ali Khan", epic: "HLS1098052" },
-            { id: 455, name: "Md Shaukat Ali Khan", epic: "HLS1097930" },
-            { id: 456, name: "Vinayaalikhan Zaukataalikhan Mohammad", epic: "TIA2506665" },
-            { id: 460, name: "Mohammad Mujahed Ali Khan", epic: "TIA4036554" },
-            { id: 465, name: "ZAKIR ALI SADIQUE ALI KHAN", epic: "HLS1096809" },
-            { id: 466, name: "Mohammed Samad Ali khan", epic: "HLS1098250" },
-            { id: 468, name: "SHAHZAD ALI KHAN", epic: "TIA2626166" },
-            { id: 474, name: "Arjumnad Faraha Shaikh Moizuddin Ahmed", epic: "HLS1097187" },
-            { id: 478, name: "SHAIKH MOIZUDDIN AHMED", epic: "HLS1095611" },
-            { id: 479, name: "Farhat Begum Gulam Mohsin", epic: "HLS2410769" },
-            { id: 491, name: "Gulam Munir", epic: "HLS1096684" },
-            { id: 495, name: "Gulamamajid Hussain", epic: "HLS2410884" },
-            { id: 497, name: "Sarfaraz Yaseen Gulaam", epic: "HLS1093350" },
-            { id: 498, name: "MUQEET AHMED GULAM HUSAIN Mukhid", epic: "HLS2410660" },
-            { id: 509, name: "GULAM MERAJ GULAM YASEEN", epic: "TIA2883114" },
-            { id: 510, name: "GULAM MUDASSIR GULAM DASTGIR", epic: "TIA2883155" },
-            { id: 524, name: "Abdul Mujeeb Abdul Rashid", epic: "HLS2409597" },
-            { id: 526, name: "PATEL RESHMA ABDUL MUJEEB", epic: "ΤΙΑ1158260" },
-            { id: 542, name: "Mohammed Shakil Mohammed Gous", epic: "HLS1094275" },
-            { id: 559, name: "MOHAMMED
+            { id: 32, name: "Abdulgaffar Abduljilani Qureshi", epic: "TIA4001038" }, { id: 36, name: "MERGEWAR SHUBHAM SONAJI", epic: "TIA3481546" },
+            { id: 40, name: "Naseema Begum", epic: "TIA3976628" }, { id: 41, name: "Irfana Begum", epic: "TIA3976636" },
+            { id: 44, name: "YOUNUS KHAN", epic: "TIA3573615" }, { id: 56, name: "Mohammad Anwar Abdul Habib", epic: "HLS1090174" },
+            { id: 58, name: "Neha Firdose Shaikh Taufiq", epic: "TIA4003059" }, { id: 67, name: "HINA KAUSAR MOHAMMAD GAUS", epic: "TIA2729457" },
+            { id: 69, name: "Nasreen Begum Mohammed Imran", epic: "TIA3613833" }, { id: 70, name: "MOHAMMED AFROZ MOHAMMED AFSAR", epic: "TIA4021309" },
+            { id: 73, name: "SALEEMUDDIN AHMED", epic: "HLS2411197" }, { id: 74, name: "SHAHANA PARVEEN", epic: "HLS2410587" },
+            { id: 75, name: "GAUS MOHIUDDIN AHMED", epic: "TIA3752888" }, { id: 76, name: "FURQUANUDDIN", epic: "TIA4084661" },
+            { id: 83, name: "RAJIYA SULTANA GULAM MAJID", epic: "TIA3602729" }, { id: 84, name: "AYESHA BEGUM QAISER CHOUSE", epic: "HLS1093335" },
+            { id: 85, name: "Shameem Begum", epic: "TIA3608833" }, { id: 86, name: "WAJEED KHAN", epic: "ΤΙΑ1640440" },
+            { id: 87, name: "Rasheed Khan", epic: "ΤΙΑ1640408" }, { id: 89, name: "Mohammed Abdul Naeem", epic: "TIA3753597" },
+            { id: 91, name: "Tabassum Begum", epic: "TIA3754686" }, { id: 97, name: "Nadeem Hussain Shaikh", epic: "TIA1640432" },
+            { id: 99, name: "Abdul Rauf Khan", epic: "HLS2405405" }, { id: 103, name: "Wajeed Ali Khan", epic: "HLS2410272" },
+            { id: 104, name: "SHAIKH RAHEEM", epic: "HLS1093749" }, { id: 108, name: "Javeed Khan", epic: "TIA3120508" },
+            { id: 117, name: "Mohammed Jafar Khan", epic: "HLS1090851" }, { id: 124, name: "Mohammed Ansar Qureshi", epic: "TIA4168142" },
+            { id: 132, name: "Mohammed Rafiq", epic: "HLS2407617" }, { id: 156, name: "Sameer Khan Sajeed Khan", epic: "TIA3753779" },
+            { id: 161, name: "Gousiya Begum", epic: "HLS1093608" }, { id: 163, name: "Mohammad Faiz", epic: "TIA3682697" },
+            { id: 164, name: "Masarrat Jahan", epic: "HLS2407070" }, { id: 167, name: "SYED FAHAID ABBAS", epic: "HLS2407039" },
+            { id: 179, name: "Farnaz Begum Shaikh Shameem", epic: "TIA3867116" }, { id: 184, name: "ABDUL SHAFI ABDUL HABEEB", epic: "HLS2406825" },
+            { id: 190, name: "Abdul Rauf Abdul Raheman", epic: "HLS1092584" }, { id: 194, name: "Rehana Md. Khaja", epic: "HLS2405462" },
+            { id: 213, name: "Vishal Sanjay Gajewar", epic: "TIA3660081" }, { id: 222, name: "Shyam Kishanrao Mantri", epic: "ΤΙΑ1075803" },
+            { id: 231, name: "Mohammad Abdul Qayyum MOHAMMAD", epic: "HLS2408532" }, { id: 236, name: "MOHD JAVEED AHMED", epic: "HLS2405777" },
+            { id: 237, name: "Mohammed Sajid Ahmed", epic: "HLS1090893" }, { id: 240, name: "Atikh Ahmed Khan", epic: "HLS1090158" },
+            { id: 241, name: "shafeeq Ahmed khan", epic: "HLS1090190" }, { id: 242, name: "Fasal Hussain Khan", epic: "HLS1090265" },
+            { id: 248, name: "Feroz Khan Jamilkhan", epic: "HLS1090083" }, { id: 250, name: "Farzana Begum", epic: "HLS2408383" },
+            { id: 252, name: "Maruf Khan Abdul Rauf Khan", epic: "HLS1090885" }, { id: 255, name: "RAFIYA BEGUM MOHAMMED FAROOQ", epic: "HLS1092550" },
+            { id: 256, name: "Mohammed Farooq", epic: "HLS1092832" }, { id: 260, name: "Mohammed Nihal Mohammed Farooq", epic: "HLS1093202" },
+            { id: 265, name: "Mohammad Saleem", epic: "HLS1091164" }, { id: 266, name: "MOHAMMAD SHAHEBAZ MOHAMMAD SALEEM", epic: "TIA2506608" },
+            { id: 276, name: "FAHIMUNNISA BEGUM GOUSE KHAN", epic: "HLS1093566" }, { id: 281, name: "SIRAJ ALI KHAN AMEER KHAN", epic: "HLS2831303" },
+            { id: 283, name: "Afarozakhan Farozakhan", epic: "HLS2831014" }, { id: 289, name: "KHAISARI BEGUM MAQSOOD KHAN", epic: "HLS2407732" },
+            { id: 290, name: "MANZOOR KHAN JAFAR KHAN", epic: "HLS2406767" }, { id: 295, name: "Begum Arefa", epic: "HLS2408615" },
+            { id: 298, name: "Khan Naser", epic: "HLS2405306" }, { id: 301, name: "HAFSA BEGUM MAQBOOL ALI KHAN", epic: "TIA4039731" },
+            { id: 303, name: "Pravin Jeevanrao Indurkar", epic: "HLS1091032" }, { id: 315, name: "AFROZ KHANAM", epic: "ΤΙΑ1056217" },
+            { id: 316, name: "Aaliya khanam Yousuf Khan", epic: "TIA1056209" }, { id: 320, name: "MINHAJ A. MAJEED KHAN", epic: "HLS2407559" },
+            { id: 346, name: "MOHAMMED FASIUR RAHEMAN", epic: "HLS1093038" }, { id: 351, name: "RIYAZ AHMED", epic: "HLS1092600" },
+            { id: 366, name: "Mohammed Majeed", epic: "HLS1092733" }, { id: 367, name: "Mohammed Javeed", epic: "HLS2406924" },
+            { id: 370, name: "mohammed juned qureshi", epic: "HLS1092402" }, { id: 373, name: "Mohammed Aijaz Qureshi", epic: "HLS1093103" },
+            { id: 374, name: "Habiba Begum Qureshi", epic: "HLS1092055" }, { id: 375, name: "Jaleel She Ratan Shaikh", epic: "HLS2407856" },
+            { id: 390, name: "QUAZI AHTESHAMUDDIN", epic: "HLS1090786" }, { id: 391, name: "JABEEN BEGUM", epic: "HLS1090570" },
+            { id: 393, name: "Mohammad Ahesan Md Aesmael", epic: "HLS2405686" }, { id: 403, name: "ABDUL SAMAD KHAN", epic: "TIA3755014" },
+            { id: 425, name: "Akhtari Begum Mohammad Fayyazuddin", epic: "ΤΙΑ1075779" }, { id: 426, name: "Mohammed Riyazuddin", epic: "TIA3041035" },
+            { id: 433, name: "NASREEN BEGUM", epic: "HLS2410066" }, { id: 436, name: "Samreennaaz Abdulgaffar Qureshi", epic: "TIA3976362" },
+            { id: 440, name: "MOHAMMAD SALIM MOHAMMAD YUSUF QURESHI", epic: "HLS1094812" }, { id: 447, name: "Syed Noman", epic: "TIA3120532" },
+            { id: 450, name: "Khan Imranali", epic: "HLS1098581" }, { id: 453, name: "Md Muddassir Ali Khan", epic: "HLS1098052" },
+            { id: 455, name: "Md Shaukat Ali Khan", epic: "HLS1097930" }, { id: 456, name: "Vinayaalikhan Zaukataalikhan Mohammad", epic: "TIA2506665" },
+            { id: 460, name: "Mohammad Mujahed Ali Khan", epic: "TIA4036554" }, { id: 465, name: "ZAKIR ALI SADIQUE ALI KHAN", epic: "HLS1096809" },
+            { id: 466, name: "Mohammed Samad Ali khan", epic: "HLS1098250" }, { id: 468, name: "SHAHZAD ALI KHAN", epic: "TIA2626166" },
+            { id: 474, name: "Arjumnad Faraha Shaikh Moizuddin Ahmed", epic: "HLS1097187" }, { id: 478, name: "SHAIKH MOIZUDDIN AHMED", epic: "HLS1095611" },
+            { id: 479, name: "Farhat Begum Gulam Mohsin", epic: "HLS2410769" }, { id: 491, name: "Gulam Munir", epic: "HLS1096684" },
+            { id: 495, name: "Gulamamajid Hussain", epic: "HLS2410884" }, { id: 497, name: "Sarfaraz Yaseen Gulaam", epic: "HLS1093350" },
+            { id: 498, name: "MUQEET AHMED GULAM HUSAIN Mukhid", epic: "HLS2410660" }, { id: 509, name: "GULAM MERAJ GULAM YASEEN", epic: "TIA2883114" },
+            { id: 510, name: "GULAM MUDASSIR GULAM DASTGIR", epic: "TIA2883155" }, { id: 524, name: "Abdul Mujeeb Abdul Rashid", epic: "HLS2409597" },
+            { id: 526, name: "PATEL RESHMA ABDUL MUJEEB", epic: "ΤΙΑ1158260" }, { id: 542, name: "Mohammed Shakil Mohammed Gous", epic: "HLS1094275" },
+            { id: 559, name: "MOHAMMED AMEEN UR RAHMAN", epic: "HLS1096197" }, { id: 567, name: "BIBI FATEMA MOHAMMED AMEEN UR RAHMAN", epic: "TIA4005708" },
+            { id: 568, name: "SHAKIL AHMED", epic: "HLS1096585" }, { id: 569, name: "Saqib Ahmed", epic: "TIA3754934" },
+            { id: 572, name: "M Shabud M Shauqat", epic: "TIA2626208" }, { id: 578, name: "Mohammed zainuddin Mohammed Jafar", epic: "HLS2409803" },
+            { id: 581, name: "FARZANA BANU MOHAMMED ZAINUDDIN", epic: "HLS2409787" }, { id: 592, name: "Mohammed Ahmed", epic: "HLS1094341" },
+            { id: 593, name: "Hakeem Khaled M Alimoddin Alimod Hakeem", epic: "HLS1097690" }, { id: 594, name: "KALIM SAJED MOHAMMED ALEEMODDIN", epic: "HLS1094523" },
+            { id: 597, name: "Azhar Ahmed Khan", epic: "TIA2729390" }, { id: 598, name: "Najamabee Shaikh Asad Shaikh", epic: "TIA3120466" },
+            { id: 602, name: "Mohammed Abdul Faisal", epic: "TIA2729432" }, { id: 603, name: "Mohammed Abdul Nadeem Mohammed Abdul Nayeem", epic: "TIA2729424" },
+            { id: 608, name: "MIRZA NOMAN BAIG MIRZA AIJAZ BAIG", epic: "TIA3628146" }, { id: 611, name: "Ajaharoddin Azimoddin Shaikh", epic: "ΤΙΑ1093749" },
+            { id: 639, name: "YAHIYA KHAN", epic: "HLS2411338" }, { id: 644, name: "Gous Khan Saheb Khan", epic: "HLS1097450" },
+            { id: 646, name: "Sajed Hussain Khan", epic: "ΤΙΑ1640499" }, { id: 651, name: "Abdul Haseeb Awaise", epic: "ΤΙΑ1640515" },
+            { id: 655, name: "Md. Rafiq A Hai", epic: "HLS2411023" }, { id: 658, name: "AMJAD PASHA MIYAN KHAN", epic: "TIA2729408" },
+            { id: 664, name: "Vaheeda Naseem", epic: "HLS2409878" }, { id: 665, name: "Habibunnisa Begum", epic: "HLS2411379" },
+            { id: 668, name: "Mujeebullah khan", epic: "HLS2410652" }, { id: 669, name: "Syed Awais", epic: "HLS2409688" },
+            { id: 670, name: "Sumaya Mahrin md Islahuddin", epic: "HLS2409860" }, { id: 673, name: "EHTESHAMUDDIN WAHEEDUDDIN", epic: "HLS1096114" },
+            { id: 678, name: "JUNED ALI KHAN", epic: "HLS2409738" }, { id: 681, name: "Himayunakhan Shauqat Alee Khan", epic: "HLS2409662" },
+            { id: 682, name: "ABDUL BASHIR", epic: "HLS2411270" }, { id: 687, name: "Md. Asif Md. Wazir", epic: "HLS1095066" },
+            { id: 703, name: "Mohd Abdul Nadim", epic: "HLS1096072" }, { id: 711, name: "Mohammed Naveed", epic: "ΤΙΑ4087318" },
+            { id: 712, name: "Azeema Begum", epic: "HLS1096841" }, { id: 714, name: "Ashfaq Ali Khan", epic: "HLS2410611" },
+            { id: 729, name: "ASHOK MERGEWAR", epic: "HLS2410447" }, { id: 751, name: "MOHAMMED IMRAN MOHAMMED ISMAIL MOMIN", epic: "TIA2729507" },
+            { id: 752, name: "MAHAMMED KAMRAN MAHAMMED ISMAIL MOMEEN", epic: "TIA2729473" }, { id: 753, name: "BUSHRA PARVEEN SHAIKH SHAFI PATEL", epic: "TIA3635349" },
+            { id: 756, name: "Basit Khan", epic: "TIA2626224" }, { id: 761, name: "MOHD ABDUL WASEEM MOHD ABDUL WAHEED", epic: "TIA1032531" },
+            { id: 777, name: "Rehana Bano Kaleem Ahmed", epic: "TIA2626273" }, { id: 778, name: "RESHMA BEGUM MOHAMMED MUBIN", epic: "HLS2407187" },
+            { id: 782, name: "MOHAMMED YOUNUS", epic: "HLS2830941" }, { id: 783, name: "Ibrahim Rehman Moham", epic: "ΤΙΑ1640507" },
+            { id: 785, name: "Dattatreya Prahlad Bhoskar", epic: "TIA1121466" }, { id: 798, name: "MOHAMMED KHALED MOHAMMAD YUNUS SHAIKH", epic: "TIA2883486" },
+            { id: 802, name: "SHARMEEN KHANUM FEROZ KHAN", epic: "TIA3998994" }, { id: 808, name: "shamsunnisa begum Mohammed qasim", epic: "HLS1098227" },
+            { id: 812, name: "Sajed Begam", epic: "HLS2407864" }, { id: 813, name: "SHAIKH AYUB SHAIKH YOUSUF", epic: "HLS2409191" },
+            { id: 827, name: "Naresh Balyya Posalu", epic: "TIA1640473" }, { id: 828, name: "Parshuram Balya Posalu", epic: "TIA1640481" },
+            { id: 832, name: "GAUSIYA JABIN", epic: "TIA2626133" }, { id: 839, name: "Shaikh Rihan", epic: "TIA4297578" },
+            { id: 841, name: "Shaikh Abuzar Shaikh Gulam Mujeeb", epic: "TIA4308763" }, { id: 850, name: "mujtaba ahmed riyaz ahmed mohammad", epic: "TIA4343984" },
+            { id: 859, name: "SALMAN ALI KHAN", epic: "TIA4365177" }, { id: 861, name: "Mohammed Sadeque Mohammed Afzal", epic: "TIA4382891" },
+            { id: 863, name: "Mohammad Kaif Abdul Shafi", epic: "ΤΙΑ4386165" }, { id: 864, name: "Mohammed Sameer Abdul Shafi", epic: "TIA4386173" },
+            { id: 873, name: "Mohammad Mujeeb", epic: "TIA3356607" }, { id: 875, name: "Shagufta Tabassum", epic: "TIA3558533" },
+            { id: 876, name: "Syed Jawad Hashmi", epic: "TIA3481678" }, { id: 877, name: "Khalil Ibrahim Mahamad", epic: "TIA3270113" },
+            { id: 882, name: "SHAIKH MANSUR AHEMAD SHAIKH HUSEN", epic: "ΤΙΑ2883460" }, { id: 884, name: "MOHAMMED SUFIYAN QURESHI MOHAMMAD ALLAUDDIN QURES", epic: "TIA3753548" },
+            { id: 885, name: "MOHAMMED FAIZAN QURESHI ALLAUDDIN QURESI", epic: "TIA3754405" }, { id: 889, name: "NAUSHEEN BEGUM SHAHBAZ KHAN", epic: "TIA4156451" },
+            { id: 902, name: "NAZMEEN SULTANA", epic: "ΤΙΑ4082301" }, { id: 906, name: "MOHAMMAD ALEEM MOHAMMAD FARUKH", epic: "TIA2883031" },
+            { id: 910, name: "FARHEENA BEGUM IRFAN KHAN", epic: "ΤΙΑ4169512" }, { id: 913, name: "SHAIKH MUSHEER", epic: "TIA4002341" },
+            { id: 917, name: "Mahreen Fatema", epic: "TIA3873692" }, { id: 918, name: "Mohammed Faisal", epic: "TIA4002655" },
+            { id: 921, name: "Mohammed Ayan", epic: "TIA4102638" }, { id: 922, name: "Sandeep Nandkumar Gajjewar", epic: "TIA2883254" },
+            { id: 924, name: "AAFREEN BEGUM", epic: "HLS1092782" }, { id: 925, name: "Akhil Ahmed Khan", epic: "HLS1090976" },
+            { id: 926, name: "Farheen Begum", epic: "TIA4168845" }, { id: 927, name: "MOHAMMAD SHOAIB HUSSAIN KHAN", epic: "TIA2883262" },
+            { id: 928, name: "ZAHEER AHMAD JAMEEL AHMAD KHAN KHAN", epic: "TIA2883270" }, { id: 931, name: "Mohammad Tauseef Ahmed Mohammad", epic: "TIA3041001" },
+            { id: 932, name: "Mohammed Shaker", epic: "TIA3120672" }, { id: 934, name: "Sultan Nikhat", epic: "HLS2831774" },
+            { id: 941, name: "FURKHAN ALI KHAN", epic: "ΤΙΑ4241980" }, { id: 943, name: "NASREEN KHANUM MAHEMUD ALAM KHA", epic: "TIA2883130" },
+            { id: 949, name: "NISHRAT FERDOS MINHAJ KHAN", epic: "TIA4163150" }, { id: 963, name: "ASHIYA BEE", epic: "TIA4009262" },
+            { id: 966, name: "SHAIKH BASHIRUDDIN AHMED", epic: "TIA3630118" }, { id: 977, name: "FARHEEN BEGUM", epic: "TIA3686110" },
+            { id: 979, name: "AATIF KHAN MAHMOOD KHAN", epic: "TIA2882884" }, { id: 987, name: "AMER KHAN AMAN ALI KHAN", epic: "TIA3041019" },
+            { id: 988, name: "Sana Samrin Mohd Abdul Nadim", epic: "TIA4226767" }, { id: 998, name: "ASHISH SONAJI MERGEWAR", epic: "TIA2883056" },
+            { id: 999, name: "Akash Sonaji Mergewar", epic: "TIA3270097" }, { id: 1003, name: "GULNAZ BEGUM MOHD ABDUL WASEEM", epic: "TIA3754140" },
+            { id: 1006, name: "Mohammed Abdul Bakhtiyar", epic: "TIA3120649" }, { id: 1014, name: "POOJA RAKHEWAR", epic: "TIA4389805" },
+            { id: 1016, name: "Anisa Begum", epic: "TIA2626299" }, { id: 1017, name: "A. Khadir Shaikh Musa Musa", epic: "TIA2626281" },
+            { id: 1024, name: "Tarannum Begum Aslam Khan", epic: "TIA4209714" }, { id: 1032, name: "Aasma Begum Abdul Rajjakh Qureshi", epic: "TIA4153888" },
+            { id: 1034, name: "SHAFI AHEMAD", epic: "ΤΙΑ1640697" }, { id: 1041, name: "ABDUL KHALED", epic: "TIA4015855" },
+            { id: 1050, name: "FAIZAN ARIF ABDUL RASHEED", epic: "TIA4202883" }, { id: 1054, name: "Shaikh Aslam", epic: "TIA3539749" },
+            { id: 1058, name: "SHAIKH KHIZER ABDUL RAHMAN", epic: "TIA2883163" }, { id: 1063, name: "Mirza Furkhan Baig", epic: "TIA2883528" },
+            { id: 1065, name: "Azhar Khurshid Mohammad", epic: "ΤΙΑ1640655" }, { id: 1069, name: "lyaoddin Nairoddin", epic: "ΤΙΑ1056332" },
+            { id: 1071, name: "Mohammad Sayeed Mohammad Farooq", epic: "TIA1032713" }, { id: 1073, name: "Afreen khanam Khan", epic: "TIA3212263" },
+            { id: 1074, name: "Mohammed Ali Sher Afroz", epic: "TIA2626323" }, { id: 1075, name: "Khan Yunus Khan Aamir", epic: "TIA1312537" },
+            { id: 1079, name: "Salma Begum Mohammed Mustafa", epic: "TIA1056233" }, { id: 1080, name: "Santosha Shivaji Amekar", epic: "TIA1183383" },
+            { id: 1085, name: "Namita Ritesh Ranavirakar", epic: "ΤΙΑ1075829" }, { id: 1087, name: "IMRAN KHAN", epic: "ΤΙΑ1032614" },
+            { id: 1091, name: "MD FARUQ MD YAQUB", epic: "ΤΙΑ1032648" }, { id: 1093, name: "Afarin Begum Md. Farooqh", epic: "ΤΙΑ1032630" },
+            { id: 1094, name: "Md. Tarikh Md. Yakhub Momin", epic: "TIA1202183" }, { id: 1098, name: "Saima Tabassum", epic: "TIA3997566" },
+            { id: 1100, name: "Saba Begum Md. Suyuf", epic: "TIA1138577" }, { id: 1102, name: "Md. Wazid A Rasheed", epic: "ΤΙΑ1056225" },
+            { id: 1108, name: "Mohammad Khaja Abdul Rauf", epic: "ΤΙΑ1075837" }, { id: 1109, name: "Habib Meer Hamajat Sayyed", epic: "ΤΙΑ1056274" },
+            { id: 1111, name: "Bashirabee Mirhumiyat Ali", epic: "ΤΙΑ1056282" }, { id: 1112, name: "Javeed Khan Feroz Khan", epic: "TIA2729242" },
+            { id: 1114, name: "Majeed Khan", epic: "ΤΙΑ1093822" }, { id: 1115, name: "Mudassir Khan", epic: "ΤΙΑ1093814" },
+            { id: 1119, name: "Mohammed Aamer", epic: "TIA3539772" }, { id: 1120, name: "Mohammed Aleem Jameel Ahmed", epic: "TIA3481769" },
+            { id: 1121, name: "Sabila Firdos", epic: "ΤΙΑ4094397" }, { id: 1127, name: "FARHEEN KHANAM MAKSUD ALI", epic: "TIA2729259" },
+            { id: 1128, name: "UMER ALI MAQBOOL ALI KHAN", epic: "TIA4135380" }, { id: 1129, name: "Suresh Baliram Ranavirakar", epic: "ΤΙΑ1183409" },
+            { id: 1132, name: "Moin Khan Abdul Hafeez Khan", epic: "ΤΙΑ1056308" }, { id: 1140, name: "Muneeb Ahmed", epic: "TIA2729283" },
+            { id: 1141, name: "MOHAMMAD FAHED MOHAMMAD UBED", epic: "TIA2882736" }, { id: 1143, name: "MOHAMMAD FARAZ QURESHI MOHAMMAD AIJAZ QURESHI", epic: "TIA2882801" },
+            { id: 1148, name: "Abdul Rajjakh Abdul Jilani Qureshi", epic: "TIA1183433" }, { id: 1149, name: "ZAFAR QURESHI JILANI QURESHI", epic: "TIA2882728" },
+            { id: 1150, name: "NAJUA BEGUM JILANI QURESHI", epic: "ΤΙΑ2882819" }, { id: 1151, name: "SABERA BEGUM JILANI QURESHI", epic: "TIA2882827" },
+            { id: 1152, name: "Jishan S. Jalal Sayyed", epic: "TIA1312545" }, { id: 1160, name: "Mohammed Yaseen Jamal", epic: "TIA3415452" },
+            { id: 1161, name: "SHAHEDA FARNAZ FEROZ ALI", epic: "ΤΙΑ1056340" }, { id: 1164, name: "ABDUL SALAM", epic: "ΤΙΑ1093855" },
+            { id: 1166, name: "Jamashedakho Khadarakho", epic: "ΤΙΑ1093863" }, { id: 1167, name: "Mohmmad shafi", epic: "TIA3270154" },
+            { id: 1183, name: "Ahmed A. Sattar Shaikh", epic: "ΤΙΑ1056316" }, { id: 1186, name: "Akera Begum Khurarshid Shaikh", epic: "ΤΙΑ1056324" },
+            { id: 1191, name: "Saquib Khan", epic: "TIA3481710" }, { id: 1195, name: "BANO BEE MOHAMMAD YOUSUF QURESHI", epic: "ΤΙΑ4392908" },
+            { id: 1196, name: "Rais Fatema Idrees Quadri", epic: "TIA4402624" }, { id: 1197, name: "MUZAMMIL AHMED SHAKIL AHMAD", epic: "TIA4412102" },
+            { id: 1201, name: "ADIBA TAMKEEN", epic: "TIA4415071" }, { id: 1206, name: "MAHEVISH ANAM", epic: "ΤΙΑ4415717" },
+            { id: 1207, name: "SHAIKH FAROOQ SHAIKH AFSAR QURESHI", epic: "ΤΙΑ4415832" }, { id: 1212, name: "MOHAMMED PARVEZ QURESHI", epic: "ΤΙΑ4416020" },
+            { id: 1224, name: "Saqeb Khan Jamsheed Khan", epic: "TIA4478376" }, { id: 1225, name: "Siraj Khan Naser Khan", epic: "ΤΙΑ4480414" },
+            { id: 1226, name: "HURUNISA MOHAMMAD JAVAD", epic: "TIA4483327" }, { id: 1229, name: "NUZHAT FATEMA", epic: "TIA4487237" },
+            { id: 1231, name: "javeriya khatoon", epic: "TIA4489233" }, { id: 1233, name: "Mohammed Shoaib", epic: "TIA4491437" },
+            { id: 1234, name: "Mohammed Sufiyan", epic: "ΤΙΑ4491445" }, { id: 1236, name: "GOUS KHAN", epic: "AHM4095295" },
+            { id: 1243, name: "Iram Fatima", epic: "ΤΙΑ4509113" }, { id: 1244, name: "Jawariya Begum", epic: "TIA4509139" },
+            { id: 1249, name: "MOHAMMED IMRAN MOHAMMED ISHAQUE", epic: "ΤΙΑ1093632" }, { id: 1250, name: "Afsari Begum Mohammed Aijaz", epic: "TIA4524641" },
+            { id: 1253, name: "Syeda Sana Fatema", epic: "TIA4528196" }, { id: 1257, name: "Md. Anwar Md. Riyaz", epic: "TIA4557708" }
+        ];
+
+        // Global Variables
+        window.appData = RAW_DATA.map(item => ({ ...item, anomalyTypes: [], isResolved: false }));
+        window.openDropdownId = null;
+        window.firebaseUser = null;
+        window.dbRef = null;
+
+        // Initialize Dropdown
+        const filterAnomalySelect = document.getElementById('filter-anomaly');
+        ANOMALY_TYPES.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.innerText = type;
+            filterAnomalySelect.appendChild(option);
+        });
+
+        // App Render Logic (This runs immediately)
+        window.renderApp = function() {
+            const searchSrNo = document.getElementById('search-srno').value.trim();
+            const searchQuery = document.getElementById('search-query').value.toLowerCase().trim();
+            const filterStatus = document.getElementById('filter-status').value;
+            const filterAnomaly = document.getElementById('filter-anomaly').value;
+
+            window.appData.sort((a, b) => a.id - b.id);
+
+            const filteredData = window.appData.filter(row => {
+                const matchesSrNo = searchSrNo === '' || row.id.toString() === searchSrNo;
+                const matchesQuery = row.name.toLowerCase().includes(searchQuery) || row.epic.toLowerCase().includes(searchQuery);
+                const matchesStatus = filterStatus === 'ALL' ? true : (filterStatus === 'RESOLVED' ? row.isResolved : !row.isResolved);
+                const matchesAnomalyFilter = filterAnomaly === 'ALL' ? true : row.anomalyTypes.includes(filterAnomaly);
+                return matchesSrNo && matchesQuery && matchesStatus && matchesAnomalyFilter;
+            });
+
+            document.getElementById('stat-total').innerText = window.appData.length;
+            document.getElementById('stat-resolved').innerText = window.appData.filter(d => d.isResolved).length;
+            document.getElementById('stat-pending').innerText = window.appData.length - window.appData.filter(d => d.isResolved).length;
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-16 text-center text-gray-500"><div class="flex flex-col items-center justify-center"><i class="fa-solid fa-magnifying-glass text-4xl text-gray-300 mb-4"></i><p class="text-xl font-medium text-gray-600">Koyi Record Nahi Mila</p></div></td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-indigo-50/40 transition-colors ${row.isResolved ? 'bg-green-50/30' : ''}`;
+                
+                let anomalyOptionsHTML = '';
+                ANOMALY_TYPES.forEach(type => {
+                    const isChecked = row.anomalyTypes.includes(type) ? 'checked' : '';
+                    anomalyOptionsHTML += `<label class="flex items-start px-4 py-2 hover:bg-indigo-50 cursor-pointer"><input type="checkbox" class="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" ${isChecked} onchange="window.toggleAnomaly(${row.id}, '${type}')" /><span class="ml-3 text-sm text-gray-700">${type}</span></label>`;
+                });
+
+                const dropdownOpenClass = window.openDropdownId === row.id && !row.isResolved ? '' : 'hidden';
+                const selectText = row.anomalyTypes.length > 0 ? `${row.anomalyTypes.length} Anomaly Selected` : 'Select Anomaly Types...';
+
+                tr.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">#${row.id}</td>
+                    <td class="px-4 py-4 min-w-[200px]">
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-gray-900">${row.name}</span>
+                            <span class="text-xs text-indigo-600 mt-1 bg-indigo-50 w-fit px-2 py-0.5 rounded border border-indigo-100 font-medium tracking-wide">EPIC: ${row.epic}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 relative min-w-[280px]">
+                        <div class="relative dropdown-container">
+                            <div class="flex space-x-2">
+                                <button onclick="window.toggleDropdown(${row.id}, ${row.isResolved})" ${row.isResolved ? 'disabled' : ''} class="flex-grow flex items-center justify-between px-3 py-2 text-sm border rounded-lg focus:outline-none transition-colors ${row.isResolved ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed' : 'bg-white border-gray-300 text-gray-700 hover:border-indigo-400'}">
+                                    <span class="truncate">${selectText}</span><i class="fa-solid fa-chevron-down text-gray-400 ml-2"></i>
+                                </button>
+                                <button onclick="window.saveRowToFirebase(${row.id})" title="Save Data" ${row.isResolved ? 'disabled' : ''} class="p-2 rounded-lg border flex items-center justify-center ${row.isResolved ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-700 shadow-sm'}">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                </button>
+                            </div>
+                            <div class="absolute z-30 mt-1 w-[350px] bg-white border border-gray-200 rounded-lg shadow-xl py-2 max-h-64 overflow-y-auto ${dropdownOpenClass}">
+                                ${anomalyOptionsHTML}
+                                <div class="sticky bottom-0 bg-white border-t p-2 mt-2">
+                                    <button onclick="window.saveRowToFirebase(${row.id})" class="w-full bg-indigo-600 text-white text-sm font-medium py-1.5 rounded-md hover:bg-indigo-700">Done & Save</button>
+                                </div>
+                            </div>
+                        </div>
+                        ${row.anomalyTypes.length > 0 && !row.isResolved ? `<div class="mt-2 text-xs text-gray-500">${row.anomalyTypes.length} types marked.</div>` : ''}
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                        <div class="flex flex-col xl:flex-row gap-2 items-center justify-center">
+                            <button onclick="window.openModal(${row.id})" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors w-full xl:w-auto justify-center"><i class="fa-solid fa-eye mr-1"></i> Dekhein</button>
+                            <button onclick="window.openEditModal(${row.id})" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-colors w-full xl:w-auto justify-center"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+                            <button onclick="window.toggleResolveStatus(${row.id})" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold transition-all w-full xl:w-auto justify-center ${row.isResolved ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm'}">
+                                ${row.isResolved ? '<i class="fa-solid fa-circle-check mr-1"></i> Resolved' : '<i class="fa-solid fa-triangle-exclamation mr-1 text-orange-500"></i> Mark Resolve'}
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        // Render Immediately so you see the 280 records instantly!
+        window.renderApp();
+
+        // Standard Functions
+        window.toggleDropdown = (id, isResolved) => {
+            if (isResolved) return;
+            window.openDropdownId = window.openDropdownId === id ? null : id;
+            window.renderApp();
+        };
+
+        window.toggleAnomaly = (id, anomalyType) => {
+            const row = window.appData.find(r => r.id === id);
+            if (row) {
+                if (row.anomalyTypes.includes(anomalyType)) row.anomalyTypes = row.anomalyTypes.filter(a => a !== anomalyType);
+                else row.anomalyTypes.push(anomalyType);
+                window.renderApp();
+            }
+        };
+
+        window.openAddModal = () => {
+            window.formMode = 'add';
+            document.getElementById('form-modal-title').innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Naya Record Jodein';
+            document.getElementById('form-id').value = '';
+            document.getElementById('form-id').disabled = false;
+            document.getElementById('form-name').value = '';
+            document.getElementById('form-epic').value = '';
+            document.getElementById('form-modal').classList.remove('hidden');
+        };
+
+        window.openEditModal = (id) => {
+            const row = window.appData.find(r => r.id === id);
+            if (!row) return;
+            window.formMode = 'edit';
+            window.formEditId = id;
+            document.getElementById('form-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i> Record Edit Karein';
+            document.getElementById('form-id').value = row.id;
+            document.getElementById('form-id').disabled = true;
+            document.getElementById('form-name').value = row.name;
+            document.getElementById('form-epic').value = row.epic;
+            document.getElementById('form-modal').classList.remove('hidden');
+        };
+
+        window.closeFormModal = () => document.getElementById('form-modal').classList.add('hidden');
+
+        // Form Saving (Local + Firebase if connected)
+        window.saveRecordForm = async () => {
+            const idNum = parseInt(document.getElementById('form-id').value);
+            const nameVal = document.getElementById('form-name').value.trim();
+            const epicVal = document.getElementById('form-epic').value.trim().toUpperCase();
+
+            if(!idNum || !nameVal || !epicVal) return window.showToast("Sabhi fields bharna zaroori hai!");
+
+            let recordToSave;
+            if (window.formMode === 'add') {
+                if (window.appData.some(r => r.id === idNum)) return window.showToast("Ye Serial No pehle se maujood hai!");
+                recordToSave = { id: idNum, name: nameVal, epic: epicVal, anomalyTypes: [], isResolved: false };
+                window.appData.push(recordToSave);
+            } else {
+                const row = window.appData.find(r => r.id === window.formEditId);
+                if(row) {
+                    row.name = nameVal;
+                    row.epic = epicVal;
+                    recordToSave = row;
+                }
+            }
+            
+            // Sync specific record immediately to Firebase
+            if (window.firebaseUser && window.dbRef && window.setDoc && window.doc) {
+                try {
+                    await window.setDoc(window.doc(window.dbRef, 'elector_anomalies', recordToSave.id.toString()), recordToSave, { merge: true });
+                    window.showToast("Data saved to Firebase!");
+                } catch(e) { console.error(e); }
+            } else {
+                window.showToast("Saved locally");
+            }
+            window.closeFormModal();
+            window.renderApp();
+        };
+
+        window.openModal = (id) => {
+            const row = window.appData.find(r => r.id === id);
+            if (!row) return;
+            document.getElementById('modal-srno').innerText = `#${row.id}`;
+            document.getElementById('modal-epic').innerText = row.epic;
+            document.getElementById('modal-name').innerText = row.name;
+            
+            const anomaliesContainer = document.getElementById('modal-anomalies-container');
+            anomaliesContainer.innerHTML = '';
+            if (row.anomalyTypes.length > 0) {
+                const ul = document.createElement('ul'); ul.className = "space-y-2";
+                row.anomalyTypes.forEach(a => ul.innerHTML += `<li class="flex items-start text-sm bg-red-50 text-red-800 p-3 rounded-lg border border-red-100"><i class="fa-solid fa-triangle-exclamation text-red-500 mr-2 mt-0.5"></i><span>${a}</span></li>`);
+                anomaliesContainer.appendChild(ul);
+            } else {
+                anomaliesContainer.innerHTML = `<div class="text-center p-6 bg-green-50 rounded-xl border border-green-100"><p class="text-sm font-medium text-green-800">Koyi Anomaly select nahi ki gayi hai.</p></div>`;
+            }
+            document.getElementById('view-modal').classList.remove('hidden');
+        };
+        window.closeModal = () => document.getElementById('view-modal').classList.add('hidden');
+
+        let toastTimer;
+        window.showToast = (msg) => {
+            document.getElementById('toast-message').innerText = msg;
+            document.getElementById('toast').classList.remove('hidden');
+            document.getElementById('toast').classList.add('flex');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { document.getElementById('toast').classList.add('hidden'); document.getElementById('toast').classList.remove('flex'); }, 3000);
+        };
+
+        // DOM Listeners
+        document.getElementById('search-srno').addEventListener('input', window.renderApp);
+        document.getElementById('search-query').addEventListener('input', window.renderApp);
+        document.getElementById('filter-status').addEventListener('change', window.renderApp);
+        document.getElementById('filter-anomaly').addEventListener('change', window.renderApp);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-container') && window.openDropdownId !== null) { window.openDropdownId = null; window.renderApp(); }
+        });
+
+        // ==========================================
+        // 3. FIREBASE CONNECTION & SYNC LOGIC
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0XJ0hQjhuSkFjx-RnIJeUSRzHRISNt4E",
+            authDomain: "voters-ac217.firebaseapp.com",
+            databaseURL: "https://voters-ac217-default-rtdb.firebaseio.com",
+            projectId: "voters-ac217",
+            storageBucket: "voters-ac217.firebasestorage.app",
+            messagingSenderId: "98307843068",
+            appId: "1:98307843068:web:b091e8b6de83ed9ffc0879"
+        };
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            window.dbRef = getFirestore(app);
+
+            // Export references for inline handlers
+            window.setDoc = setDoc;
+            window.doc = doc;
+
+            signInAnonymously(auth).then((result) => {
+                window.firebaseUser = result.user;
+                const statusEl = document.getElementById('firebase-status');
+                statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Sync Active';
+                statusEl.classList.replace('text-yellow-300', 'text-green-300');
+
+                // 🌟 Firebase Recall Logic
+                onSnapshot(collection(window.dbRef, 'elector_anomalies'), (snapshot) => {
+                    const dbData = {};
+                    snapshot.forEach(doc => { dbData[doc.id] = doc.data(); });
+                    
+                    // Merge DB data with local App Data (DB has priority)
+                    let mergedData = RAW_DATA.map(item => ({
+                        ...item,
+                        name: dbData[item.id]?.name || item.name, 
+                        epic: dbData[item.id]?.epic || item.epic,
+                        anomalyTypes: dbData[item.id]?.anomalyTypes || item.anomalyTypes || [],
+                        isResolved: dbData[item.id]?.isResolved || item.isResolved || false
+                    }));
+
+                    // Add new records that exist in DB but not in RAW_DATA
+                    Object.keys(dbData).forEach(dbId => {
+                        const numId = parseInt(dbId);
+                        if (!RAW_DATA.find(item => item.id === numId)) {
+                            mergedData.push({
+                                id: numId,
+                                name: dbData[dbId].name || 'Unknown',
+                                epic: dbData[dbId].epic || 'Unknown',
+                                anomalyTypes: dbData[dbId].anomalyTypes || [],
+                                isResolved: dbData[dbId].isResolved || false
+                            });
+                        }
+                    });
+
+                    window.appData = mergedData;
+                    window.renderApp();
+                });
+            }).catch(error => {
+                console.error("Auth error", error);
+                document.getElementById('firebase-status').innerHTML = '<i class="fa-solid fa-circle-xmark mr-1"></i> Check Rules/Auth';
+                document.getElementById('firebase-status').classList.replace('text-yellow-300', 'text-red-300');
+            });
+        } catch (e) {
+            console.error("Firebase Init Error:", e);
+        }
+
+        // Save a single row when Checkmark / floppy icon is clicked
+        window.saveRowToFirebase = async (id) => {
+            const row = window.appData.find(r => r.id === id);
+            if (!window.firebaseUser || !window.dbRef) { window.openDropdownId = null; window.renderApp(); window.showToast("Local save (Firebase off)"); return; }
+            try {
+                await setDoc(doc(window.dbRef, 'elector_anomalies', id.toString()), {
+                    name: row.name, epic: row.epic, anomalyTypes: row.anomalyTypes, isResolved: row.isResolved, updatedAt: new Date().toISOString()
+                }, { merge: true });
+                window.showToast("Data saved to Firebase!");
+            } catch (error) { window.showToast("Save Failed! Permission check karein."); }
+            window.openDropdownId = null;
+            window.renderApp();
+        };
+
+        window.toggleResolveStatus = async (id) => {
+            const row = window.appData.find(r => r.id === id);
+            row.isResolved = !row.isResolved;
+            if(row.isResolved) window.openDropdownId = null;
+            window.renderApp();
+
+            if (window.firebaseUser && window.dbRef) {
+                try {
+                    await setDoc(doc(window.dbRef, 'elector_anomalies', id.toString()), { isResolved: row.isResolved, updatedAt: new Date().toISOString() }, { merge: true });
+                    window.showToast(row.isResolved ? "Marked Resolved!" : "Marked Pending!");
+                } catch (error) { row.isResolved = !row.isResolved; window.renderApp(); window.showToast("Sync Error!"); }
+            }
+        };
+
+        // 🌟 "Sync Data" Button Logic (Push All ~280 items to Firebase)
+        window.manualSync = async () => {
+            document.getElementById('sync-icon').classList.add('fa-spin');
+            
+            if (window.firebaseUser && window.dbRef) {
+                try {
+                    const batch = writeBatch(window.dbRef);
+
+                    // Har ek row ko batch me daalna
+                    window.appData.forEach(row => {
+                        const docRef = doc(window.dbRef, 'elector_anomalies', row.id.toString());
+                        batch.set(docRef, {
+                            name: row.name,
+                            epic: row.epic,
+                            anomalyTypes: row.anomalyTypes,
+                            isResolved: row.isResolved,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true });
+                    });
+
+                    // Ek saath sabko Firebase bhej dena (Maximum batch size 500 hota hai, 280 ek dum safe hai)
+                    await batch.commit();
+
+                    window.showToast("Sync Successful! Sabhi 280+ Records Firebase me upload ho gaye.");
+                } catch (e) {
+                    console.error("Manual sync error: ", e);
+                    window.showToast("Sync Failed! Firestore Rules check karein.");
+                }
+            } else { window.showToast("Firebase offline hai."); }
+            
+            setTimeout(() => document.getElementById('sync-icon').classList.remove('fa-spin'), 1000);
+        };
+    </script>
+</body>
+</html>
